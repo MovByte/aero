@@ -56,7 +56,12 @@
 		"type": "git",
 		"url": "git+https://github.com/vyperdeveloperlabs/aero.git"
 	},
-	"keywords": ["Proxy", "Archiver", "Unblock", "Interception"],
+	"keywords": [
+		"Proxy",
+		"Archiver",
+		"Unblock",
+		"Interception"
+	],
 	"author": "Ryan Wilson",
 	"license": "AGPL-3.0-or-later",
 	"homepage": "https://github.com/ProxyHaven/aero#readme",
@@ -68,10 +73,16 @@
 		"@rspack/core": "^1.0.13",
 		"@types/serviceworker": "^0.0.100",
 		"@types/web-app-manifest": "^1.0.8",
+		"@typhonjs-typedoc/ts-lib-docs": "^2024.9.18",
+		"@typhonjs-typedoc/typedoc-theme-dmt": "^0.2.3",
 		"clean-webpack-plugin": "^4.0.0",
 		"import-sync": "^2.2.2",
 		"playwright": "^1.48.1",
 		"ts-node": "^10.9.2",
+		"typedoc": "^0.26.10",
+		"typedoc-plugin-emojify": "^1.0.1",
+		"typedoc-plugin-markdown": "^4.2.9",
+		"typedoc-plugin-mdn-links": "^3.3.4",
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {

@@ -1,5 +1,8 @@
-name: reviewdog
-on: [pull_request]
+name: PR stable checks (to main)
+on: 
+  pull_request:
+    branches:
+      - main
 jobs:
   biome:
     name: runner / Biome

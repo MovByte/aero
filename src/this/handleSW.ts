@@ -59,6 +59,7 @@ self.config = aeroConfig;
  * @returns  The proxified response
  */
 // TODO: Move all the proxy middleware code to a bare mixin
+// TODO: Use Neverthrow
 async function handle(event: FetchEvent): Promise<Response> {
 	// Ensure that everything has been initalized properly
 	if (!("logger" in self))
@@ -331,11 +332,13 @@ async function handle(event: FetchEvent): Promise<Response> {
     <!-- If not defined already, manually set the favicon -->
     <link href="/favicon.ico" rel="icon" type="image/x-icon">
 
+    <script src="${self.config.bundles.sandboxInitAero}"></script>
     <script>
 		{
 			// Aero's global proxy namespace
 			// The only things defined in here at this time are what is needed to be passed through the SW context to the client context. The rest is defined in the client when the aero bundle for the client is loaded.
 			window.$aero = {
+				...window.$aero,
 				// Security
 				sec:  { ${sec ? `...${JSON.stringify(sec)}` : ""} },
 				// This is used to later copy into an iFrame's srcdoc; this is for an edge case

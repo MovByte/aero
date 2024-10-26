@@ -18,7 +18,8 @@
 		"check": "biome check --write",
 		"formatBiome": "biome format --write",
 		"serve": "rspack serve",
-		"build": "BUILD_CONFIG_PATH=./buildConfigs/aero && rspack build",
+    "build": "deno run --allow-all ./build/build.ts",
+		"buildRaw": "BUILD_CONFIG_PATH=./buildConfigs/aero && rspack build",
 		"initApis": "deno run ./scripts/initApis.ts",
 		"initApiTypes": "deno run --allow-write ./scripts/initApiTypes.ts",
 		"initDist": "deno run --allow-read --allow-write ./scripts/InitDist.ts",
@@ -38,5 +39,17 @@
 		"indentWidth": 4,
 		"semiColons": true,
 		"singleQuote": false
-	}
+  },
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "@types/websql"
+    ]
+  }
 }

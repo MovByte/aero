@@ -1,7 +1,0 @@
-name: "Auto-release"
-
-on:
-  push:
-  pull_request:
-
-# TODO: Implement my ideas for the aero live deployment page

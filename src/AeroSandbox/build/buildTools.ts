@@ -3,8 +3,8 @@
  * This module contains generic code used by both aero and AeroSandbox's build system
  */
 
-import type { Result } from "neverthrow";
-import { err as errr, ok } from "neverthrow";
+import type { Result, AsyncResult } from "neverthrow";
+import { ok, err as errr, okAsync, errAsync as errrAsync } from "neverthrow";
 
 import InitDist from "../scripts/InitDist";
 import genWebIDL from "../scripts/initApiTypes";
@@ -27,10 +27,10 @@ interface MiscRequiredArgs {
 /**
  * This method runs all of the scripts in the scripts directory for AeroSandbox
  */
-export function initAll(
+export async function initAll(
 	requiredDirs: Dirs,
 	miscRequiredArgs: MiscRequiredArgs
-): void {
+): AsyncResult<void, Error> {
 	const { dist: distDir, proper: properDir } = requiredDirs;
 	const { verboseMode, properDirType } = miscRequiredArgs;
 
@@ -42,10 +42,18 @@ export function initAll(
 		properDirType,
 		verboseMode
 	);
-	const errUnwrapper = new ErrUnwrapper(debugMode);
-	errUnwrapper(initDist.init(), "⚠️ Unable to initialize the dist folder");
-	errUnwrapper(genWebIDL(verboseMode), "⚠️ Unable to generate WebIDL");
-	errUnwrapper(initApis(), "⚠️ Unable to initialize the API Bitwise Enum");
+
+	const initDistRes = await initDist.init()
+	if (initDistRes.isErr())
+		return errrAsync(new Error(`Failed to initialize the dist folder: ${initDistRes.error}`));
+	const genWebIDLRes = genWebIDL(miscRequiredArgs.verboseMode);
+	if (genWebIDLRes.isErr())
+		return errrAsync(new Error(`Failed to generate WebIDL: ${genWebIDLRes.error}`));
+	const initApisRes = initApis();
+	if (initApisRes.isErr())
+		return errrAsync(new Error(`Failed to initialize the API Bitwise Enum: ${initApisRes.error}`));
+
+	return okAsync(undefined);
 }
 
 export function importFeatureFlagOverrides(): Result<
@@ -65,6 +73,8 @@ export function importFeatureFlagOverrides(): Result<
 /**
  * This class is a helper for handling Neverthrow errors
  * @example
+ * import { ErrUnwrapper } from "...";
+ * 
  * const debugMode = process.env.DEBUG;
  * ...
  * const errUnwrapper = new ErrUnwrapper(debugMode);
@@ -82,9 +92,9 @@ export class ErrUnwrapper {
 	// biome-ignore lint/suspicious/noExplicitAny: this is intentionally generic
 	// deno-lint-ignore no-explicit-any
 	unwrap(
-		res: Result<any, Error>,
+		res: Result<any | void, Error>,
 		msgDesc: string,
-		debugMode: boolean,
+		debugMode = true,
 		msgPreview = "⚠️ "
 	): void {
 		if (res.isErr()) {

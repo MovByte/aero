@@ -7,6 +7,7 @@
 		"wayou.vscode-todo-highlight",
 		"gruntfuggly.todo-tree",
 		"yoavbls.pretty-ts-errors",
-		"bierner.comment-tagged-templates"
+		"bierner.comment-tagged-templates",
+		"github.vscode-github-actions"
 	]
 }

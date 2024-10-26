@@ -29,7 +29,8 @@
 		"formatBiome": "biome format --write",
 		"formatDeno": "deno fmt",
 		"serve": "rspack serve",
-		"build": "BUILD_CONFIG_PATH=./buildConfigs/aero && rspack build",
+		"build": "node --import-tsx ./build/build.ts",
+		"buildRaw": "BUILD_CONFIG_PATH=./buildConfigs/aero && rspack build",
 		"initApis": "node --import=tsx ./scripts/initApis.ts",
 		"initApiTypes": "node --import=tsx ./scripts/initApiTypes.ts",
 		"initDist": "node --import=tsx ./scripts/InitDist.ts",
@@ -66,6 +67,7 @@
 		"htmlparser2": "^9.1.0",
 		"neverthrow": "^8.0.0",
 		"node-source-walk": "^7.0.0",
-		"traverse-the-universe": "^2.1.2"
+		"traverse-the-universe": "^2.1.2",
+		"zod": "^3.23.8"
 	}
 }

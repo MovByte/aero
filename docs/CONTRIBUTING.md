@@ -6,11 +6,10 @@
 - Don't use the built-in Github Web Editor to commit multi-file changes. I will know if you do this, and I will deny your pull request. If this happens again, you will be blocked.
 - Write sensible commit names and descriptions
 - [Use imperative commit naming](https://stackoverflow.com/a/3580764)
-- Try to use [emojis in git](https://gitmoji.dev)
 - If you make any changes to the API interceptors, ensure the tests still pass
 - Try your best to follow the style of aero
 
-### Commits
+## Commits
 
 ### Making changes to GitHub Actions
 

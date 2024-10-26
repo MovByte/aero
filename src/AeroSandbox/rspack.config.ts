@@ -137,7 +137,8 @@ const defaultBuild = {
 	sandbox: "./build/init.ts",
 	jsRewriter: "./src/sandboxers/JS/JSRewriter.ts",
 	featureFlags: "./src/featureFlags.ts",
-	swAdditions: "./src/swAdditions.ts"
+	swAdditions: "./src/swAdditions.ts",
+	init$aero.ts: "./src/init$aero.ts"
 };
 
 const config: rspack.Configuration = {
@@ -148,28 +149,28 @@ const config: rspack.Configuration = {
 	entry: genEntryFiles(
 		testBuild
 			? {
-					// API Interceptors for the Script Sandbox
-					location: "./src/interceptors/loc/location.ts",
-					scriptSandbox:
-						"./src/interceptors/concealer/misc/scriptSandboxing.ts",
-					// Libs for the API Interceptors
-					loggers: "./src/shared/Loggers.ts",
-					replaceProxyNamespace: "./build/replaceProxyNamespace.ts",
-					// The JS rewriter
-					jsRewriter: "./src/sandboxers/JS/JSRewriter.ts"
-				}
+				// API Interceptors for the Script Sandbox
+				location: "./src/interceptors/loc/location.ts",
+				scriptSandbox:
+					"./src/interceptors/concealer/misc/scriptSandboxing.ts",
+				// Libs for the API Interceptors
+				loggers: "./src/shared/Loggers.ts",
+				replaceProxyNamespace: "./build/replaceProxyNamespace.ts",
+				// The JS rewriter
+				jsRewriter: "./src/sandboxers/JS/JSRewriter.ts"
+			}
 			: minimalBuild
 				? {
-						...defaultBuild,
-						// Extra APIs
-						storageIsolation:
-							"./src/apis/StorageIsolator/storageIsolation.ts",
-						ControlView: "./src/apis/CustomViews/ControlView.ts",
-						ElectronControlView:
-							"./src/apis/CustomViews/ElectronControlView.ts",
-						ElectronWebView:
-							"./src/apis/CustomViews/ElectronWebView.ts"
-					}
+					...defaultBuild,
+					// Extra APIs
+					storageIsolation:
+						"./src/apis/StorageIsolator/storageIsolation.ts",
+					ControlView: "./src/apis/CustomViews/ControlView.ts",
+					ElectronControlView:
+						"./src/apis/CustomViews/ElectronControlView.ts",
+					ElectronWebView:
+						"./src/apis/CustomViews/ElectronWebView.ts"
+				}
 				: defaultBuild
 	),
 	plugins,
@@ -209,10 +210,6 @@ function genEntryFiles(entryFiles) {
 
 if (debugMode) config.watch = true;
 
-initAll({
-	dist: path.resolve(__dirname, "dist"),
-	proper: properDir
-});
 // TODO: Import and use this in the Rspack config for aero
 
 export default config;

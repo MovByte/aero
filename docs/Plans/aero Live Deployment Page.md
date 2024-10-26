@@ -1,6 +1,4 @@
-# Aero Live Deployment Page
-
-I want something like the GitHub site ScramJet has but for aero.
+# Aero Live Deployment Page (new demo)
 
 ### What it will be
 
@@ -9,7 +7,7 @@ I want something like the GitHub site ScramJet has but for aero.
 
 ### What it will have (wants)
 
-- [ ] TODO: To be on the main branch by default and to be able to switch to commits on the unstable branch to get reference builds from.
+- [ ] TODO: To be on the `main` branch by default and to be able to switch to commits on the `unstable` branch to get reference builds from. The `untested` branch will not be supported.
 - [ ] TODO: To say what checks have passed through a button that says `# of checks passed/# of checks` and drops down to show what is broken and what is not.
 - [ ] TODO: To be configurable in the settings to automatically choose the commit with the least breaking changes in that branch; it would select the latest one if it needs a tie-breaker.
 - [ ] TODO: The ability to change the backend servers, including setting multiple in rotation and being able to sort them differently (by ping, by priority order, etc...), with multiple transport support such as bare v1-3, [bare v4](https://github.com/tomphttp/specifications-v4), [wisp](https://github.com/MercuryWorkshop/wisp-protocol), and epoxy-tls.

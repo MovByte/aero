@@ -1,0 +1,61 @@
+# TODO: Ignore this file; it's not ready yet    
+name: wpt_diff_epoch
+
+#on:
+  #schedule:
+    # 30 minutes after the `epoch/daily` branch is triggered to be created in the WPT repo
+    #- cron: 40 0 * * *
+  #workflow_dispatch:
+
+jobs:
+  wpt:
+    # TODO: Run these tests for every major browser (Chrome, Webkit, Firefox)
+    # Make a job to compare the difference in results from every browser
+    name: aero wpt
+    # Don't run on forks
+    if: github.repository == 'vortexdeveloperlabs/aero'
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+
+  steps:
+    # TODO: Use composite actions to combine all of these repetitive steps, such as installing deps and building aero (env setup), into one (because we have to do this for every browser)
+    - name: Clone repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    # Deno will be used to build aero
+    - name: Setup Deno
+      uses: denoland/setup-deno@v2
+
+    - name: Install Python
+      uses: actions/setup-python@5
+      with:
+        python-version: 3.x
+
+    - name: Log versions
+      run: |
+        deno --version
+        python --version
+
+    # TODO: Make this a compound action with three steps: 1. Clone the repo | 2. Apply patches needed to hook into WebDriver (@see https://github.com/web-platform-tests/wpt/blob/master/tools/webdriver/webdriver/client.py) so I can hijack and run the tests under the proxy | 3. Install the WPT CLI | 4. Setup the hosts file | 5. Copy my tests from `tests/browser/wpt-diff` into the WPT repo | 6. Build aero | 7. Spin up aero instance | 8. Run the tests through the CLI like normal | 9. Store the results
+    - name: Install and patch WPT Cli
+        # @see - https://web-platform-tests.org/running-tests/from-local-system.html#install-wpt
+    
+    - name: Setup hosts file (*nix)
+
+    - name: Setup hosts file (Windows)
+
+    - name: Build aero
+      run: |
+        deno i
+        deno task buildSW
+        &(cd src/AeroSandbox && deno task i && deno task --profile=src/AeroSandbox build)
+
+    - name: Spin up aero instance
+    
+    - name: Run (Chromium)
+      # TODO: Implement... (@see https://web-platform-tests.org/running-tests/command-line-arguments.html#run)
+
+    # TODO: Implement this rest...

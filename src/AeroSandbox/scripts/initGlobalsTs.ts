@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 
-import createDefaultFeatureFlags from "../createDefaultFeatureFlags";
+import { default as createDefaultFeatureFlags_ } from "../createDefaultFeatureFlags";
 import featureFlagsBuilder from "../featureFlagsBuilder";
 
 import type { Result } from "neverthrow";
@@ -8,6 +8,7 @@ import { err as errr, ok } from "neverthrow";
 
 export default function initGlobalsTs(
 	output: "../types/dist/globals.d.ts",
+	createDefaultFeatureFlags = createDefaultFeatureFlags_,
 ): Result<void, Error> {
 	const featureFlags = featureFlagsBuilder(createDefaultFeatureFlags({
 		debugMode: true,
