@@ -45,6 +45,7 @@
 		"liveBuildWinter": "pm2 start ecosystemDeno.config.cjs --only \"aero-build-winterjs,aero-sandbox-build-watch\", \"",
 		"liveBuildCFWorkers": "pm2 start ecosystemDeno.config.cjs --only \"aero-build-cf-workers,aero-sandbox-build-watch\", \"",
 		"liveBuildAeroSandbox": "pm2 start ecosystemDeno.config.cjs --only \"aero-sandbox-build-watch\"",
+		"syncPackageJson": "deno run --allow-read --allow-write --allow-net ./scripts/syncPackageJson",
 		"initGlobalsBiome": "deno run --allow-read --allow-write ./scripts/initGlobalsBiome.ts",
 		"initGlobalsTs": "deno run --allow-read --allow-write ./scripts/initGlobalsTs.ts"
 	},

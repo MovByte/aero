@@ -3,6 +3,8 @@ import path from "node:path";
 import rspack from "@rspack/core";
 import { RsdoctorRspackPlugin } from "@rsdoctor/rspack-plugin";
 
+import Logger from "./build/Logger";
+
 const liveBuildMode = "LIVE_BUILD" in process.env;
 let debugMode = liveBuildMode || "DEBUG" in process.env;
 /** This var is enabled by default */
@@ -18,10 +20,9 @@ if (!debugMode && testBuild) debugMode = true;
 // This is the most important env variable
 const buildConfigPath = "BUILD_CONFIG_PATH" in process.env;
 if (!buildConfigPath) {
-	console.error(
+	throw new Error(
 		"Fatal: BUILD_CONFIG_PATH env variable not set. Don't know what to build for!"
 	);
-	process.exit(1);
 }
 
 import type { createFeatureFlags } from "./build/featureFlags.ts";
@@ -69,27 +70,6 @@ const plugins: any[] = [
 	})
 ];
 
-/** A rudimentary log function that only logs if verbose mode is enabled */
-export class Logger {
-	/**
-	 * @param verboseMode Should the log method do anything?
-	 */
-	verboseMode: boolean;
-	/**
-	 * @param verboseMode Whether verbose mode is enabled.
-	 */
-	constructor(verboseMode: boolean) {
-		this.verboseMode = verboseMode;
-	}
-	/**
-	 * This method wraps console.log, but doesn't log if verbose mode is disabled
-	 * @param msg The message to log
-	 */
-	// biome-ignore lint/suspicious/noExplicitAny: this is intentionally generic
-	log(msg: any) {
-		if (this.verboseMode) console.log(msg);
-	}
-}
 
 const logger = new Logger(verboseMode);
 

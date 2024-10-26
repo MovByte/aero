@@ -20,7 +20,7 @@ const serverMode = process.env.SERVER_MODE;
 // Scripts
 // TODO: Instead use the one from AeroSandbox import InitDist from "./scripts/InitDist";
 
-import { Logger } from "./src/AeroSandbox/rspack.config.ts";
+import Logger from "./src/AeroSandbox/build/Logger";
 
 import importSync from "import-sync";
 

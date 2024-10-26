@@ -1,7 +1,7 @@
 {
 	"name": "aero-proxy",
 	"version": "0.0.6",
-	"description": "The innovative interception proxy",
+	"description": "A safe, developer-friendly, innovative interception web proxy with many features with a powerful web sandboxing library to bypass and overcome browser limitations in a secure sandbox that respects security features",
 	"main": "extras/node/aeroPath.js",
 	"exports": {
 		".": {
@@ -49,24 +49,37 @@
 		"liveBuildWinter": "pm2 start ecosystem.config.cjs --only \"aero-build-winterjs,aero-sandbox-build-watch\", \"",
 		"liveBuildCFWorkers": "pm2 start ecosystem.config.cjs --only \"aero-build-cf-workers,aero-sandbox-build-watch\", \"",
 		"liveBuildAeroSandbox": "pm2 start ecosystem.config.cjs --only \"aero-sandbox-build-watch\"",
-		"initGlobalsBiome": "node -- ./scripts/initGlobalsBiome.ts",
-		"initGlobalsTs": "node -- ./scripts/initGlobalsTs.ts"
+		"syncPackageJson": "node --experimental-strip-types -- ./scripts/syncPackageJson",
+		"initGlobalsBiome": "node -- --experimental-strip-types ./scripts/initGlobalsBiome.ts",
+		"initGlobalsTs": "node --experimental-strip-types -- ./scripts/initGlobalsTs.ts"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/vyperdeveloperlabs/aero.git"
+		"url": "git+https://github.com/vortexdevelopergroup/aero.git"
 	},
 	"keywords": [
-		"Proxy",
-		"Archiver",
-		"Unblock",
-		"Interception"
+		"emulation",
+		"emulator",
+		"frontend",
+		"hackathon",
+		"intercept-calls",
+		"intercept-requests",
+		"interception",
+		"interceptor",
+		"proxy",
+		"sandbox",
+		"sandboxing",
+		"service-worker",
+		"unblocker",
+		"userscripts",
+		"vpn"
 	],
 	"author": "Ryan Wilson",
 	"license": "AGPL-3.0-or-later",
-	"homepage": "https://github.com/ProxyHaven/aero#readme",
+	"homepage": "https://github.com/vortexdevelopergroup/aero#readme",
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"@biomejs/js-api": "^0.7.1",
 		"@rsdoctor/cli": "^0.4.7",
 		"@rsdoctor/rspack-plugin": "^0.4.7",
 		"@rspack/cli": "^1.0.13",
@@ -77,6 +90,7 @@
 		"@typhonjs-typedoc/typedoc-theme-dmt": "^0.2.3",
 		"clean-webpack-plugin": "^4.0.0",
 		"import-sync": "^2.2.2",
+		"octokit": "^4.0.2",
 		"playwright": "^1.48.1",
 		"ts-node": "^10.9.2",
 		"typedoc": "^0.26.10",
@@ -86,6 +100,7 @@
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {
+		"@biomejs/wasm-nodejs": "^1.9.4",
 		"@mercuryworkshop/bare-mux": "^2.1.4"
 	}
 }
