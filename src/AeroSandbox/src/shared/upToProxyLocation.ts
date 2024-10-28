@@ -1,5 +1,5 @@
-import { getProxyConfig } from "$util/getConfig";
-
 import { proxyLocation } from "./proxyLocation";
 
-export default () => getProxyConfig().prefix + proxyLocation().origin;
+import type { AeroLogger, AeroSandboxLogger } from "./Loggers";
+
+export default (prefix: string, logger: AeroSandboxLogger | AeroLogger) => prefix + proxyLocation(prefix, logger).origin;

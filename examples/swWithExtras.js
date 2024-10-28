@@ -14,6 +14,7 @@ importScripts(`${dirToAero}config.js`);
 importScripts(aeroConfig.bundles["bare-mux"]);
 // aero handlers
 importScripts(aeroConfig.bundles.handle);
+importScripts(aeroConfig.bundles.logger);
 
 importScripts(pathToPatchedAerohandler);
 

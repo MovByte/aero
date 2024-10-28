@@ -56,6 +56,7 @@
 		//urlDecoder: __uv$config.urlDecoder,
 		urlEncoder: url => url,
 		urlDecoder: url => url,
-		featureFlags: "all"
+		featureFlags: "all",
+		dbTransactionTimeout: 2000,
 	};
 }

@@ -2,17 +2,26 @@ import { getProxyConfig } from "$util/getConfig";
 
 import { proxyLocation } from "./proxyLocation";
 
-/**
- * This should not be used for processed html attributes, rather rewriteSrcHtml
- * @param - The url to rewrite
- */
-function rewriteSrc(url: string, proxyHref = proxyLocation().href): string {
-	// Protocol
-	const rewroteUrl = /^(https?:\/\/)/g.test(url)
-		? getProxyConfig().prefix + url
-		: new URL(url, proxyHref).href;
+import { AeroSandboxLogger, AeroLogger } from "./Loggers";
 
-	return rewroteUrl;
+const protocolRegExp = /^https?:\/\//;
+
+/**
+ * This should not be used for processed html attributes, rather rewriteSrcHtml.
+ * This function isn't used often anymore, since most use of it has been replaced by Catch-all SW Request URL Interception.
+ * @param The url to rewrite
+ * @param The prefix to add to the url
+ * @param The logger to use
+ * @param The proxy href location to use
+ * @returns The rewritten url
+ */
+function rewriteSrc(url: string, prefix: string, logger: AeroSandboxLogger | AeroLogger, proxyHref = proxyLocation(prefix, logger).href): string {
+    // Protocol
+    const rewroteUrl = protocolRegExp.test(url)
+        ? prefix + url
+        : new URL(url, proxyHref).href;
+
+    return rewroteUrl;
 }
 
 export default rewriteSrc;

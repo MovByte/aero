@@ -1,12 +1,8 @@
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
 
-// Only supported on Chromium
+/** Only supported on Chromium **/
 export default {
-	proxifiedObj: Proxy.revocable(WebTransport, {
-		construct(target, args) {
-			// I'm waiting for the bare/wisp spec to support WebTransport before implementing this
-			return Reflect.construct(target, args);
-		}
-	}),
-	globalProp: "WebTransport"
+    /** I'm waiting for the bare/wisp spec to support WebTransport before implementing this **/
+    skip: true,
+    globalProp: "WebTransport"
 } as APIInterceptor;

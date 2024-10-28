@@ -116,7 +116,7 @@ async function runTests() {
 }
 
 function runGeneratorTests(testType, testRunner) {
-	while (true) {
+  for (; ;) {
 		const { done, value } = testRunner.next();
 		if (done) break;
 		const testRes = value;

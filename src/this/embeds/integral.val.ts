@@ -1,7 +1,9 @@
-export default () => {
-	return {
-		code: /* js */ `
-	// I might want to use a promise for this
+export default (): {
+    code: string;
+} => {
+    return {
+        code: /* js */ `
+// I might want to use a promise for this
 (async () => {
 	async function calc(integrity, html) {
 		const [rawAlgo, hash] = integrity.split("-");
@@ -21,5 +23,5 @@ export default () => {
 		if (blocked) throw new Error("Script blocked");
 	}
 	`
-	};
+    };
 };

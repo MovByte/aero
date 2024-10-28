@@ -1,12 +1,13 @@
 export default (params: URLSearchParams, param: string): string | false => {
-	const item = params.get(param);
+    const item = params.get(param);
 
-	if (item) {
-		params.getAll(`_${item}`).forEach(v => params.append(item, v));
-		params.delete(`_${item}`);
+    if (item) {
+        for (const passthroughVal of params.getAll(`_${item}`))
+            params.append(item, passthroughVal);
+        params.delete(`_${item}`);
 
-		return item;
-	}
+        return item;
+    }
 
-	return false;
+    return false;
 };

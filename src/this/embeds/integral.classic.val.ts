@@ -1,6 +1,8 @@
-export default () => {
-	return {
-		code: /* js */ `
+export default (): {
+    code: string;
+} => {
+    return {
+        code: /* js */`
 if (
 	// FIXME: Doesn't work in async scripts like found on https://discord.com/
 	document.currentScript &&
@@ -11,5 +13,5 @@ if (
 		document.currentScript.innerHTML
 	);
 	`
-	};
+    };
 };

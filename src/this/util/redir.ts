@@ -1,7 +1,7 @@
-export default (url: string) =>
-	new Response("", {
-		status: 307,
-		headers: {
-			location: $self.config.prefix + url
-		}
-	});
+export default (url: string): Response =>
+    new Response("", {
+        status: 307,
+        headers: {
+            location: aeroConfig.prefix + url
+        }
+    });

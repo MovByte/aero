@@ -91,6 +91,7 @@
 		"clean-webpack-plugin": "^4.0.0",
 		"import-sync": "^2.2.2",
 		"octokit": "^4.0.2",
+		"option-t": "^50.0.0",
 		"playwright": "^1.48.1",
 		"ts-node": "^10.9.2",
 		"typedoc": "^0.26.10",
@@ -101,6 +102,7 @@
 	},
 	"dependencies": {
 		"@biomejs/wasm-nodejs": "^1.9.4",
-		"@mercuryworkshop/bare-mux": "^2.1.4"
+		"@mercuryworkshop/bare-mux": "^2.1.4",
+		"neverthrow": "^8.1.1"
 	}
 }
