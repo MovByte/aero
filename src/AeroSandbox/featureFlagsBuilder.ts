@@ -13,7 +13,7 @@ export default (featureFlagsRaw: FeatureFlags) => {
 		const camelCaseToFeatureFlagFmtKey = key
 			.replaceAll(snakeCaseMatch, replacementSnakeCaseToUnderscoreCase)
 			.toUpperCase();
-		featureFlags[camelCaseToFeatureFlagFmtKey] = JSON.stringify(val);
+		featureFlags[camelCaseToFeatureFlagFmtKey] = JSON.stringify(typeof val === "bool" ? `($aero.config.sandbox.featureFlags.includeEsniff || ${val})` : val);
 	}
 	Object.freeze(featureFlags);
 	return new rspack.DefinePlugin(featureFlags);

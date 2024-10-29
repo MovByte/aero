@@ -20,8 +20,8 @@ export type AeroSandboxFeaturesConfig = {
 	/** These enum members enable code inside of the Proxy handler that provide other things you may want to use AeroSandbox for */
 	extraAPIs?: ExtraAPIs[] | "all";
 	supports?: SupportEnum;
-	apiIncludeBitwiseEnum?: APIBitwiseEnum | "all";
-	apiExcludeBitwiseEnum?: APIBitwiseEnum | "none";
+	apiIncludeBitwiseEnum?: APIBitwiseEnum | "all" | "fake_vars_and_global_only";
+	apiExcludeBitwiseEnum?: APIBitwiseEnum | "none" | "fake_vars_and_global_only";
 	specialInterceptionFeatures?: InterceptionFeatures;
 };
 

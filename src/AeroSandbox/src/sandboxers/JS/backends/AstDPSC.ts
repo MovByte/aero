@@ -15,15 +15,8 @@ import traverse from "traverse-the-universe";
 // This is the only realistic option
 import { generate, type Node } from "astring";
 
-// Webpack Feature Flags
-// biome-ignore lint/style/useSingleVarDeclarator: <explanation>
-let INCLUDE_AST_PARSER_OXC: boolean, INCLUDE_AST_PARSER_SEAFOX: boolean;
-let INCLUDE_AST_WALKER_TRAVERSE_THE_UNIVERSE: boolean;
-
-/*
-// Scope Checking. This is for DPSC. TODO: Make DPSC configurable on AST parsing and only use it when in a block scope.
-$aero.check = val => (val === location ? $location : val);
-*/
+// Strings
+export const noSuitableAstWalkersFoundMsg = "No suitable AST walkers found; not rewriting!";
 
 export default class ASTRewriter {
 	config: ASTRewriterConfig;
@@ -64,6 +57,7 @@ export default class ASTRewriter {
 					// TODO: Include more checks to ensure that this is the proper `window` that we want to rewrite
 					node.name = this.config.objPaths.proxy.window;
 				}
+				// TODO: Perform DPSC here
 				if (
 					node.type === "Identifier" &&
 					node.name === "that" &&
@@ -91,11 +85,8 @@ export default class ASTRewriter {
 					this.parentNode.body.insertAfter(windowProxyConcealmentAst);
 				}
 			});
-		} else {
-			$aero.logger.warn("No suitable AST walkers found; not rewriting!");
-		}
-		$aero.logger.fatalErr("AeroGel minimal is unsupported at the moment!");
-		return ast;
+		} else
+			$aero.logger.fatalErr(noSuitableAstWalkersFoundMsg);
 	}
 	parseAst(script: string, isModule: boolean): [Node, Node] {
 		if (INCLUDE_AST_PARSER_OXC) {
@@ -104,12 +95,10 @@ export default class ASTRewriter {
 		}
 		if (INCLUDE_AST_PARSER_SEAFOX) {
 			return [
-				// @ts-ignore
 				parse(script, {
 					module: isModule,
 					next: true
 				}).body as Node,
-				// @ts-ignore
 				parse(
 					/** js  */ `
 					if (that === window) {

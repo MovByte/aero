@@ -13,7 +13,6 @@ import { access, mkdir } from "node:fs/promises";
 import { writeFileSync } from "node:fs";
 
 import { createApiInterceptorIteratorNodeSync } from "../build/createApiInterceptorIteratorNode";
-import process from "node:process";
 
 /**
  * Detect if the script is being ran as a CLI script and not as a module

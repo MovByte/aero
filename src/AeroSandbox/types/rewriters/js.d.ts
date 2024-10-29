@@ -1,8 +1,8 @@
-import type { overwriteRecordsType } from "$types/generic";
+import type { overwriteRecordsType } from "./generic";
 
 /** @warning Basic Regexp is unsupported as of now and will never be recommended */
-export type rewriterMode = "aerogel" | "ast" | "basic_regexp";
-export type aerogelParser = "esniff";
+export type rewriterMode = "aerogel" | "ast" | "custom_made";
+export type aerogelParser = "esniff" | astParser;
 export type astParser = "oxc" | "seafox";
 export type astWalker = "traverse_the_universe";
 
@@ -12,12 +12,7 @@ export interface RewriteOptions {
 	/** The code to insert */
 	insertCode?: string;
 }
-export type keywordReplacementType = {
-	[key: string]: {
-		keywordLen: number;
-		replacementStr: string;
-	};
-};
+
 export interface GenericJSParserConfig {
 	/* Use null only if you don't have a proxy namespace you want to conceal */
 	proxyNamespace: string | null;
@@ -37,11 +32,22 @@ export interface AeroGelConfig extends GenericJSParserConfig {
 	/**
 	 * TODO: Support the overwriteRecords instead of blindly overwriting `location` in the IIFE
 	 * */
-	overwriteRecords: overwriteRecordsType;
+	overwriteRecords?: overwriteRecordsType;
 	parserConfig: {
 		parser: aerogelParser;
+		fakeVarObjPropTree: string;
+		proxifiedEvalPropTree: string;
 	};
 }
+export type AeroGelParserConfig = {
+    letNamespace: string;
+    constNamespace: string;
+    locationNamespace: string;
+    respectStrings: boolean;
+    respectTemplateLiterals: boolean;
+    respectRegex: boolean;
+    proxifiedEvalPropTree: string;
+};
 export interface ASTRewriterConfig extends GenericJSParserConfig {
 	parserConfig: {
 		parser: astParser;

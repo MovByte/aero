@@ -14,7 +14,7 @@ AeroGel solves this by using setters on "fake vars' for let/const through minima
 
 ## How fake vars work
 
-This is done through RegExp
+> Keep in mind this rewriting is only done during the first block scope once you enter a function no nested functions, for example
 
 AeroGel transforms as such:
 
