@@ -6,7 +6,7 @@ import type {
 	keywordReplacementType
 } from "../../../../types/aeroSandbox";
 
-import AeroGelBare from "./shared/AeroGelBare";
+import AeroGelBare from "./shared/AeroGelGeneric";
 
 // This is so that it can use parseAST
 import { default as AST, noSuitableAstWalkersFoundMsg } from "./AST";
@@ -59,19 +59,19 @@ export default class AeroGelAst extends AeroGelBare {
 	applyNewConfig(config: AeroGelConfig) {
 		this.config = config;
 	}
-    /**
-     * List the parsers that AeroGel AST has been compiled with via Feature Flags
-     */
-    static supportedParsers(): aerogelParser[] {
+	/**
+	 * List the parsers that AeroGel AST has been compiled with via Feature Flags
+	 */
+	static supportedParsers(): aerogelParser[] {
 		const supports: aerogelParser[] = [];
 		if (INCLUDE_ESNIFF) supports.push("esniff");
 		if (INCLUDE_AST_PARSER_OXC) supports.push("oxc");
 		if (INCLUDE_AST_PARSER_SEAFOX) supports.push("seafox");
 		return supports;
 	}
-    /**
-     * List the walkers that AeroGel AST has been compiled with via Feature Flags
-     */
+	/**
+	 * List the walkers that AeroGel AST has been compiled with via Feature Flags
+	 */
 	static supportedWalkers(): astWalker[] {
 		const supports: astWalker[] = [];
 		if (INCLUDE_AST_WALKER_TRAVERSE_THE_UNIVERSE)
@@ -92,38 +92,38 @@ export default class AeroGelAst extends AeroGelBare {
 			// traverse-the-universe has no typings
 			traverse(ast, node => {
 				if (node.type === "VariableDeclaration" && ["let", "const"].includes(node.kind)) {
-			      	node.declarations.forEach((declaration) => {
-				        if (declaration.id.type === "ArrayPattern") {
-				          	// Transform array destructuring to <fakeVar>.fakeArrayDestructure
-				          	const newNode = types.memberExpression(
-				            	types.identifier(this.config.parserConfig.fakeVarObjPropTree),
-				            	types.identifier("fakeArrayDestructure")
-				          	);
-				          	this.replace({ ...node, id: newNode });
-				        } else if (declaration.id.type === "ObjectPattern") {
-				          	// Transform object destructuring to <fakeVar>.fakeObjectDestructure
-				          	const newNode = types.memberExpression(
-				            	types.identifier(this.config.parserConfig.fakeVarObjPropTree),
-				            	types.identifier("fakeObjectDestructure")
-				          	);
-				          	this.replace({ ...node, id: newNode });
-				        } else if (declaration.id.type === "Identifier") {
-				          	// Transform normal variable to let.<variable name>
-				          	const newNode = types.memberExpression(
-				            	types.identifier(`${this.config.parserConfig.fakeVarObjPropTree}.${node.kind}.`),
-				            	types.identifier(declaration.id.name)
-				          	);
-				          	this.replace({ ...node, id: newNode });
-				        }
-			      	});
-			    }
+					node.declarations.forEach((declaration) => {
+						if (declaration.id.type === "ArrayPattern") {
+							// Transform array destructuring to <fakeVar>.fakeArrayDestructure
+							const newNode = types.memberExpression(
+								types.identifier(this.config.parserConfig.fakeVarObjPropTree),
+								types.identifier("fakeArrayDestructure")
+							);
+							this.replace({ ...node, id: newNode });
+						} else if (declaration.id.type === "ObjectPattern") {
+							// Transform object destructuring to <fakeVar>.fakeObjectDestructure
+							const newNode = types.memberExpression(
+								types.identifier(this.config.parserConfig.fakeVarObjPropTree),
+								types.identifier("fakeObjectDestructure")
+							);
+							this.replace({ ...node, id: newNode });
+						} else if (declaration.id.type === "Identifier") {
+							// Transform normal variable to let.<variable name>
+							const newNode = types.memberExpression(
+								types.identifier(`${this.config.parserConfig.fakeVarObjPropTree}.${node.kind}.`),
+								types.identifier(declaration.id.name)
+							);
+							this.replace({ ...node, id: newNode });
+						}
+					});
+				}
 				else if (node.type === "CallExpression" && node.callee.name === "eval") {
-				    // Transform `eval` to your sandbox library's proxified version of `eval`
-				    const newNode = types.callExpression(
-				      	types.identifier(this.config.parserConfig.proxifiedEvalPropTree),
-				      	node.arguments // Keep the same arguments as in the original `eval` call
-				    );
-				    this.replace(newNode);
+					// Transform `eval` to your sandbox library's proxified version of `eval`
+					const newNode = types.callExpression(
+						types.identifier(this.config.parserConfig.proxifiedEvalPropTree),
+						node.arguments // Keep the same arguments as in the original `eval` call
+					);
+					this.replace(newNode);
 				}
 				else if (
 					node.type === "Identifier" &&
@@ -140,10 +140,10 @@ export default class AeroGelAst extends AeroGelBare {
 					this.parentNode.parentNode.key.name === "apply" &&
 					// @ts-ignore
 					this.parentNode.parentNode.parentNode ===
-						"ObjectExpression" &&
+					"ObjectExpression" &&
 					// @ts-ignore
 					this.parentNode.parentNode.parentNode.parentNode ===
-						"NewExpression" &&
+					"NewExpression" &&
 					// @ts-ignore
 					this.parentNode.parentNode.parentNode.parentNode.callee
 						.name === "Proxy"

@@ -40,13 +40,13 @@ export interface AeroGelConfig extends GenericJSParserConfig {
 	};
 }
 export type AeroGelParserConfig = {
-    letNamespace: string;
-    constNamespace: string;
-    locationNamespace: string;
-    respectStrings: boolean;
-    respectTemplateLiterals: boolean;
-    respectRegex: boolean;
-    proxifiedEvalPropTree: string;
+	letNamespace: string;
+	constNamespace: string;
+	locationNamespace: string;
+	respectStrings: boolean;
+	respectTemplateLiterals: boolean;
+	respectRegex: boolean;
+	proxifiedEvalPropTree: string;
 };
 export interface ASTRewriterConfig extends GenericJSParserConfig {
 	parserConfig: {
@@ -55,6 +55,7 @@ export interface ASTRewriterConfig extends GenericJSParserConfig {
 	walkerConfig: {
 		walker: astWalker;
 	};
+	checkFuncPropTree: string;
 }
 export interface AeroJSParserConfig {
 	proxyNamespace: string;
