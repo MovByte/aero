@@ -1,4 +1,5 @@
 {
+	"deno.enable": false,
 	"editor.wordWrap": "on",
 	"editor.defaultFormatter": "biomejs.biome",
 	"editor.formatOnSave": true,

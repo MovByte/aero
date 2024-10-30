@@ -50,14 +50,14 @@
 		"initGlobalsTs": "deno run --allow-read --allow-write ./scripts/initGlobalsTs.ts"
 	},
 	"include": ["scripts/**/*.ts", "tests/deno/**/*.ts"],
-	"exclude": ["src/AeroSandbox/scripts/runtime/**/*.ts"],
+	"exclude": ["src/AeroSandbox/scripts/runtime/**/*.ts", "src"],
 	"lint": {
 		"include": ["scripts/**/*.ts", "tests/deno/**/*.ts"],
-		"exclude": ["src/AeroSandbox/scripts/runtime/**/*.ts"]
+		"exclude": ["src/AeroSandbox/scripts/runtime/**/*.ts", "src"]
 	},
 	"fmt": {
 		"include": ["scripts/**/*.ts", "tests/deno/**/*.ts"],
-		"exclude": ["src/AeroSandbox/scripts/runtime/**/*.ts"],
+		"exclude": ["src/AeroSandbox/scripts/runtime/**/*.ts", "src"],
 		"useTabs": true,
 		"indentWidth": 4,
 		"semiColons": true,
