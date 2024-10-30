@@ -2,6 +2,8 @@
  * @module
  */
 
+// TODO: Import Neverthrow
+
 import type {
     AeroJSParserConfig,
     RewriteOptions,
@@ -49,11 +51,7 @@ import AeroGel from "./backends/AeroGel";
  *                  }
  *              }
  *          }
- *      },
- *      preferredParsers: {
- *          aerogel: ["seafox"]
- *      },
- *      preferredASTWalkers: ["traverse_the_universe"]
+ *      }
  *  });
  *
  *  const aeroSandbox = new AeroSandbox({
@@ -66,14 +64,6 @@ import AeroGel from "./backends/AeroGel";
  *          },
  *          rewriters: {
  *              jsLib: self.JSRewriter,
- *          },
- *          featureFlags: {
- *              includeAstParserSeafox: true,
- *              includeAstWalkerTraverseTheUniverse: true
- *          },
- *          featureConfig: {
- *              apiIncludeBitwiseEnum: "fake_vars_and_global_only",
- *              apiExcludeBitwiseEnum: "fake_vars_and_global_only"
  *          }
  *      }
  *  });
@@ -99,73 +89,30 @@ export default class JSRewriter {
     }
     rewriteScript(script: string, rewriteOptions: RewriteOptions): string {
         if (rewriteOptions.isModule) {
-            if (this.config.modeModule === "ast")
+            if (this.config.modeModule === "aerojet")
                 return this.astRewrite(script, rewriteOptions.isModule);
             if (this.config.modeModule === "aerogel")
                 return this.aerogelRewrite(script, rewriteOptions.isModule);
         } else {
-            if (this.config.modeDefault === "ast")
+            if (this.config.modeDefault === "aerojet")
                 return this.astRewrite(script, rewriteOptions.isModule);
             if (this.config.modeDefault === "aerogel")
                 return this.aerogelRewrite(script, rewriteOptions.isModule);
         }
         return script;
     }
-    /** Calls the AST Rewriter with the config that you provided in the constructor earlier */
+    /** Calls the AeroJet with the config that you provided in the constructor earlier */
     astRewrite(script: string, isModule: boolean): string {
-        let parserOfChoice: astParser;
-        let walkerOfChoice: astWalker;
-        for (const astParser of this.config.preferredParsers.ast) {
-            const astSupportedParsers = ASTRewriter.supportedParsers();
-            if (astParser in astSupportedParsers)
-                parserOfChoice = astParser;
-        }
-        if (!parserOfChoice) {
-            $aero.logger.fatalErr(
-                "No compatible AST parsers found with your preferred list of parsers!"
-            );
-            return script;
-        }
-        for (const astWalker of this.config.preferredASTWalkers) {
-            const astSupportedWalkers = ASTRewriter.supportedWalkers();
-            if (astWalker in astSupportedWalkers) walkerOfChoice = astWalker;
-        }
-        if (!walkerOfChoice) {
-            $aero.logger.fatalErr(
-                "No compatible AST walkers found with your preferred list of walkers!"
-            );
-            return script;
-        }
-
-        // @ts-ignore
-        const astRewriter = new ASTRewriter({
-            parserConfig: {
-                parser: parserOfChoice
-            },
-            walkerConfig: {
-                walker: walkerOfChoice
-            }
-        });
+        // TODO: Call with the config
+        const astRewriter = new AeroJet();
         return astRewriter.rewriteScript(script, isModule);
     }
+    /**
+     * Calls AeroGel with the config that you provided in the constructor earlier
+     */
     aerogelRewrite(script: string, isModule: boolean): string {
-        let parserOfChoice: aerogelParser;
-        for (const aerogelParser of this.config.preferredParsers.aerogel) {
-            const aerogelSupportedParsers = AeroGel.supportedParsers();
-            if (aerogelParser in aerogelSupportedParsers)
-                parserOfChoice = aerogelParser;
-        }
-        if (!parserOfChoice)
-            $aero.logger.fatalErr(
-                "No compatible AeroGel parsers found with your preferred list of parsers!"
-            );
-
-        // @ts-ignore
-        const aerogelRewriter = new AeroGel({
-            parserConfig: {
-                parser: parserOfChoice
-            }
-        });
+        // TODO: Call with the config
+        const aerogelRewriter = new AeroGel();
         return aerogelRewriter.jailScript(script, isModule);
     }
     /** This is the method you want to use in your proxy */

@@ -52,21 +52,16 @@
 		"babel-loader": "^9.2.1",
 		"glob": "^11.0.0",
 		"navigation-api-types": "^0.5.1",
-		"seafox": "^1.7.1",
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {
 		"@mercuryworkshop/bare-as-module3": "^2.2.4",
 		"@mercuryworkshop/bare-mux": "^2.1.4",
-		"@oxc-parser/wasm": "^0.31.0",
 		"@rsbuild/core": "^1.0.15",
-		"@types/estraverse": "^5.1.7",
 		"@types/trusted-types": "^2.0.7",
 		"@types/webpack": "^5.28.5",
-		"astring": "^1.9.0",
 		"htmlparser2": "^9.1.0",
 		"neverthrow": "^8.0.0",
-		"node-source-walk": "^7.0.0",
 		"traverse-the-universe": "^2.1.2",
 		"zod": "^3.23.8"
 	}

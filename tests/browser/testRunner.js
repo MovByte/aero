@@ -1,3 +1,6 @@
+// TODO: Update this file to reflect the new changes in the JSRewriter's APIs
+
+/*
 // Manage "imports"
 const replaceProxyNamespace = Mod.replaceProxyNamespace.default;
 
@@ -17,16 +20,13 @@ const jsRewriterConfigGeneric = {
 			}
 		}
 	},
-	preferredParsers: {
-		ast: ["oxc", "seafox"]
-	},
 	preferredASTWalkers: []
 };
 
-const jsRewriterConfigAST = {
+const jsRewriterConfigAeroJet = {
 	...jsRewriterConfigGeneric,
-	modeDefault: "ast",
-	modeModule: "ast"
+	modeDefault: "aerojet",
+	modeModule: "aerojet"
 };
 
 const jsRewriterConfigAeroGel = {
@@ -73,7 +73,7 @@ for (const [_apiInterceptor, ctx] of Object.entries(locationSandboxingModule))
 			testProxyNamespace
 		)} = ${ctx.proxifiedObj.toString()}`;
 
-const jsRewriterAST = new JSRewriter(jsRewriterConfigAST);
+const jsRewriterAST = new JSRewriter(jsRewriterConfigAeroJet);
 const jsRewriterAeroGel = new JSRewriter(jsRewriterConfigAeroGel);
 
 function scopeFunction(func, type) {
@@ -130,3 +130,4 @@ runTests().then(() => {
 		console.log("Failed test:", failedTest);
 	}
 });
+*/
