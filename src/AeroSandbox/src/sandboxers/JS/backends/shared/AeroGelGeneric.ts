@@ -7,7 +7,7 @@ import {
 } from "neverthrow";
 
 import type {
-    AeroGelConfig,
+    AeroGelConfigFull,
 } from "../../../../types/aeroSandbox";
 
 import RewriterGeneric from "./RewriterGeneric";
@@ -16,23 +16,27 @@ import RewriterGeneric from "./RewriterGeneric";
  * Do not import this; use `AeroGel`
  */
 export default class AeroGelGeneric extends RewriterGeneric {
-    constructor(config: AeroGelConfig) {
+    constructor(config: AeroGelConfigFull) {
         super(config);
     }
-    applyNewConfig(config: AeroGelConfig) {
+    applyNewConfig(config: AeroGelConfigFull) {
         super.applyNewConfig(config);
     }
     // @ts-ignore: This is meant to be generic
-    jailScript(script: string, config: any, isModule: boolean): Result<string,
+    jailScript(script: string, isModule: boolean, config: AeroGelConfigFull, rewriteScript: Function): Result<string,
         Error> {
         //@ts-ignore: This should be defined in any class that extends this
-        const rewrittenScriptRes = this.rewriteScript(script);
+        const rewrittenScriptRes = rewriteScript(script, {
+            trackBlockDepth: config.trackers.blockDepth,
+            trackPropertyChain: config.trackers.propertyChain,
+            trackProxyApply: config.trackers.proxyApply
+        });
         if (rewrittenScriptRes.isErr())
             return errr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
         return ok( /* js */ `
-		!(window = ${this.config.objPaths.proxy.window},
-			globalThis = ${this.config.objPaths.proxy.window}
-			location = ${this.config.objPaths.proxy.location}) => {
+		!(window = ${config.aeroGelConfig.proxified.window},
+			globalThis = ${config.aeroGelConfig.proxified.window}
+			location = ${config.aeroGelConfig.proxified.location}) => {
 			${isModule ? script : script},
 		}();
 		`);

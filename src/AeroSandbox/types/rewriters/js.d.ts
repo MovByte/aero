@@ -10,40 +10,31 @@ export interface RewriteOptions {
     insertCode?: string;
 }
 
-export interface GenericJSParserConfig {
-    /* Use null only if you don't have a proxy namespace you want to conceal */
-    proxyNamespace: string | null;
-    /** These must be on some sort of global object */
-    objPaths: {
-        proxy: {
-            window: string;
-            location: string;
-        };
-        fakeVars: {
-            let: string;
-            const: string;
-        };
-    };
+export interface AeroGelConfigFull {
+    aeroGelConfig: AeroGelConfig;
+    keywordGenConfig: {
+        supportStrings: boolean;
+        supportTemplateLiterals: boolean;
+        supportRegex: boolean;
+    },
+    trackers: {
+        blockDepth: boolean;
+        propertyChain: boolean;
+        proxyApply: boolean;
+    }
 }
 export interface AeroGelConfig extends GenericJSParserConfig {
-    /**
-     * TODO: Support the overwriteRecords instead of blindly overwriting `location` in the IIFE
-     * */
-    overwriteRecords?: overwriteRecordsType;
-    parserConfig: {
-        fakeVarObjPropTree: string;
-        proxifiedEvalPropTree: string;
-    };
+    propTrees: {
+        fakeLet: string;
+        fakeConst: string;
+    }
+    proxified: {
+        evalFunc: string;
+        window: string;
+        location: string;
+    }
+    checkFunc: string;
 }
-export type AeroGelParserConfig = {
-    letNamespace: string;
-    constNamespace: string;
-    locationNamespace: string;
-    respectStrings: boolean;
-    respectTemplateLiterals: boolean;
-    respectRegex: boolean;
-    proxifiedEvalPropTree: string;
-};
 export interface AeroJetRewriterConfig extends GenericJSParserConfig {
     checkFuncPropTree: string;
 }

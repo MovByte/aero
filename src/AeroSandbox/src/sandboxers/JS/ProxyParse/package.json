@@ -1,0 +1,43 @@
+{
+  "name": "proxy-parse-js",
+  "version": "0.0.1",
+  "description": "This library can process JS keywords in an efficient manner made specifically for proxies (jail and DSPC systems)",
+  "main": "dist/keywordIterator.js",
+  "type": "module",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": "./dist/keywordIterator.js"
+  },
+  "scripts": {
+    "start": "rspack build -c rspack.config.ts",
+    "bench-JSTest": "tsx tests/bench/jsTest.ts",
+    "bench-Discord": "tsx tests/bench/discord.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vortexdevelopergroup/aero.git"
+  },
+  "keywords": [
+    "proxy",
+    "rewriter",
+    "parser",
+    "js"
+  ],
+  "author": "Ryan Wilson",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/vortexdevelopergroup/aero/issues"
+  },
+  "homepage": "https://github.com/vortexdevelopergroup/aero#readme",
+  "devDependencies": {
+    "@rspack/core": "^1.0.14",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "glob": "^11.0.0",
+    "tinybench": "^3.0.3"
+  }
+}
