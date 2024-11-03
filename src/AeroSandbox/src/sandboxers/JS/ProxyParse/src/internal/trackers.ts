@@ -9,12 +9,12 @@ import { BlockDepthRefPassthrough, TrackPropertyChainRefPassthrough } from "../i
  * @param propertyChainEnded Has the property chain has ended?
  * @param currentChain The current chain we are ready to keep track of
  */
-export function createPropertyChainTracker(blockDepth: Partial<BlockDepthRefPassthrough>, trackPropertyChainRefPassthrough: Partial<TrackPropertyChainRefPassthrough>) {
+export function createPropertyChainTracker(blockDepthRefPassthrough: Partial<BlockDepthRefPassthrough>, trackPropertyChainRefPassthrough: Partial<TrackPropertyChainRefPassthrough>) {
     return (char: string) => {
         trackPropertyChainRefPassthrough.propertyChainEnded = false;
 
         const checkIfCharDenotesComputedAccess = createCheckIfCharDenotesComputedAccess();
-        if (checkIfCharDenotesComputedAccess(char) && blockDepth > 0) {
+        if (checkIfCharDenotesComputedAccess(char) && blockDepthRefPassthrough.blockDepth > 0) {
             trackPropertyChainRefPassthrough.currentChain += char;
             trackPropertyChainRefPassthrough.inPropertyChain = true;
         } else {
@@ -27,10 +27,9 @@ export function createPropertyChainTracker(blockDepth: Partial<BlockDepthRefPass
 
         return {
             char,
-            blockDepth,
             inPropertyChain: trackPropertyChainRefPassthrough.inPropertyChain,
-            propertyChainEnded: trackPropertyChainRefPassthrough.propertyChainEnded,
-            currentChain: trackPropertyChainRefPassthrough.currentChain
+            currentChain: trackPropertyChainRefPassthrough.currentChain,
+			propertyChainEnded: trackPropertyChainRefPassthrough.propertyChainEnded,s
         };
     }
 }

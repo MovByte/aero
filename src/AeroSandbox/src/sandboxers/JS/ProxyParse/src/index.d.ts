@@ -1,4 +1,24 @@
+export type processKeywordHandlerType = (i: number, char: string, ctx: Partial<processKeywordHandlerCtx>) => void
+export interface processKeywordHandlerCtx {
+		currentChain: string | null;
+		/** Flag for tracking if the character is in a property chain */
+		inPropertyChain: boolean | null;
+		/** Flag for tracking if the property chain has ended */
+		propertyChainEnded: boolean | null;
+		/** Is it tracking the handler object? */
+		inProxyTrackingHandler: boolean | null;
+		inProxy: boolean | null;
+		inApply: boolean | null;
+		inApplyBody: boolean | null;
+		/** Is it just now entering the apply body? */
+		enteringApplyBody: boolean | null;
+		exitingProxyHandler: boolean | null;
+}
+
 // Ref passthrough
+export interface InNewStatementRefPassthrough {
+	inNewStatement: boolean;
+}
 export interface BlockDepthRefPassthrough {
     /**
      * Block depth counter

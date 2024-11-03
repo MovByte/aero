@@ -39,6 +39,7 @@ import type { keywordIterator } from ".";
  *  ...
  * }
  */
+/*@__INLINE__*/
 export function replaceVarAssignmentKeywordWithFakeVarNamespace(iterator: keywordIterator, i: number, script: string, res: string, varAssignmentKeyword: varAssignmentKeywords, fakeVarNamespace: string): ReturnTypeForVarAssignmentKeywordReplacement {
     return replaceVarAssignmentKeyword(iterator, i, script, res, varAssignmentKeyword, `let ${fakeVarNamespace}.`);
 }
@@ -72,6 +73,7 @@ export function replaceVarAssignmentKeywordWithFakeVarNamespace(iterator: keywor
  *  }
  * }
  */
+/*@__INLINE__*/
 export function replaceVarAssignmentKeyword(iterator: keywordIterator, i: number, script: string, res: string, varAssignmentKeyword: varAssignmentKeywords, replacement: string): ReturnTypeForVarAssignmentKeywordReplacement {
     let newRes = res;
     if (script.slice(i, varAssignmentKeyword.length) === varAssignmentKeyword) {
@@ -113,6 +115,7 @@ export function replaceVarAssignmentKeyword(iterator: keywordIterator, i: number
  *  }
  * }
  */
+/*@__INLINE__*/
 export function replaceMethod(iterator: keywordIterator, i: number, script: string, res: string, methodName: string, replacement: string): ReturnTypeForVarAssignmentKeywordReplacement {
     let newRes = res;
     if (script.slice(i, i + 4) === methodName && (res.trim().slice(-1) === '(' || res.trim() === '')) {
@@ -158,6 +161,7 @@ export function replaceMethod(iterator: keywordIterator, i: number, script: stri
  *  ...
  * }
  */
+/*@__INLINE__*/
 export function replaceAssignmentKeyword(iterator: keywordIterator, i: number, script: string, res: string, keyword: string, replacement: string): ReturnTypeForVarAssignmentKeywordReplacement {
     let newRes = res;
     if (script.slice(i, keyword.length) === keyword && script[i + keyword.length] === '=') {

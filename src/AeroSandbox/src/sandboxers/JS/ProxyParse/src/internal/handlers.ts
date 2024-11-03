@@ -81,12 +81,12 @@ export class StringSpecificHandlers {
 /**
  * Process the new lines if they exist
  * @param char The character to process
- * @returns Whether the character is a start of a new statement
+ * @returns Whether the character is a start of a new statement and should be skipped
  */
-export function processStatement(char: string, inNewStatement: boolean): boolean {
+export function processStatement(char: string, inNewStatementRefPassthrough: InNewStatementRefPassthrough): boolean {
     if (char === '\n' || char === ';') {
         // Reset for the start of a new statement
-        inNewStatement = true;
+        inNewStatementRefPassthrough.inNewStatement = true;
         return true;
     }
     return false;

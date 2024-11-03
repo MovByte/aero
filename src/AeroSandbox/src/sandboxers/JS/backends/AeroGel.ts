@@ -18,7 +18,9 @@ import type {
 
 import AeroGelGeneric from "./shared/AeroGelGeneric";
 
-import processKeyword from "../ProxyParse/src/keywordProcessor";
+import keywordProcessorHandler from "../ProxyParse/src/keywordProcessorHandler";
+// This one is slow
+import processKeyword from "../ProxyParse/src/keywordProcessorIterator";
 import { replaceVarAssignmentKeywordWithFakeVarNamespace, replaceAssignmentKeyword, replaceMethod } from "../ProxyParse/src/replaceKeywords";
 import { containsAmbiguousAccess } from "../ProxyParse/src/internal/checks";
 
@@ -130,12 +132,19 @@ export function rewriteScript(script: string, config: {
     trackProxyApply: boolean
 }): Result<string, Error> {
     let res = "";
+
+	keywordProcessorHandler(script, {
+
+	}, (char: string) => )
+
+	/*
     const iterator = processKeyword(script, {
         trackBlockDepth: config.trackBlockDepth,
         trackPropertyChain: config.trackPropertyChain,
         trackProxyApply: config.trackProxyApply
     });
-    // @ts-ignoe
+    // @ts-ignore
+	/*
     for (let { char, i, blockDepth = 0, inNewStatement = false, inPropertyChain = false, currentChain = null, propertyChainEnded = false, enteredProxyTrackingHandler = false } of iterator) {
         if (enteredProxyTrackingHandler) {
             // TODO: When you just enter it, inject what is needed and skip the number of times (make a var for the "skipQueue")
@@ -190,6 +199,7 @@ export function rewriteScript(script: string, config: {
         // Nothing to do, keep going
         res += char;
     }
+	*/
 
     return ok(res);
 }
