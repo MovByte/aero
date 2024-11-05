@@ -51,7 +51,7 @@
 		"@rsdoctor/rspack-plugin": "^0.4.7",
 		"@rspack/cli": "^1.0.13",
 		"@rspack/core": "^1.0.13",
-		"@types/serviceworker": "^0.0.101",
+		"@types/serviceworker": "^0.0.102",
 		"@types/web-app-manifest": "^1.0.8",
 		"clean-webpack-plugin": "^4.0.0",
 		"playwright": "^1.48.1",
