@@ -8,9 +8,9 @@
 			"indentWidth": 4
 		}
 	},
-  	"files": {
-    		"ignoreUnknown": true
-  	},
+  "files": {
+    "ignoreUnknown": true
+  },
 	"linter": {
 		"rules": {
 			"nursery": {

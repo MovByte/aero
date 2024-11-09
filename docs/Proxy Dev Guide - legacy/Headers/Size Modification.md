@@ -1,3 +1,0 @@
-# Size Modification
-
-TODO: This is size...

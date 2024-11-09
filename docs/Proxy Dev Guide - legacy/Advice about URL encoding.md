@@ -1,3 +1,0 @@
-# Advice about URL encoding - DRAFT 📝
-
-TODO: This is a stub...

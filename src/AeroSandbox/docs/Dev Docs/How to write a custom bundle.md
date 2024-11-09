@@ -1,3 +1,0 @@
-# How to write a custom bundle
-
-TODO: This is a stub...

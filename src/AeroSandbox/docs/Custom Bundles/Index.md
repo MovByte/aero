@@ -1,3 +1,0 @@
-# Index
-
-These are specialized builds of AeroSandbox that aren't meant for aero specifically. TODO: This is a stub...

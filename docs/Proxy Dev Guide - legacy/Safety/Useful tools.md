@@ -1,3 +1,0 @@
-# Useful tools
-
-TODO: This is a stub...

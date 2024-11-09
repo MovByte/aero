@@ -21,8 +21,6 @@ mutable_node_modules
 # aero dev server
 dev-server/
 # aero.sh
-aero.sh/
-aero-site/
 site/
 # aero test pkgs
 /**/testPkgs/

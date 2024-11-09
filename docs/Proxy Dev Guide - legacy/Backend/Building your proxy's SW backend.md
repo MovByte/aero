@@ -1,3 +1,0 @@
-# Building your proxy's SW backend - DRAFT 📝
-
-TODO: This is a stub...
