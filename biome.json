@@ -7,6 +7,7 @@
 			"tests/deno",
 			"scripts/**/*.ts",
 			"tests/deno/**/*.ts",
+			"aero.sh",
 			"dev-server",
 			"src/AeroSandbox"
 		]
