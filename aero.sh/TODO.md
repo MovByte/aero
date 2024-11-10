@@ -6,7 +6,7 @@
 
 ## Frontend
 
-- [ ] Use [Daisy UI](https://daisyui.com) and the [Catppuccin theme for it](https://github.com/midiidev/catppuccin-daisyui)
+- [ ] Use [Daisy UI](https://daisyui.com) and the [Catppuccin theme for it](https://github.com/midiidev/catppuccin-daisyui). The Catppuccin switcher that comes with Starlight will be hijacked for the switching.
 - [ ] Make a top bar with links to these pages: about `index.astro`, proxy demo `proxy.astro`, playground/live demos `demos.astro`, stats `stats.astro`
 - [ ] Find a React graphing library for the stats page
 - [ ] Get data from GitHub CI builds for the stats page (usually in the form of CSV files) and visualize it

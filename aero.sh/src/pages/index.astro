@@ -1,7 +1,23 @@
 ---
 import BaseLayout from "@/layouts/Base.astro";
+
+import packageJSON from "../../../package.json" with { type: "json" };
 ---
 
-<BaseLayout title="aero.sh">
-  <p>aero.sh (home)</p>
+<BaseLayout title="Welcome to aero">
+  <p>{packageJSON.description}</p>
+  <label class="input input-bordered flex items-center gap-2">
+    <input type="text" class="grow" placeholder="Enter your search query or URL" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+      class="h-4 w-4 opacity-70">
+      <path
+        fill-rule="evenodd"
+        d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+        clip-rule="evenodd" />
+    </svg>
+  </label>
+  <!-- TODO: Place a bare/wisp server list with addition support -->
 </BaseLayout>

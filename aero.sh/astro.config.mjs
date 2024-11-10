@@ -5,6 +5,8 @@ import { defineConfig } from "astro/config";
 
 import react from "@astrojs/react";
 
+import tailwind from "@astrojs/tailwind";
+
 import starlight from "@astrojs/starlight";
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc";
 import catppuccin from "starlight-theme-catppuccin";
@@ -24,32 +26,27 @@ export default defineConfig({
 	},
 	integrations: [
 		react(),
-		/*
 		tailwind({
-		applyBaseStyles: false,
+		  applyBaseStyles: false,
 		}),
-		*/
 		starlight({
-			title: "aero",
+			title: "",
 			logo: {
 				src: "../aero.webp" // TODO: Use an SVG instead
 			},
 			//favicon: "../aero.svg",
 			plugins: [
-				catppuccin({ dark: "mocha-mauve", light: "latte-mauve" })
-				/*
-				starlightTypeDoc({
-					//entryFiles: ["../src/**\/*.ts"],
+				catppuccin({ dark: "mocha-mauve", light: "latte-mauve" }),
+				//starlightTypeDoc({
+					//entryFiles: ["../src/**/*.ts"],
 					//tsconfig: "../tsconfig.json",
-				})
-        */
+				//})
 			],
       sidebar: [
         {
           label: "Nav",
           items: [
-            { label: "About", link: "/" },
-            { label: "Proxy", link: "/proxy" },
+            { label: "Home", link: "/" },
             { label: "Demos", link: "/demos" },
             { label: "Stats", link: "/stats" },
           ],

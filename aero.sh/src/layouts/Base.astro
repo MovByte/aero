@@ -7,7 +7,7 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
 import packageJSON from "../../../package.json" with { type: "json" };
 ---
 
-<StarlightPage frontmatter={{ title }} >
+<StarlightPage frontmatter={{ title, toc: false }} >
   <meta property="og:title" content={title} />
   <meta property="og:description" content={packageJSON.description} />
   <meta property="og:type" content="website" />
