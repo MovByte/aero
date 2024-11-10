@@ -1,0 +1,16 @@
+---
+import "@/styles/globals.css";
+const { title } = Astro.props;
+ 
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+
+import packageJSON from "../../../package.json" with { type: "json" };
+---
+
+<StarlightPage frontmatter={{ title }} >
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={packageJSON.description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/logo.svg" />
+  <slot />
+</StarlightPage>

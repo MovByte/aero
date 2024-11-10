@@ -30,11 +30,11 @@ export default defineConfig({
 		}),
 		*/
 		starlight({
-			title: "aero/AeroSandbox docs",
+			title: "aero",
 			logo: {
 				src: "../aero.webp" // TODO: Use an SVG instead
 			},
-			//favicon: "../aero.webp",
+			//favicon: "../aero.svg",
 			plugins: [
 				catppuccin({ dark: "mocha-mauve", light: "latte-mauve" })
 				/*
@@ -43,7 +43,25 @@ export default defineConfig({
 					//tsconfig: "../tsconfig.json",
 				})
         */
-			]
+			],
+      sidebar: [
+        {
+          label: "Nav",
+          items: [
+            { label: "About", link: "/" },
+            { label: "Proxy", link: "/proxy" },
+            { label: "Demos", link: "/demos" },
+            { label: "Stats", link: "/stats" },
+          ],
+        },
+        {
+          label: "Docs",
+          autogenerate: { directory: "Docs" }
+        }
+      ],
+      social: {
+        github: "https://github.com/vortexdl/aero"
+      }
 		})
 	],
 	server: {

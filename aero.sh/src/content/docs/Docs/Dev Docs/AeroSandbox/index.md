@@ -12,7 +12,7 @@ description: A collection of dev docs related to AeroSandbox
 - [... API interceptor-related terms](interceptors/index.md#glossary)
 - **internally used APIs** vs **externally used libraries**: *internally used APIs* are APIs that are used by aero/AeroSandbox and externally used libraries are APIs that can be found helpful for other devs, but not used in the codebase
 
-> This section assumes that you have already read the [Glossary for aero](../../index.md)
+> This section assumes that you have already read the [Glossary for aero](../../../index.md)
 
 # Directory listing
 
