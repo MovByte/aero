@@ -2,26 +2,17 @@
 import BaseLayout from "@/layouts/Base.astro";
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-// import Playground from "javascript-playgrounds"
+import AeroSandboxRewriteDemo from "@/components/demo/AeroSandboxRewriteDemo.tsx";
+import AeroSandboxREPL from "@/components/demo/AeroSandboxREPL.tsx";
 ---
 
 <BaseLayout title="Live Demos/Playgrounds">
   <Tabs>
     <TabItem label="Rewriter Comparisons">
-      <Tabs>
-        <select class="select w-full max-w-xs">
-          <option disabled selected>Select a rewriter to try</option>
-          <option>HTML</option>
-          <option>XML+XSLT</option>
-          <option>JS</option>
-          <option>Cache Manifests</option>
-        </select>
-      </Tabs>
-      <button class="btn">Rewrite</button>
-      <!--- TODO: Place the dual-split Monaco Rewrite editor with Catppuccin here -->
+      <AeroSandboxRewriteDemo client:only="react" />
     </TabItem>
     <TabItem label="AeroSandbox Repl">
-      <!--<Playground />-->
+      <AeroSandboxREPL client:only="react" />
     </TabItem>
   </Tabs>
 </BaseLayout>

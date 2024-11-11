@@ -1,7 +1,34 @@
 ---
 import BaseLayout from "@/layouts/Base.astro";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+//import { Octokit } from "octokit";
+
+//import getGitHubURLSplit from "../../../scripts/shared/getGitHubURLSplit";
 
 import packageJSON from "../../../package.json" with { type: "json" };
+
+const npmRegistry = await fetch("https://registry.npmjs.com/aero-proxy");
+const npmRegistryJSON = await npmRegistry.json();
+const packageVersions = Object.keys(npmRegistryJSON.versions).reverse();
+
+/*
+const octokit = new Octokit({ auth: import.meta.env.GITHUB_KEY });
+
+const githubURLSplit = getGitHubURLSplit(packageJSON.repository.url);
+if (githubURLSplit.isErr())
+  throw new Error("Invalid GitHub URL in the package.json");
+const [owner, repo] = githubURLSplit.value;
+
+const repoJSON = await octokit.request('GET  /repos/{owner}/{repo}', {
+		owner,
+		repo,
+		headers: {
+			'X-GitHub-Api-Version': '2022-11-28'
+		}
+	});
+	*/
+// TODO: Get all of the commits that have CI builds attached and list them in the corresponding dropdown
 ---
 
 <BaseLayout title="Welcome to aero">
@@ -19,5 +46,59 @@ import packageJSON from "../../../package.json" with { type: "json" };
         clip-rule="evenodd" />
     </svg>
   </label>
-  <!-- TODO: Place a bare/wisp server list with addition support -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th><p>Bare Servers</p><br><input type="checkbox" class="toggle toggle-success" checked="checked" /></th>
+        <th><p>Wisp Servers</p><br><input type="checkbox" class="toggle toggle-success" checked="checked" /></th>
+        <th><p>Proxy Middleware Bundle URLs</p><br><input type="checkbox" class="toggle toggle-success" checked="checked" /></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="bg-base-200">...</td>
+        <td class="bg-base-200">...</td>
+        <td class="bg-base-200">...</td>
+      </tr>
+    </tbody>
+  </table>
+  <br>
+
+  <input type="text" placeholder="Add wisp server" class="input input-bordered input-sm" />
+  <button class="btn btn-success btn-sm">Add</button>
+  <button class="btn btn-error btn-sm">Remove</button>
+  <br>
+
+  <input type="text" placeholder="Add bare server" class="input input-bordered input-sm" />
+  <button class="btn btn-success btn-sm">Add</button>
+  <button class="btn btn-error btn-sm">Remove</button>
+  <br>
+
+  <input type="text" placeholder="Add proxy middleware" class="input input-bordered input-sm" />
+  <button class="btn btn-success btn-sm">Add</button>
+  <button class="btn btn-error btn-sm">Remove</button>
+  <br>
+
+  <h2>Revision Selection</h2>
+  <Tabs>
+    <TabItem label="NPM">
+      <p>Select which NPM version to use of aero</p>
+      <select class="select">
+        <option selected>{packageVersions[0] + " (latest)"}</option>
+        {packageVersions.slice(1).map((item: string) => {
+          return <option>{item}</option>
+        })};
+      </select>
+    </TabItem>
+    <TabItem label="GitHub">
+    <p>Select which GitHub build to use of aero from the commits with successful builds</p>
+      <select class="select">
+        <option selected>Stable (main)</option>
+        <option> Unstable (unstable)</option>
+      </select>
+      <select class="select">
+        <option selected>Stable (latest)</option>
+      </select>
+    </TabItem>
+  </Tabs>
 </BaseLayout>
