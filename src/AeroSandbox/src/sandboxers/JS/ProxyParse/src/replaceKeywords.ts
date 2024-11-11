@@ -40,8 +40,8 @@ import type { keywordIterator } from ".";
  * }
  */
 /*@__INLINE__*/
-export function replaceVarAssignmentKeywordWithFakeVarNamespace(iterator: keywordIterator, i: number, script: string, res: string, varAssignmentKeyword: varAssignmentKeywords, fakeVarNamespace: string): ReturnTypeForVarAssignmentKeywordReplacement {
-    return replaceVarAssignmentKeyword(iterator, i, script, res, varAssignmentKeyword, `let ${fakeVarNamespace}.`);
+export function replaceVarAssignmentKeywordWithFakeVarNamespace(i: number, script: string, res: string, varAssignmentKeyword: varAssignmentKeywords, fakeVarNamespace: string, iterator?: keywordIterator): ReturnTypeForVarAssignmentKeywordReplacement {
+    return iterator ? replaceVarAssignmentKeyword(i, script, res, varAssignmentKeyword, `let ${fakeVarNamespace}.`, iterator) : replaceVarAssignmentKeyword(i, script, res, varAssignmentKeyword, `let ${fakeVarNamespace}.`);
 }
 
 /**
@@ -74,7 +74,7 @@ export function replaceVarAssignmentKeywordWithFakeVarNamespace(iterator: keywor
  * }
  */
 /*@__INLINE__*/
-export function replaceVarAssignmentKeyword(iterator: keywordIterator, i: number, script: string, res: string, varAssignmentKeyword: varAssignmentKeywords, replacement: string): ReturnTypeForVarAssignmentKeywordReplacement {
+export function replaceVarAssignmentKeyword(i: number, script: string, res: string, varAssignmentKeyword: varAssignmentKeywords, replacement: string, iterator?: keywordIterator): ReturnTypeForVarAssignmentKeywordReplacement {
     let newRes = res;
     if (script.slice(i, varAssignmentKeyword.length) === varAssignmentKeyword) {
         newRes += replacement;
@@ -116,25 +116,34 @@ export function replaceVarAssignmentKeyword(iterator: keywordIterator, i: number
  * }
  */
 /*@__INLINE__*/
-export function replaceMethod(iterator: keywordIterator, i: number, script: string, res: string, methodName: string, replacement: string): ReturnTypeForVarAssignmentKeywordReplacement {
+export function replaceMethod(i: number, script: string, res: string, methodName: string, replacement: string, iterator?: keywordIterator): ReturnTypeForVarAssignmentKeywordReplacement {
     let newRes = res;
     if (script.slice(i, i + 4) === methodName && (res.trim().slice(-1) === '(' || res.trim() === '')) {
         newRes += `${replacement}(`;
 
-        // Skip the keyword by going next from the amount of chars after the first letter of the keyword
-        for (const _ of Array.from({ length: methodName.length - 1 }))
-            iterator.next();
-
-        return {
+        let ret = {
             newRes,
             shouldContinue: true
         };
+
+        if (iterator) {
+            // Skip the keyword by going next from the amount of chars after the first letter of the keyword
+            for (const _ of Array.from({ length: methodName.length - 1 }))
+                iterator.next();
+            return ret;
+        }
+
+        return {
+            ...ret,
+            skipChars: methodName.length - 1
+        }
     }
     return {
         newRes,
         shouldContinue: false
-    };
+    }
 }
+
 
 /**
  * This method allows you to replace the the variable that is being assigned to
@@ -162,17 +171,27 @@ export function replaceMethod(iterator: keywordIterator, i: number, script: stri
  * }
  */
 /*@__INLINE__*/
-export function replaceAssignmentKeyword(iterator: keywordIterator, i: number, script: string, res: string, keyword: string, replacement: string): ReturnTypeForVarAssignmentKeywordReplacement {
+export function replaceAssignmentKeyword(i: number, script: string, res: string, keyword: string, replacement: string, iterator?: keywordIterator): ReturnTypeForVarAssignmentKeywordReplacement {
     let newRes = res;
     if (script.slice(i, keyword.length) === keyword && script[i + keyword.length] === '=') {
         newRes += `${replacement}.location = `;
-        // Skip the keyword by going next from the amount of chars after the first letter of the keyword
-        for (const _ of Array.from({ length: keyword.length - 1 }))
-            iterator.next();
-        return {
+
+        let ret = {
             newRes,
             shouldContinue: true
         };
+
+        if (iterator) {
+            // Skip the keyword by going next from the amount of chars after the first letter of the keyword
+            for (const _ of Array.from({ length: keyword.length - 1 }))
+                iterator.next();
+            return ret;
+        }
+
+        return {
+            ...ret,
+            skipChars: keyword.length - 1
+        }
     }
     return {
         newRes,

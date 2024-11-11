@@ -12,9 +12,9 @@ import {
     err as errr
 } from "neverthrow";
 
-import type {
-    AeroGelConfig
-} from "../../../../types/rewriters/js";
+import type AeroConfig from "./types/config.d.ts";
+
+import type { processKeywordHandlerCtx } from "../ProxyParse/src/index.d.ts";
 
 import AeroGelGeneric from "./shared/AeroGelGeneric";
 
@@ -56,14 +56,14 @@ export default class AeroGel extends AeroGelGeneric {
      * This is the config object, which is primarily used to tell AeroGel where the globals are
      * @param config The config object for AeroGel
      */
-    constructor(config: AeroGelConfigFull) {
+    constructor(config: AeroConfig) {
         super(config);
     }
     /**
      * Apply a new config later
      * @param config The new AeroGel config to apply
      */
-    applyNewConfig(config: AeroGelConfigFull) {
+    applyNewConfig(config: AeroConfig) {
         super.applyNewConfig(config);
     }
 
@@ -71,7 +71,7 @@ export default class AeroGel extends AeroGelGeneric {
      * This essentially the rewriter
      * @param script The script to jail. Before it is jailed the let/const to fake vars RegExp rewriting occurs.
      * @param config The config for the AeroGel parsing
-     * @param isModule Module scripts don't need to be rewrote because they don't require fake vars for scope emulation since module scripts run in their own isolated scope.
+     * @param isModule Module scripts don't need to be rewritten because they don't require fake vars for scope emulation since module scripts run in their own isolated scope.
      *
      * @example
      * const aeroGel = new AeroGelNative(...);
@@ -83,7 +83,7 @@ export default class AeroGel extends AeroGelGeneric {
      */
     jailScript(script: string, isModule: boolean): Result<string, Error> {
         return ok(super.jailScript(script, isModule, {
-            aeroGelConfig: {
+            globalsConfig: {
                 propTrees: {
                     fakeLet: propTreeAeroGelSpecific + "fakeLet",
                     fakeConst: propTreeAeroGelSpecific + "fakeConst",
@@ -126,80 +126,89 @@ export default class AeroGel extends AeroGelGeneric {
  *   }();
  * `);
  */
-export function rewriteScript(script: string, config: {
-    trackBlockDepth: boolean,
-    trackPropertyChain: boolean,
-    trackProxyApply: boolean
-}): Result<string, Error> {
+export function rewriteScript(script: string, config: AeroConfig): Result<string, Error> {
     let res = "";
 
-	keywordProcessorHandler(script, {
-
-	}, (char: string) => )
-
-	/*
-    const iterator = processKeyword(script, {
-        trackBlockDepth: config.trackBlockDepth,
-        trackPropertyChain: config.trackPropertyChain,
-        trackProxyApply: config.trackProxyApply
-    });
-    // @ts-ignore
-	/*
-    for (let { char, i, blockDepth = 0, inNewStatement = false, inPropertyChain = false, currentChain = null, propertyChainEnded = false, enteredProxyTrackingHandler = false } of iterator) {
-        if (enteredProxyTrackingHandler) {
-            // TODO: When you just enter it, inject what is needed and skip the number of times (make a var for the "skipQueue")
-        }
-
-        // Rewrite `let`, `const`, `eval`, and `location` only at the start of a new statement
-        if (blockDepth === 1 && inNewStatement) {
-            // Rewrite `let` with the fake var namespace from the config provided in this class
-            {
-                const { newRes, shouldContinue } = replaceVarAssignmentKeywordWithFakeVarNamespace(iterator, i, script, res, "let", this.config.letNamespace);
-                res = newRes;
-                if (shouldContinue)
-                    continue;
+    let skipChars_ = 0;
+    try {
+        keywordProcessorHandler(script, {
+            keywordGenConfig: config.keywordGenConfig,
+            trackers: config.trackers
+        }, (i: number, char: string, ctx: processKeywordHandlerCtx): void => {
+            if (skipChars_ !== 0) {
+                skipChars_--;
+                return;
+            }
+            else if (skipChars_ < 0) {
+                console.warn("The var skipChars_ is less than 0. The rewriter may be broken.");
+                skipChars_ = 0;
+                return;
             }
 
-            // Rewrite `const` with the fake var namespace from the config provided in this class
-            {
-                const { newRes, shouldContinue } = replaceVarAssignmentKeywordWithFakeVarNamespace(iterator, i, script, res, "const", this.config.letNamespace);
-                res = newRes;
-                if (shouldContinue)
-                    continue;
+            if (ctx.enteredProxyTrackingHandler) {
+                // TODO: When you just enter it, inject what is needed and skip the number of times (make a var for the "skipQueue")
             }
 
-            // Rewrite `eval` with the proxified version of it if it is in a module script
-            if (this.config.isModule) {
-                const { newRes, shouldContinue } = replaceMethod(iterator, i, script, res, "eval", this.config.proxifiedEvalPropTree);
-                res = newRes;
-                if (shouldContinue)
-                    continue;
-            }
+            // Rewrite `let`, `const`, `eval`, and `location` only at the start of a new statement
+            if (ctx.blockDepth === 1 && ctx.enteredNewStatement) {
+                // TODO: Make versions of these that don't require iterators
+                // TODO: Ensure these are inlined. Make a build plugin to inline these instead of doing this manually
 
-            // Intercept the `location = ...` assignment and rewrite it to `<locationNamespace>.location = ...` to prevent a no-op
-            {
-                const { newRes, shouldContinue } = replaceAssignmentKeyword(iterator, i, script, res, "location", this.config.locationNamespace);
-                res = newRes;
-                if (shouldContinue)
-                    continue;
+                // Rewrite `let` with the fake var namespace from the config provided in this class
+                {
+                    const { newRes, shouldContinue, skipChars } = replaceVarAssignmentKeywordWithFakeVarNamespace(i, script, res, "let", this.config.letNamespace);
+                    res = newRes;
+                    skipChars_ += skipChars;
+                    if (shouldContinue)
+                        return;
+                }
+
+                // Rewrite `const` with the fake var namespace from the config provided in this class
+                {
+                    const { newRes, shouldContinue, skipChars } = replaceVarAssignmentKeywordWithFakeVarNamespace(i, script, res, "const", this.config.letNamespace);
+                    res = newRes;
+                    skipChars_ += skipChars;
+                    if (shouldContinue)
+                        return;
+                }
+
+                // Rewrite `eval` with the proxified version of it if it is in a module script
+                if (this.config.isModule) {
+                    const { newRes, shouldContinue, skipChars } = replaceMethod(i, script, res, "eval", this.config.proxifiedEvalPropTree);
+                    res = newRes;
+                    skipChars_ += skipChars;
+                    if (shouldContinue)
+                        return;
+                }
+
+                // Intercept the `location = ...` assignment and rewrite it to `<locationNamespace>.location = ...` to prevent a no-op
+                {
+                    const { newRes, shouldContinue, skipChars } = replaceAssignmentKeyword(i, script, res, "location", this.config.locationNamespace);
+                    res = newRes;
+                    skipChars_ += skipChars;
+                    if (shouldContinue)
+                        return;
+                }
+            } else if (
+                ctx.currentChain !== null
+            ) {
+                if (ctx.propertyChainEnded)
+                    res += containsAmbiguousAccess(ctx.currentChain) ?
+                        // If the chain contains `window` or `location`, wrap with the check function provided
+                        `${config.checkFuncPropTree}(${ctx.currentChain})` :
+                        // No wrapping needed; append the chain as-is
+                        ctx.currentChain;
+                else
+                    // We need to wait and see what happens next
+                    return;
             }
-        } else if (
-            currentChain !== null
-        ) {
-            if (propertyChainEnded)
-                res += containsAmbiguousAccess(currentChain) ?
-                    // If the chain contains `window` or `location`, wrap with the check function provided
-                    `${config.checkFuncPropTree}(${currentChain})` :
-                    // No wrapping needed; append the chain as-is
-                    currentChain;
-            else
-                // We need to wait and see what happens next
-                continue;
-        }
-        // Nothing to do, keep going
-        res += char;
+            // Nothing to do, keep going
+            res += char;
+        })
+    } catch (err) {
+        return errr(new Error(`Failed to rewrite the script: ${err}`));
     }
-	*/
+    return ok(undefined);
 
     return ok(res);
 }

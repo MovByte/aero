@@ -1,23 +1,25 @@
 export type processKeywordHandlerType = (i: number, char: string, ctx: Partial<processKeywordHandlerCtx>) => void
 export interface processKeywordHandlerCtx {
-		currentChain: string | null;
-		/** Flag for tracking if the character is in a property chain */
-		inPropertyChain: boolean | null;
-		/** Flag for tracking if the property chain has ended */
-		propertyChainEnded: boolean | null;
-		/** Is it tracking the handler object? */
-		inProxyTrackingHandler: boolean | null;
-		inProxy: boolean | null;
-		inApply: boolean | null;
-		inApplyBody: boolean | null;
-		/** Is it just now entering the apply body? */
-		enteringApplyBody: boolean | null;
-		exitingProxyHandler: boolean | null;
+    blockDepth: boolean;
+    enteredNewStatement: boolean;
+    currentChain: string;
+    /** Flag for tracking if the character is in a property chain */
+    inPropertyChain: boolean;
+    /** Flag for tracking if the property chain has ended */
+    propertyChainEnded: boolean;
+    /** Is it tracking the handler object? */
+    inProxyTrackingHandler: boolean;
+    inProxy: boolean;
+    inApply: boolean;
+    inApplyBody: boolean;
+    /** Is it just now entering the apply body? */
+    enteringApplyBody: boolean;
+    exitingProxyHandler: boolean;
 }
 
 // Ref passthrough
-export interface InNewStatementRefPassthrough {
-	inNewStatement: boolean;
+export interface EnteredNewStatementRefPassthrough {
+    enteredNewStatement: boolean;
 }
 export interface BlockDepthRefPassthrough {
     /**
@@ -97,6 +99,8 @@ export interface ReturnTypeForVarAssignmentKeywordReplacement {
     newRes: string,
     /** If you should `continue` to pass to the next iteration of the loop */
     shouldContinue: boolean
+    /** This is only done if there is no iterator provided (in the case that the handler is being used) */
+    skipChars?: number
 }
 
 export type KeywordGenConfig = {

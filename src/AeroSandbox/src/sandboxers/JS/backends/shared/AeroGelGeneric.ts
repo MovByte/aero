@@ -6,9 +6,7 @@ import {
     err as errr
 } from "neverthrow";
 
-import type {
-    AeroGelConfigFull,
-} from "../../../../types/aeroSandbox";
+import type AeroConfig from "../types/config.d.ts";
 
 import RewriterGeneric from "./RewriterGeneric";
 
@@ -16,14 +14,14 @@ import RewriterGeneric from "./RewriterGeneric";
  * Do not import this; use `AeroGel`
  */
 export default class AeroGelGeneric extends RewriterGeneric {
-    constructor(config: AeroGelConfigFull) {
+    constructor(config: AeroConfig) {
         super(config);
     }
-    applyNewConfig(config: AeroGelConfigFull) {
+    applyNewConfig(config: AeroConfig) {
         super.applyNewConfig(config);
     }
     // @ts-ignore: This is meant to be generic
-    jailScript(script: string, isModule: boolean, config: AeroGelConfigFull, rewriteScript: Function): Result<string,
+    jailScript(script: string, isModule: boolean, config: AeroConfig, rewriteScript: Function): Result<string,
         Error> {
         //@ts-ignore: This should be defined in any class that extends this
         const rewrittenScriptRes = rewriteScript(script, {
@@ -34,9 +32,9 @@ export default class AeroGelGeneric extends RewriterGeneric {
         if (rewrittenScriptRes.isErr())
             return errr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
         return ok( /* js */ `
-		!(window = ${config.aeroGelConfig.proxified.window},
-			globalThis = ${config.aeroGelConfig.proxified.window}
-			location = ${config.aeroGelConfig.proxified.location}) => {
+		!(window = ${config.globalsConfig.proxified.window},
+			globalThis = ${config.globalsConfig.proxified.window}
+			location = ${config.globalsConfig.proxified.location}) => {
 			${isModule ? script : script},
 		}();
 		`);
