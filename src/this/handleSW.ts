@@ -242,13 +242,13 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
     );
 
     // Rewrite the request headers
-    const rewroteReqHeaders = req.headers;
+    const rewrittenReqHeaders = req.headers;
 
     let sec: Sec;
     if (FEATURE_CACHES_EMULATION) {
         if (proxyUrl.protocol === "http:") {
             const hstsCacheEmulator = new HSTSCacheEmulation(
-                rewroteReqHeaders.get("strict-transport-security"),
+                rewrittenReqHeaders.get("strict-transport-security"),
                 proxyUrl.origin
             );
 
@@ -269,14 +269,14 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
     }
 
     if (FEATURE_CORS_EMULATION) {
-        if (rewroteReqHeaders.has("timing-allow-origin"))
-            sec.timing = rewroteReqHeaders.get("timing-allow-origin");
-        if (rewroteReqHeaders.has("permissions-policy"))
-            sec.perms = rewroteReqHeaders.get("permissions-policy");
-        if (rewroteReqHeaders.has("x-frame-options"))
-            sec.frame = rewroteReqHeaders.get("x-frame-options");
-        if (rewroteReqHeaders.has("content-security-policy"))
-            sec.csp = rewroteReqHeaders.get("content-security-policy");
+        if (rewrittenReqHeaders.has("timing-allow-origin"))
+            sec.timing = rewrittenReqHeaders.get("timing-allow-origin");
+        if (rewrittenReqHeaders.has("permissions-policy"))
+            sec.perms = rewrittenReqHeaders.get("permissions-policy");
+        if (rewrittenReqHeaders.has("x-frame-options"))
+            sec.frame = rewrittenReqHeaders.get("x-frame-options");
+        if (rewrittenReqHeaders.has("content-security-policy"))
+            sec.csp = rewrittenReqHeaders.get("content-security-policy");
     }
 
     /*
@@ -289,7 +289,7 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
 
     let cacheMan: CacheManager;
     if (FEATURE_CACHES_EMULATION) {
-        cacheMan = new CacheManager(rewroteReqHeaders);
+        cacheMan = new CacheManager(rewrittenReqHeaders);
 
         if (cacheMan.mode === "only-if-cached")
             // TODO: log here if in DEBUG/VERBOSE
@@ -301,18 +301,18 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
 
     //rewriteReqHeaders(reqHeaders, clientUrl);
 
-    const rewroteReqOpts: RequestInit = {
+    const rewrittenReqOpts: RequestInit = {
         method: req.method,
-        headers: rewroteReqHeaders
+        headers: rewrittenReqHeaders
     };
 
     // A request body should not be created under these conditions
-    if (!["GET", "HEAD"].includes(req.method)) rewroteReqOpts.body = req.body;
+    if (!["GET", "HEAD"].includes(req.method)) rewrittenReqOpts.body = req.body;
 
     // Make the request to the proxy
     const resp = await new BareMux.BareClient().fetch(
         new URL(proxyUrl).href,
-        rewroteReqOpts
+        rewrittenReqOpts
     );
 
     if (!resp) self.logger.fatalErr("No response found!");
@@ -320,8 +320,8 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
 
     if (FEATURE_CACHES_EMULATION) {
         const cacheAge = cacheMan.getAge(
-            rewroteReqHeaders.get("cache-control"),
-            rewroteReqHeaders.get("expires")
+            rewrittenReqHeaders.get("cache-control"),
+            rewrittenReqHeaders.get("expires")
         );
 
         const c1achedResp = await cacheMan.get(reqUrl, cacheAge);
@@ -329,12 +329,12 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
     }
 
     // Rewrite the response headers
-    //const rewroteRespHeaders = rewriteRespHeaders(resp.headers, clientUrl);
+    //const rewrittenRespHeaders = rewriteRespHeaders(resp.headers, clientUrl);
 
     // Overwrite the response headers (they are immutable)
     /*
     Object.defineProperty(resp, "headers", {
-        value: rewroteRespHeaders,
+        value: rewrittenRespHeaders,
         configurable: false
     });
     */
@@ -349,7 +349,7 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
         // Not all sites respond with a type
         typeof type === "undefined" || isHTML(type);
 
-    let rewroteBody: string | ReadableStream;
+    let rewrittenBody: string | ReadableStream;
     // Rewrite the body
     // TODO: Pack these injected scripts with Webpack
     if (REWRITER_HTML && isNavigate && html) {
@@ -411,7 +411,7 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
 `;
 
             // Recursion
-            rewroteBody = base.replace(/_IMPORT_/, escapeJS(base)) + body;
+            rewrittenBody = base.replace(/_IMPORT_/, escapeJS(base)) + body;
         }
     } else if (
         REWRITER_XSLT &&
@@ -419,11 +419,11 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
         (type.startsWith("text/xml") || type.startsWith("application/xml"))
     ) {
         const body = await resp.text();
-        rewroteBody = body;
+        rewrittenBody = body;
 
         // TODO: Update this to support modern aero
         /*
-        xml rewroteBody = `
+        xml rewrittenBody = `
 <config>
 {
     prefix: ${prefix}
@@ -459,13 +459,13 @@ ${body}
         // Safari exclusive
         if (SUPPORT_LEGACY && type.includes("text/cache-manifest")) {
             const isFirefox =
-                rewroteReqHeaders["user-agent"].includes("Firefox");
+                rewrittenReqHeaders["user-agent"].includes("Firefox");
 
-            rewroteBody = rewriteCacheManifest(body, isFirefox);
-        } else rewroteBody = rewriteManifest(body, proxyUrl);
+            rewrittenBody = rewriteCacheManifest(body, isFirefox);
+        } else rewrittenBody = rewriteManifest(body, proxyUrl);
     } // TODO: Bring back worker support in aero
     /*else if (SUPPORT_WORKER && req.destination === "worker") {
-        rewroteBody = isModWorker
+        rewrittenBody = isModWorker
             ? /* js *\/ `
 import { proxyLocation } from "${prefix}worker/worker";
 import { FeatureFlags } from '../featureFlags';
@@ -490,7 +490,7 @@ ${body}
         `;
     */
     // No rewrites are needed; proceed as normal
-    else rewroteBody = resp.body;
+    else rewrittenBody = resp.body;
 
     if (FEATURE_ENC_BODY_EMULATION) {
         // FIXME: Fix whatever this is. I forgot where I was going with this.
@@ -498,13 +498,13 @@ ${body}
         resp.headers["x-aero-size-encbody"] = null;
 
         // TODO: x-aero-size-transfer
-        if (typeof rewroteBody === "string") {
+        if (typeof rewrittenBody === "string") {
             resp.headers["x-aero-size-body"] = new TextEncoder().encode(
-                rewroteBody
+                rewrittenBody
             ).length;
             // TODO: Emulate x-aero-size-encbody
-        } else if (rewroteBody instanceof ArrayBuffer) {
-            resp.headers["x-aero-size-body"] = rewroteBody.byteLength;
+        } else if (rewrittenBody instanceof ArrayBuffer) {
+            resp.headers["x-aero-size-body"] = rewrittenBody.byteLength;
             // TODO: Emulate x-aero-size-encbody
         }
     }
@@ -521,7 +521,7 @@ ${body}
             $aero.logger.fatalErr(new Error(`${baseErrMsg} (can't proceed with Cache Emulation): ${cacheManSetRes.error.message}`));
         } else {
             // Return the response
-            return okAsync(new Response(resp.status === 204 ? null : rewroteBody, {
+            return okAsync(new Response(resp.status === 204 ? null : rewrittenBody, {
                 headers: resp.headers,
                 status: resp.status
             }));

@@ -14,7 +14,7 @@ The webworker bundle will be made with [Partytown](https://partytown.builder.io)
 
 ### Server-only runtime for proxies
 
-There will be special bundles for CF Workers due to them being nearly identical to the service worker API. I might also try to make it possible for the HTML and JS to be rewrote server-side on this platform, for providing better compatiblity.
+There will be special bundles for CF Workers due to them being nearly identical to the service worker API. I might also try to make it possible for the HTML and JS to be rewritten server-side on this platform, for providing better compatiblity.
 
 > If you don't want to use CF Workers, that's fine! You will be able to run these in the standard runtimes through wrangler. I will provide middleware for routers in the other runtimes.
 

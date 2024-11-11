@@ -3,19 +3,19 @@ import htmlRules from "./htmlRules";
 import rewriteSrc from "$shared/src";
 import rewriteHtmlSrc from "./htmlSrc";
 
-const afterRewrote = new WeakMap<Element, boolean>();
+const afterRewritten = new WeakMap<Element, boolean>();
 const elContainer = new WeakMap<Element, Element>();
 
 function set(el: Element, attr: string, val = "", backup = true): void {
-	// Avoid rewriting the next time by marking it to not be rewrote
-	if (afterRewrote.has(el)) {
-		const isAfterRewrote = afterRewrote.get(el);
-		if (isAfterRewrote === true) {
-			afterRewrote.set(el, false);
+	// Avoid rewriting the next time by marking it to not be rewritten
+	if (afterRewritten.has(el)) {
+		const isAfterRewritten = afterRewritten.get(el);
+		if (isAfterRewritten === true) {
+			afterRewritten.set(el, false);
 			return;
 		}
 	}
-	afterRewrote.set(el, true);
+	afterRewritten.set(el, true);
 
 	const elBak = el.cloneNode(true);
 	if (elBak instanceof Element) {

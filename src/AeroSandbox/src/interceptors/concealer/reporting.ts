@@ -10,7 +10,7 @@ if ("ReportingObserver" in window) {
       // https://w3c.github.io/reporting/#serialize-reports
       const json = report.toJSON();
       report.toJSON = () => ({
-				..on,
+                ..on,
         url: afterPrefix(json.url),
       });
 
@@ -26,7 +26,7 @@ if ("ReportingObserver" in window) {
           CSPViolationReportBody.sourceFile
         );
 
-        // Don't reveal the rewrote script
+        // Don't reveal the rewritten script
         const resp = await fetch(CSPViolationReportBody.sourceFile);
         CSPViolationReportBody.sample = (await resp.text()).slice(
           0,

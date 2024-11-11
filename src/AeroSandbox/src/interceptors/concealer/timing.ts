@@ -9,7 +9,7 @@ import { afterPrefix } from "$shared/afterPrefix";
 /*
 There are 3 ways to detect proxies using the Performance API
 Using entry.name to expose the url
-If the site was rewrote or the headers were modified, the size would be different than what is intended. You can think of this as a form of hash checking
+If the site was rewritten or the headers were modified, the size would be different than what is intended. You can think of this as a form of hash checking
 If you make a request to two different proxy origins on the site that are both cached and one has the Clear-Site-Data clearing both proxy origins, the proxy can be detected
 */
 

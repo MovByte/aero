@@ -17,11 +17,11 @@ const protocolRegExp = /^https?:\/\//;
  */
 function rewriteSrc(url: string, prefix: string, logger: AeroSandboxLogger | AeroLogger, proxyHref = proxyLocation(prefix, logger).href): string {
     // Protocol
-    const rewroteUrl = protocolRegExp.test(url)
+    const rewrittenUrl = protocolRegExp.test(url)
         ? prefix + url
         : new URL(url, proxyHref).href;
 
-    return rewroteUrl;
+    return rewrittenUrl;
 }
 
 export default rewriteSrc;

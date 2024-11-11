@@ -56,7 +56,7 @@ function rewritePath(path: string, isFirefox: boolean): string {
  *
  * @param body - The Cache Manifest to rewrite.
  * @param isFirefox - Whether the browser is Firefox.
- * @returns The rewrote Cache Manifest.
+ * @returns The rewritten Cache Manifest.
  */
 export default (body: string, isFirefox: boolean): string => {
     const lines = body.split(matchNewLines); // Handle different newline characters

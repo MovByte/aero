@@ -34,7 +34,7 @@ function failedToGeneric(action: string, variableName: string, variableType?: st
  * @example
  * ...
  * const hstsCacheEmulator = new HSTSCacheEmulation(
- *  rewroteReqHeaders.get("strict-transport-security"),
+ *  rewrittenReqHeaders.get("strict-transport-security"),
     proxyUrl.origin
  * );
  */

@@ -57,11 +57,11 @@ import htmlRules from "../shared/htmlRules";
 // You can also use a Mutation Observer. TODO: I will make a flag so that you can choose which method you prefer.
 // TODO: On the SW wrap the site content with `$aero.config.htmlSandboxElementName`
 {
-	const alreadyRewroteChildren = new WeakSet<Element>();
+	const alreadyRewrittenChildren = new WeakSet<Element>();
 	class HTMLSandbox extends HTMLDivElement {
 		connectedCallback() {
 			for (const child of super.children) {
-				if (!alreadyRewroteChildren.has(child)) {
+				if (!alreadyRewrittenChildren.has(child)) {
 					for (const [
 						OriginalHTMLElement,
 						htmlRule
@@ -77,10 +77,10 @@ import htmlRules from "../shared/htmlRules";
 								proxifyCustomElementName(child.tagName)
 							);
 					}
-					alreadyRewroteChildren.add(child);
+					alreadyRewrittenChildren.add(child);
 				} else {
 					// Toggle
-					alreadyRewroteChildren.delete(child);
+					alreadyRewrittenChildren.delete(child);
 				}
 			}
 		}
