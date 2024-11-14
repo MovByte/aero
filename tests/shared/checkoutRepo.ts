@@ -50,9 +50,56 @@ export default async function checkoutRepo(repoURL: string, rootDir: string, rep
 }
 
 // TODO: Make an exported function that supports sparse checkouts and use it in `jsTest.ts`
-export async function checkoutDirSparsely(repoURL: string, rootDir: string, repoName: string, sparsePaths: string[]): Promise<ResultAsync<void, Error>> {
+export async function checkoutDirSparsely(repoURL: string, repoName: string, dirs: {
+	dirs: {
+		rootDir: string,
+		checkoutsDir: string,
+	}
+}, sparsePaths: string[]): Promise<ResultAsync<void, Error>> {
 	// TODO: Implement
 	const checkoutDirPathRes = path.resolve(rootDir, repoName);
+
+	/*
+		// TODO: Remove this code and instead call 
+	try {
+		try {
+			await access(jsTestsDir);
+			await safeExec(
+				`cd ${jsTestsDir} && git pull`,
+				{
+					cwd: rootDir
+				}
+			);
+		} catch {
+			try {
+				await access(webkitCheckoutDir)
+			} catch {
+				setTimeout(async () => {
+					await mkdir(webkitCheckoutDir, { recursive: true });
+					await safeExec(
+						`git clone--filter = blob: none--no - checkout--depth 1 --sparse https://github.com/WebKit/WebKit.git ${webkitCheckoutDir}`, {
+						cwd: rootDir
+					}
+					);
+				}, 5000);
+			}
+			setTimeout(async () => {
+				await safeExec(`git sparse-checkout add JSTests`, {
+					cwd: rootDir
+				});
+			}, 10000);
+			setTimeout(async () => {
+				await safeExec("git checkout", {
+					cwd: rootDir
+				});
+			}, 15000);
+			//console.info("All of the commands have been executed successfully!");
+		}
+		// @ts-ignore
+	} catch (err: any) {
+		throw new Error(`Failed to execute a command for initializing the JSTests dir: ${err.message}`);
+	}
+	*/
 
 	return ok(undefined)
 }
