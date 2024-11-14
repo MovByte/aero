@@ -1,5 +1,5 @@
-import type { AeroSandboxFeaturesConfig } from "../../../types/aeroSandbox.js";
-import { defaultSWProxyFeatures } from "../../../types/featureMembers.js";
+import type { AeroSandboxFeaturesConfig } from "../../../types/aeroSandbox";
+import { defaultSWProxyFeatures } from "../../../types/featureMembers";
 import type { BuildConfig } from "../../../types/buildConfig";
 
 export default {

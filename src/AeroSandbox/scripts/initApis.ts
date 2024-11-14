@@ -79,5 +79,5 @@ if (isCLI) {
 		process.env.LOG_STATUS !== "true" && process.env.LOG_STATUS !== "false"
 			? undefined
 			: process.env.LOG_STATUS === "true";
-	initGlobalsTs(output, distDir, logStatus);
+	initApis(output, distDir, logStatus);
 }

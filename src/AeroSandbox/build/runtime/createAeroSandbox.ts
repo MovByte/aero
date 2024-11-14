@@ -23,6 +23,7 @@ export default (buildConfig: BuildConfig) =>
 		configObj: any;
 		mergedFeatureConfig: any;
 		// TODO: Remove AeroSandboxBuildConfig
+		// TODO: validate the config with 
 		constructor(config: Config) {
 			/** This would be `$aero` */
 			// @ts-ignore

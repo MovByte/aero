@@ -25,7 +25,7 @@ site/
 # aero test pkgs
 /**/testPkgs/
 
-# WPT test suite
-tests/browser/wpt-diff/wpt/
+# Checkouts (usually for tests)
+/**/checkouts/
 
 # Unreleased features (Not finished) 👀
