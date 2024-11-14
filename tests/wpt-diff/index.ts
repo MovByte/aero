@@ -1,7 +1,7 @@
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as errrAsync } from "neverthrow";
 
-import { envSafe, url } from "envSafe";
+import { envSafe, string, url } from "envSafe";
 
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -13,6 +13,12 @@ const env = envSafe({
 	PROXY_URL: url({
 		devDefault: "http://localhost:2525/go/"
 	}),
+	WPT_REPO: url({
+		devDefault: "https://github.com/web-platform-tests/wpt.git"
+	}),
+	WPT_DIR: string({
+		devDefault: "WPT"
+	})
 });
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -23,7 +29,7 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
  * @param rootDir The root directory where the checkouts directory will reside
  */
 export async function checkoutWPT(rootDir: string): Promise<ResultAsync<void, Error>> {
-	const checkoutRepoRes = await checkoutRepo("https://github.com/web-platform-tests/wpt.git", rootDir, "WPT");
+	const checkoutRepoRes = await checkoutRepo(env.WPT_REPO, rootDir, "WPT");
 	if (checkoutRepoRes.isErr())
 		return errrAsync(new Error(`Error while trying to checkout the WPT repo: ${checkoutRepoRes.error}`));
 
