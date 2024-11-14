@@ -1,0 +1,44 @@
+  name: JS-Diff
+  author: Ryan Wilson
+  description: Runs JS-Diff on JS rewriters. JS-diff is a test and benchmark that runs the JS Rewriter on all of the tests that are used in the WebKit browser, processed as one large bundle.
+
+  on:
+    workflow_dispatch:
+      inputs: 
+        jsDiffBaseCommand:
+          description: The base command to runthe JS-Diff CLI
+          required: false
+          default: npx run aero-sandbox/tests/jsdiff
+        # Flags for the CLI
+        proxyURL:
+          description: The URL to your web proxy
+          required: true
+        webkitRepo:
+          description: The URL to a git repo of WebKit
+          required: false
+          default: "https://github.com/WebKit/WebKit.git"
+        webkitDir:
+          description: The directory name of what is cloned inside of the `checkoutsDir`
+          required: false
+          default: "WebKit"
+        rootDir:
+          description: The root directory of the project which contains the checkoutsDir
+          required: true
+        checkoutsDir:
+          description: The directory inside of root that is where the checkouts occur in the test
+          required: true
+
+  jobs:
+    js-diff:
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v2
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v1
+          with:
+            node-version: 21
+
+        - name: Run JS Diff
+          run: ${{ github.event.inputs.jsDiffBaseCommand --proxyURL ${{ github.event.inputs.proxyURL }} --webkitRepo ${{ github.event.inputs.webkitRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}"

@@ -1,0 +1,27 @@
+name: JS-Diff
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    paths: ["src/AeroSandbox/sandboxers/**.ts"]
+    
+  push:
+    branches:
+      - main
+      - unstable
+    paths: ["src/AeroSandbox/sandboxers/**.ts"]
+
+jobs:
+  js-diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run JS-Diff Action
+        uses: ./github/actions/js-diff.yml
+        with:
+          proxyURL: "http://localhost:2525/go/"
+          rootDir: src/AeroSandbox/tests
+          checkoutsDir: checkouts

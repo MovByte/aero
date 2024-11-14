@@ -93,22 +93,19 @@
 		"clean-webpack-plugin": "^4.0.0",
 		"import-sync": "^2.2.2",
 		"octokit": "^4.0.2",
-		"option-t": "^50.0.0",
 		"playwright": "^1.48.1",
 		"ts-node": "^10.9.2",
 		"ts-patch": "^3.2.1",
 		"ts-runtime-checks": "^0.6.2",
-		"typedoc": "^0.26.10",
-		"typedoc-plugin-emojify": "^1.0.1",
-		"typedoc-plugin-markdown": "^4.2.9",
-		"typedoc-plugin-mdn-links": "^3.3.4",
-		"typescript": "^5.6.3"
+		"typescript": "^5.6.3",
+    "envsafe": "^2.0.3",
+		"flags": "^0.2.2",
+		"neverthrow": "^8.1.1",
+    "option-t": "^50.0.0"
 	},
 	"dependencies": {
 		"@biomejs/wasm-nodejs": "^1.9.4",
 		"@mercuryworkshop/bare-mux": "^2.1.4",
-		"envsafe": "^2.0.3",
-		"neverthrow": "^8.1.1",
 		"typia": "^6.12.0"
 	}
 }

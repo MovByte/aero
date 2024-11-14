@@ -1,7 +1,8 @@
 /**
  * @module
  * This is a test and benchmark that runs the JS Rewriter on all of the tests that are used in the WebKit browser, processed as one large bundle.
- * This module will be used internally for a GitHub Action, which will be published on the GitHub Marketplace.
+ * This module is exposed as a CLI.
+ * The CLI here is used for a GitHub Action, which will be published on the GitHub Marketplace.
  * In addition, this module will be published on NPM and JSR.
  */
 // TODO: Make a GitHub Action that runs this script and logs the results to a CSV file
@@ -9,6 +10,8 @@
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as errrAsync } from "neverthrow";
 
+import * as flags from "flags";
+// @ts-ignore: This package is installed
 import { envSafe, string, url } from "envSafe";
 
 import { fileURLToPath } from "node:url";
@@ -17,77 +20,43 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 
 import { glob } from "glob";
 
-import safeExec from "../../../../../../../../tests/shared/safeExec";
+import { tryRewritersAero } from "../shared/aeroDefaults";
 
-import AeroGel from "../../../backends/AeroGel";
-
+// @ts-ignore: This package is installed
 import { Bench } from "tinybench";
+import validateTestBenchCSV from "../../../../../../../../tests/shared/validateCSV";
 
 import checkoutDirSparsely from "../../../../../../../../tests/shared/checkoutRepo";
-import { ok } from "node:assert";
-
-/**
- * The context to checkout JSTest
- * This is exposed if you need it
- */
-export interface JSTestEnvContext {
-	proxyURL: string,
-	webkitRepo: string,
-	webkitDir: string
-}
 
 /**
  * Detect if the script is being ran as a CLI script and not as a module
  */
 const isCLI =
 	// For Deno
-	globalThis.Deno ? import.meta.main :
+	// @ts-ignore: This is a module
+	"Deno" in globalThis ? import.meta.main :
 		// For Node
 		// @ts-ignore: This is a NodeJS-only feature
 		require.main === module;
 
-// aero defaults
-const env = envSafe({
-	PROXY_URL: url({
-		devDefault: "http://localhost:2525/go/"
-	}),
-	WEBKIT_REPO: url({
-		devDefault: "https://github.com/WebKit/WebKit.git"
-	}),
-	WEBKIT_DIR: string({
-		devDefault: "WebKit"
-	})
-});
-const propTreeAeroGelSpecific = 'window["<proxyNamespace>"]["<ourNamespace>"].rewriters.js.aeroGel.';
-const propTree = 'window["<proxyNamespace>"]["<ourNamespace>"].rewriters.js.shared.';
-/** [key: rewriterName]: rewriter handler */
-const tryRewritersAero = {
-	AeroGel: (new (AeroGel.default)({
-		aeroGelConfig: {
-			propTrees: {
-				fakeLet: propTreeAeroGelSpecific + "fakeLet",
-				fakeConst: propTreeAeroGelSpecific + "fakeConst",
-			},
-			proxified: {
-				evalFunc: propTree + "proxifiedEval",
-				location: propTree + "proxifiedLocation"
-			},
-			checkFunc: propTree + "checkFunc"
-		},
-		keywordGenConfig: {
-			supportStrings: true,
-			supportTemplateLiterals: true,
-			supportRegex: true,
-		},
-		trackers: {
-			blockDepth: true,
-			propertyChain: true,
-			proxyApply: true
-		}
-	})).jailScript
-	// TODO: Add AeroJet
+/**
+ * The context to checkout JSTest
+ * This is exposed if you need it
+ */
+export interface JSTestEnvContext {
+	/** The URL to your web proxy */
+	proxyURL: string,
+	/** The URL to a git repo of *WebKit* */
+	webkitRepo: string,
+	/** The directory name of what is cloned inside of the `checkoutsDir` */
+	webkitDir: string,
+	/** The root directory of the project which contains the `checkoutsDir` */
+	rootDir: string,
+	/** The directory inside of root that is where the checkouts occur in the test */
+	checkoutsDir: string
 }
 
+// @ts-ignore: This is a module
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const rootDir = path.resolve(__dirname, "..", "..");
@@ -101,8 +70,6 @@ const checkoutsDir = path.resolve(rootDir, "checkouts");
 export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExternalTests: boolean, tryRewriters: any, benchmarkName = "JSTest Benchmarks"): Promise<ResultAsync<Bench, Error>> {
 	if (!excludeExternalTests)
 		benchmarkName += " (including external tests)";
-
-	// TODO: Catch possible exceptions for unsafe actions and return the errors accordingly with `Neverthrow`
 
 	const ignoreExternalTestsList = excludeExternalTests ? [`${jsTestEnvContext.webkitDir}/mozilla]`, `${jsTestEnvContext.webkitDir}/test262`] : [];
 
@@ -131,6 +98,7 @@ export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExt
 		for (const [rewriterName, rewriterHandler] of Object.entries(tryRewriters)) {
 			let newCombBundle: string;
 			bench.add(benchmarkName, async () => {
+				// @ts-ignore
 				newCombBundle = await rewriterHandler(combBundle);
 				if (newCombBundle) {
 					await writeFile(`${rootDir}/newCombBundle.${rewriterName}.js`, newCombBundle);
@@ -150,48 +118,103 @@ export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExt
 }
 
 /**
- * This is a stub
+ * Processes the JSTest Benchmark Results into a CSV file.
+ * The CSV is of this header: `jsRewriterName,passed,totalTime,mean,median,min,max`
+ * @param bench The Bench to be used to get the benchmark results from
+ * @returns The CSV wrapped behind a `ResultAsync` object from *Neverthrow*
  */
-export async function processJSTestBenchToCSV(): Promise<ResultAsync<void, Error>> {
-	// TODO: Implement and use this in the GitHub Action
-	return okAsync(undefined);
+// TODO: Use this in the GitHub Action
+export async function processJSTestBenchToCSV(bench: Bench, strictValidate = true, verbose = true): Promise<ResultAsync<string, Error>> {
+	// Process the bench results into a CSV
+	let csvOut = "jsRewriterName,passed,totalTime,mean,median,min,max\n";
+	for (const result of bench.results)
+		csvOut += `${result.name},true,${result.totalTime},${result.mean},${result.median},${result.min},${result.max}\n`;
+
+	// Strictly validate the CSV
+	if (strictValidate) {
+		// @ts-ignore: No, it should only expect one key
+		const validateTestBenchCSVRes = validateTestBenchCSV(csvOut, "js", Object.keys(tryRewritersAero));
+		if (validateTestBenchCSVRes.isErr())
+			return errrAsync(new Error(`The validation CSV of the csv failed: ${validateTestBenchCSVRes.error}${verbose ? `\nThe CSV in question is: ${csvOut}` : ""}`));
+	}
+
+	return okAsync(csvOut)
 }
 
+/**
+ * This is a stub
+ */
+// TODO: Use this in the GitHub Action
 export default async function testJSTest(excludeExternalTests: boolean): Promise<ResultAsync<void, Error>> {
 	// TODO: Add the arguments to allow you to provide
 	// TODO: Patch the CLI to run JSTest to make it run inside of a proxy context and compare the results with and without the proxy like I do on WPT-diff and publish that as a GitHub Action on the GitHub Marketplace as well
-
-	return okAsync(undefined);
+	return errrAsync(new Error("This is a stub!"));
 }
 
 // @ts-ignore
 /**
  * Checks out the JSTests directory from the WebKit repository using the `git` CLI
  * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
+ * @param jsTestEnvContext The context required to checkout JSTest
  */
-export async function checkoutJSTestDir(): Promise<ResultAsync<void, Error>> {
-	const checkoutSpareRepoRes = await checkoutDirSparsely(env.WEBKIT_REPO, env.WEBKIT_DIR, {
-		rootDir,
-		checkoutsDir
+export async function checkoutJSTestDir(jsTestEnvContext: JSTestEnvContext): Promise<ResultAsync<void, Error>> {
+	const checkoutSpareRepoRes = await checkoutDirSparsely(jsTestEnvContext.webkitRepo, jsTestEnvContext.webkitDir, {
+		rootDir: jsTestEnvContext.rootDir,
+		checkoutsDir: jsTestEnvContext.checkoutsDir
 	}, ["JSTests"])
 	if (checkoutSpareRepoRes.isErr())
-		return errrAsync(new Error(`Failed to execute a command for initializing the JSTests dir: ${checkoutSpareRepoRes.error.message}`));
+		return errrAsync(new Error(`Failed to execute a command for initializing the JSTests dir: ${checkoutSpareRepoRes.error.message} `));
 	return okAsync(undefined);
 }
 
 if (isCLI) {
 	(async () => {
-		// TODO: Allow CLI flags to be used as an alternative to ENV Vars
+		flags.defineString("proxyURL").setDescription("The URL to your web proxy");
+		flags.defineString("webkitRepo").setDescription("The URL to a git repo of WebKit");
+		flags.defineString("webkitDir").setDescription("The directory name that WebKit will be cloned to in your checkouts directory");
+		flags.defineString("checkoutsDir").setDescription("The directory name that WebKit will be cloned to in your checkouts directory");
+		flags.defineString("outputCSV", "false", "The path to output the CSV file to. If this is ommited, the CSV will be outputted to the console.");
+		flags.parse();
+
+		const outputCSV = flags.get("outputCSV") !== "false";
+
+		const env = envSafe({
+			PROXY_URL: url({
+				devDefault: "http://localhost:2525/go/"
+			}),
+			WEBKIT_REPO: url({
+				devDefault: "https://github.com/WebKit/WebKit.git"
+			}),
+			WEBKIT_DIR: string({
+				devDefault: "WebKit"
+			}),
+			ROOT_DIR: string({
+				devDefault: rootDir
+			})
+			CHECKOUTS_DIR: string({
+				devDefault: checkoutsDir
+			})
+		});
+
 		const benchRes = await benchJSTest({
-			proxyURL: env.PROXY_URL,
-			webkitRepo: env.WEBKIT_REPO,
-			webkitDir: env.WEBKIT_DIR
+			proxyURL: flags.get("proxyURL") || env.PROXY_URL,
+			webkitRepo: flags.get("webkitRepo") || env.WEBKIT_REPO,
+			webkitDir: flags.get("webkitDir") || env.WEBKIT_DIR,
+			rootDir: flags.get("rootDir") || env.ROOT_DIR,
+			checkoutsDir: flags.get("checkoutsDir") || env.CHECKOUTS_DIR
 		}, true, tryRewritersAero);
 		if (benchRes.isErr())
-			throw new Error(`Failed to run the JSTest benchmarks for the CLI: ${benchRes.error.message}`);
+			throw new Error(`Failed to run the JSTest benchmarks for the CLI: ${benchRes.error.message} `);
 		const bench = benchRes.value;
-		// TODO: Add separate subcommands for benchmarking and testing
-		console.log(bench.name);
-		console.log(bench.table())
+
+		if (outputCSV) {
+			const csvRes = await processJSTestBenchToCSV(bench);
+			if (csvRes.isErr())
+				throw new Error(`Failed to process the JSTest Benchmarks into a CSV for the CLI: ${csvRes.error.message}`);
+			console.log(csvRes.value);
+		} else {
+			console.log(bench.name);
+			console.log(bench.table());
+		}
 	});
 }
