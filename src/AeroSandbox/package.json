@@ -52,6 +52,7 @@
 		"babel-loader": "^9.2.1",
 		"glob": "^11.0.0",
 		"navigation-api-types": "^0.5.1",
+		"ts-runtime-checks": "^0.6.2",
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {
@@ -63,6 +64,5 @@
 		"htmlparser2": "^9.1.0",
 		"neverthrow": "^8.0.0",
 		"traverse-the-universe": "^2.1.2",
-		"zod": "^3.23.8"
 	}
 }

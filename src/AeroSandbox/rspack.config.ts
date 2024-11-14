@@ -118,7 +118,8 @@ const defaultBuild = {
 	jsRewriter: "./src/sandboxers/JS/JSRewriter.ts",
 	featureFlags: "./src/featureFlags.ts",
 	swAdditions: "./src/swAdditions.ts",
-	init$aero.ts: "./src/init$aero.ts"
+	init$aero: "./src/init$aero.ts",
+	end$aero: "./src/end$aero.ts"
 };
 
 const config: rspack.Configuration = {

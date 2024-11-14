@@ -61,7 +61,7 @@ self.config = aeroConfig;
  */
 // TODO: Move all the proxy middleware code to a bare mixin
 // TODO: Use Neverthrow
-async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> {
+async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
     // Ensure that everything has been initalized properly
     if (!("logger" in self))
         throw new Error("The logger hasn't been initalized!");
@@ -407,6 +407,7 @@ async function handle(event: FetchEvent): Promise<ResultAsync<Response, Error>> 
 		$aero.logger.log("Welcome to aero! Our GitHub repo is at ${GITHUB_REPO}.")
 		$aero.logger.log("\\nAeroSandbox has been loaded and initialized: aero is ready to go!");
 	</script>
+    <script src="${self.config.bundles.sandboxEndAero}"></script>
 </head>
 `;
 
@@ -529,6 +530,6 @@ ${body}
     }
 
     self.aeroHandle = handle;
-    self.routeAero = (event: FetchEvent): boolean => {
+    self.routeAero = (event: Assert<FetchEvent>): boolean => {
         return event.request.url.startsWith(location.origin + aeroConfig.prefix);
     };

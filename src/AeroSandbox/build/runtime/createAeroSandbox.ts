@@ -25,6 +25,8 @@ export default (buildConfig: BuildConfig) =>
 		// TODO: Remove AeroSandboxBuildConfig
 		// TODO: validate the config with 
 		constructor(config: Config) {
+			typia.assert<Config>(config);
+
 			/** This would be `$aero` */
 			// @ts-ignore
 			this.proxyNamespaceObj = getPropFromTree(
@@ -80,7 +82,7 @@ export default (buildConfig: BuildConfig) =>
 			return toBeDefinedErrs.length > 0 ? err(toBeDefinedErrs) : ok();
 		}
 		fakeOrigin(
-			proxyOrigin?: string
+			proxyOrigin?: Assert<string>
 			// TODO: isWorker = false,
 			// TODO: Import from Neverthrow
 		): void {

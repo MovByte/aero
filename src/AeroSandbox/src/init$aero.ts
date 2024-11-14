@@ -2,29 +2,6 @@ import { z } from "zod";
 
 import BareClient from "@mercuryworkshop/bare-mux";
 
-$aero = z.object({
-	init: z.string(),
-	config: z.object({
-
-	}),
-	sandbox: z.object({
-	})
-})
-
-/*
-	init: string;
-	sec: {
-		csp: string;
-	};
-	bc: BareClient;
-	logger: AeroSandboxLogger;
-	config: Config;
-	searchParamOptions: SearchParamOptionsConfig;
-	rewriters: {
-		js: JSRewriter;
-	};
-	*/
-
 // Sanity check
 if (!("$aero" in window)) {
 	const err = "Unable to initalize $aero";
