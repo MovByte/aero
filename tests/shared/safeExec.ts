@@ -9,7 +9,7 @@ import { errAsync as errrAsync, okAsync } from "neverthrow";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 
-import { fmtError } from "./fmtErrorTest";
+import { fmtErr } from "./fmtErrTest";
 
 /**
 * Unwraps the safely handled error from `safeExec` throws it for you
@@ -21,7 +21,7 @@ import { fmtError } from "./fmtErrorTest";
 export default async function safeExecUnwrapped(cmd: string, cwd: any, extraMsg = ""): Promise<void> {
 	const safeExecRes = await safeExec(cmd, cwd);
 	if (safeExecRes.isErr())
-		throw fmtError(`Failed to execute ${cmd}${extraMsg}`, safeExecRes.error.message);
+		throw fmtErr(`Failed to execute ${cmd}${extraMsg}`, safeExecRes.error.message);
 }
 
 /**
