@@ -28,7 +28,7 @@ const createErrorFmters = (errorLogAfterColon: string) => ({
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted *Neverthrow* error
 	 */
-	// @ts-ignore
-	fmtNeverthrowErr: (explanation: string, originalErr: string, async = false): Err<void, Error> => (async ? errrAsync : errr)(this.fmtError(explanation, originalErr))
+	// @ts-ignore I want to do this method switching, and it doesn't matter what the first template type is in `Err` from *Neverthrow*, because this method is meant to be generic
+	fmtNeverthrowErr: (explanation: string, originalErr: string, async = false): Err<any, Error> => (async ? errrAsync : errr)(this.fmtError(explanation, originalErr))
 });
 export default createErrorFmters;
