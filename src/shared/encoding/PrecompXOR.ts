@@ -232,7 +232,7 @@ export default class PrecompXOR {
 		);
 	}
 	/**
-	 * Creates Neverthrow Error when a character missing from the lookup table.
+	 * Creates *Neverthrow* Error when a character missing from the lookup table.
 	 * This is a helper method meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
 	 * @param char The character that is missing from the lookup table
 	 * @returns The properly formatted Neverthrow Error
@@ -246,7 +246,7 @@ export default class PrecompXOR {
 		);
 	}
 	/**
-	 * Creates a Neverthrow Error when a character is not in the lookup table.
+	 * Creates a `Neverthrow` Error when a character is not in the lookup table.
 	 * This is a helper method meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
 	 * @param char The character that is not in the lookup table
 	 * @returns The properly formatted Neverthrow Error

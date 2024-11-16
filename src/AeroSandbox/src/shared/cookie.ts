@@ -1,10 +1,10 @@
-import { Result, ok, err as errr } from "neverthrow";
-
 /**
  * @module
  * This module contains rewriters for the cookie headers (both req/resp)
  * Neverthrow is used here because it contains potentially dangerous RegExp code
  */
+
+import { Result, ok, err as errr, Err } from "neverthrow";
 
 /**
  * Rewrites the `cookie` header
@@ -14,42 +14,51 @@ import { Result, ok, err as errr } from "neverthrow";
  * @returns The rewritten `cookie` header
  */
 function rewriteGetCookie(cookieHeader: string, proxyLoc: URL, prefix: string): Result<string, Error> {
-    try {
-        return ok(cookieHeader
-            .replace(
-                new RegExp(
-                    `(?<=path\=)${prefix}${proxyLoc.origin}.*(?= )`,
-                    "g"
-                ),
-                match =>
-                    match.replace(
-                        new RegExp(
-                            `^(${prefix}${proxyLoc.origin})`
-                        ),
-                        ""
-                    )
-            )
-            .replace(/_path\=.*(?= )/g, ""));
-    } catch (err) {
-        return errr(new Error(`Failed to rewrite the get cookie header: ${err.message}`));
-    }
+	try {
+		return ok(cookieHeader
+			.replace(
+				new RegExp(
+					`(?<=path\=)${prefix}${proxyLoc.origin}.*(?= )`,
+					"g"
+				),
+				match =>
+					match.replace(
+						new RegExp(
+							`^(${prefix}${proxyLoc.origin})`
+						),
+						""
+					)
+			)
+			.replace(/_path\=.*(?= )/g, ""));
+	} catch (err) {
+		return fmtErrfailedToRewriteAHeader("get cookie", err.message);
+	}
 }
 /**
  * Rewrites the `set-cookie` header
- * @param The header to rewrite
- * @param The URL object to the real proxy URL
- * @param The proxy prefix to be used
- * @returnsThe rewritten `set-cookie` header
+ * @param cookie The header to rewrite
+ * @param proxyLoc The URL object to the real proxy URL
+ * @param prefix The proxy prefix to be used
+ * @return sThe rewritten `set-cookie` header
  */
 function rewriteSetCookie(cookie: string, proxyLoc: URL, prefix: string): Result<string, Error> {
-    try {
-        return ok(cookie.replace(
-            /(?<=path\=).*(?= )/g,
-            `${prefix}${proxyLoc.origin}$& _path=$&`
-        ));
-    } catch (err) {
-        return errr(new Error(`Failed to rewrite the set cookie header: ${err.message}`));
-    }
+	try {
+		// Escape the paths
+		return ok(cookie.replace(
+			/(?<=path\=).*(?= )/g,
+			`${prefix}${proxyLoc.origin}$& _path=$&`
+		));
+	} catch (err) {
+		return fmtErrfailedToRewriteAHeader("set cookie", err.message);
+	}
+}
+
+/**
+ * Creates `Neverthrow` Error when the rewriting of a header fails because of a RegExp error.
+ * This is a helper method meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
+ */
+function fmtErrfailedToRewriteAHeader(headerType: string, errMsg: string): Err<string, Error> {
+	return errr(new Error(`Failed to rewrite the ${headerType} header (most likely a RegExp error)${ERROR_LOG_AFTER_COLON}${errMsg}`));
 }
 
 export { rewriteGetCookie, rewriteSetCookie };
