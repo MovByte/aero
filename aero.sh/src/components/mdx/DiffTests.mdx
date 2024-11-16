@@ -1,0 +1,56 @@
+export const RunInstructions = ({ type, method1Cmd, method2Cmd, method3Cmd }) => (
+  <>
+    # How to run {type} in the context of AeroSandbox
+
+    <blockquote>
+      These will automatically run in every commit to `main` (stable) and `unstable`
+    </blockquote>
+
+    ## Method 1: Selective test
+
+    `{method1Cmd}`
+
+    ## Method 2: Master tests
+
+    `{method2Comd}`
+
+    ## Method 3: Manually through the CLI
+
+    `{method3Cmd}`
+  </>
+)
+
+export const SetupInstructions = ({ type, name }) => (
+  <>
+    # How to set it up in your own proxy
+
+    ## Method 1: Setup a GitHub Workflow using the provided Action from aero:
+
+    ```yml
+    name: {name}
+
+    ...
+
+    jobs:
+      {type}:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+
+          - name: Run {type} Action
+            uses: vortexdl/aero/actions/{type}
+            with:
+              ...
+    ```
+
+    ## Run the CLI
+
+    `npx run aero-sandbox/tests/{type}`
+
+    ## Args for the CLI
+
+    TODO: Write
+  </>
+)

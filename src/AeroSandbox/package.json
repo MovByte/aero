@@ -10,6 +10,7 @@
 				"require": "./extras/node/aeroSandboxPath.cjs"
 			}
 		},
+    "./tests/jsdiff": "./tests/jsdiff.js",
 		"./configTypes": "./types/config.d.ts",
 		"./contextualIdentities": "./src/apis/contextualIdentities.ts",
 		"./ElectronControlView": "./src/apis/ControlView/ElectronControlView.ts",
@@ -35,7 +36,8 @@
 		"initApiTypes": "node --import=tsx ./scripts/initApiTypes.ts",
 		"initDist": "node --import=tsx ./scripts/InitDist.ts",
 		"initGlobalsBiome": "node --import-tsx ./scripts/initGlobalsBiome.ts",
-		"initGlobalsTs": "node --import-tsx ./scripts/initGlobalsTs.ts"
+		"initGlobalsTs": "node --import-tsx ./scripts/initGlobalsTs.ts",
+    "test:jsdiff": "node --import-tsx ./tests/jsdiff.ts"
 	},
 	"author": "Ryan Wilson",
 	"license": "AGPL-3.0-or-later",

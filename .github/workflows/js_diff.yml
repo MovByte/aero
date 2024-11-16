@@ -3,13 +3,13 @@ name: JS-Diff
 on:
   pull_request:
     types: [opened, reopened]
-    paths: ["src/AeroSandbox/sandboxers/**.ts"]
+    paths: ["src/AeroSandbox/sandboxers/JS/**.ts"]
     
   push:
     branches:
       - main
       - unstable
-    paths: ["src/AeroSandbox/sandboxers/**.ts"]
+    paths: ["src/AeroSandbox/sandboxers/JS/**.ts"]
 
 jobs:
   js-diff:

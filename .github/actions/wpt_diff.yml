@@ -1,0 +1,45 @@
+  name: WPT-Diff
+  author: Ryan Wilson
+  description: Runs WPT-diff on your proxy and gives the results back as a CSV
+
+  on:
+    workflow_dispatch:
+      inputs: 
+        wptDiffBaseCommand:
+          description: The base command to run the WPT-Diff CLI
+          required: false
+          default: npx run aero-sandbox/tests/wpt-diff
+        proxyURL:
+          description: The URL to your web proxy
+          required: true
+        wptRepo:
+          description: The URL to a git repo of WPT
+          required: false
+          default: "https://github.com/web-platform-tests/wpt.git"
+        rootDir:
+          description: The root directory of the project which contains the checkoutsDir
+          required: true
+        checkoutsDir:
+          description: The directory inside of root that is where the checkouts occur in the test
+          required: true
+
+  jobs:
+    js-diff:
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v2
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v1
+          with:
+            node-version: 21
+
+        - name: Run WPT-Diff
+          run: ${{ github.event.inputs.wptDiffBaseCommand --proxyURL ${{ github.event.inputs.proxyURL }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}"
+
+        - name: Upload the results as an artifact
+          uses: actions/upload-artifact@4
+          with:
+            name: wpt-diff-results
+            path: $${ github.event.inputs.rootDir }}/${{ github.event.inputs.resultsDir }}/wptDiffResults.csv

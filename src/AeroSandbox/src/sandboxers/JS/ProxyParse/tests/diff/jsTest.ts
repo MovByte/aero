@@ -20,24 +20,11 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 
 import { glob } from "glob";
 
-import { tryRewritersAero } from "../shared/aeroDefaults";
-
 // @ts-ignore: This package is installed
 import { Bench } from "tinybench";
 import validateTestBenchCSV from "../../../../../../../../tests/shared/validateCSV";
 
-import checkoutDirSparsely from "../../../../../../../../tests/shared/checkoutRepo";
-
-/**
- * Detect if the script is being ran as a CLI script and not as a module
- */
-const isCLI =
-	// For Deno
-	// @ts-ignore: This is a module
-	"Deno" in globalThis ? import.meta.main :
-		// For Node
-		// @ts-ignore: This is a NodeJS-only feature
-		require.main === module;
+import { checkoutDirSparsely } from "../../../../../../../../tests/shared/checkoutRepo";
 
 /**
  * The context to checkout JSTest
@@ -56,11 +43,6 @@ export interface JSTestEnvContext {
 	checkoutsDir: string
 }
 
-// @ts-ignore: This is a module
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
-
-const rootDir = path.resolve(__dirname, "..", "..");
-const checkoutsDir = path.resolve(rootDir, "checkouts");
 /**
  * Runs the JS Rewriter on all of the tests that are used in the WebKit browser, processed as one large bundle.
  * You must call `checkoutJSTestDir` before running this function
@@ -160,24 +142,38 @@ export default async function testJSTest(excludeExternalTests: boolean): Promise
 export async function checkoutJSTestDir(jsTestEnvContext: JSTestEnvContext): Promise<ResultAsync<void, Error>> {
 	const checkoutSpareRepoRes = await checkoutDirSparsely(jsTestEnvContext.webkitRepo, jsTestEnvContext.webkitDir, {
 		rootDir: jsTestEnvContext.rootDir,
-		checkoutsDir: jsTestEnvContext.checkoutsDir
+		checkoutsDir: jsTestEnvContext.checkoutsDir,
 	}, ["JSTests"])
 	if (checkoutSpareRepoRes.isErr())
 		return errrAsync(new Error(`Failed to execute a command for initializing the JSTests dir: ${checkoutSpareRepoRes.error.message} `));
 	return okAsync(undefined);
 }
 
+/**
+ * Detect if the script is being ran as a CLI script and not as a module
+ */
+const isCLI =
+	// For Deno
+	// @ts-ignore: This is a module
+	"Deno" in globalThis ? import.meta.main :
+		// For Node
+		// @ts-ignore: This is a NodeJS-only feature
+		require.main === module;
+
 if (isCLI) {
 	(async () => {
+		// @ts-ignore: This is a module script
+		const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
 		flags.defineString("proxyURL").setDescription("The URL to your web proxy");
 		flags.defineString("webkitRepo").setDescription("The URL to a git repo of WebKit");
 		flags.defineString("webkitDir").setDescription("The directory name that WebKit will be cloned to in your checkouts directory");
 		flags.defineString("checkoutsDir").setDescription("The directory name that WebKit will be cloned to in your checkouts directory");
+		flags.defineString("jsDiffTestDataPath").setDescription("The path to your JS-Diff test data bundle (required to try the JS Rewriters)");
 		flags.defineString("outputCSV", "false", "The path to output the CSV file to. If this is ommited, the CSV will be outputted to the console.");
 		flags.parse();
 
-		const outputCSV = flags.get("outputCSV") !== "false";
-
+		const rootDir = path.resolve(__dirname, "..", "..");
 		const env = envSafe({
 			PROXY_URL: url({
 				devDefault: "http://localhost:2525/go/"
@@ -190,11 +186,25 @@ if (isCLI) {
 			}),
 			ROOT_DIR: string({
 				devDefault: rootDir
-			})
+			}),
 			CHECKOUTS_DIR: string({
-				devDefault: checkoutsDir
+				devDefault: path.resolve(rootDir, "checkouts")
+			}),
+			JSDIFF_TEST_DATA_PATH: string({
+				devDefault: path.resolve(__dirname, "../../../../../../../build/jsDiffTestData.js")
 			})
 		});
+
+		const testDataPath = flags.get("jsDiffTestDataPath") || env.JSDIFF_TEST_DATA_PATH;
+		// @ts-ignore: I haven't yet made a type for this
+		let tryRewritersAero: any;
+		try {
+			const testData = import(testDataPath);
+			// @ts-ignore
+			tryRewritersAero = testData.default;
+		} catch (err) {
+			throw new Error(`Invalid test data path, ${testDataPath}, for JS-diff: ${err}`)
+		}
 
 		const benchRes = await benchJSTest({
 			proxyURL: flags.get("proxyURL") || env.PROXY_URL,
@@ -207,11 +217,17 @@ if (isCLI) {
 			throw new Error(`Failed to run the JSTest benchmarks for the CLI: ${benchRes.error.message} `);
 		const bench = benchRes.value;
 
-		if (outputCSV) {
+		const outputCSV = flags.get("outputCSV");
+		if (typeof outputCSV === "string" || outputCSV !== "false") {
 			const csvRes = await processJSTestBenchToCSV(bench);
 			if (csvRes.isErr())
 				throw new Error(`Failed to process the JSTest Benchmarks into a CSV for the CLI: ${csvRes.error.message}`);
-			console.log(csvRes.value);
+			try {
+				// @ts-ignore: `outputCSV` has already been checked to be a `string` type
+				writeFile(path.join(rootDir, outputCSV), csvRes.value, "utf-8");
+			} catch (err) {
+				throw new Error(`Failed to write the CSV to the file system: ${err}\nThe CSV was: ${csvRes.value}`);
+			}
 		} else {
 			console.log(bench.name);
 			console.log(bench.table());

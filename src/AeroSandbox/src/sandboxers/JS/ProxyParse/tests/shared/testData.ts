@@ -9,7 +9,7 @@ import AeroGel from "../../../backends/AeroGel";
 export const propTreeAeroGelSpecific = 'window["<proxyNamespace>"]["<ourNamespace>"].rewriters.js.aeroGel.';
 export const propTree = 'window["<proxyNamespace>"]["<ourNamespace>"].rewriters.js.shared.';
 /** [key: rewriterName]: rewriter handler */
-export const tryRewritersAero = {
+const tryRewriters = {
 	AeroGel: (new (AeroGel.default)({
 		aeroGelConfig: {
 			propTrees: {
@@ -35,3 +35,4 @@ export const tryRewritersAero = {
 	})).jailScript
 	// TODO: Add AeroJet
 }
+export default tryRewriters;

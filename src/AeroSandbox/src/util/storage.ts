@@ -26,7 +26,6 @@ function storageKey(key: string) {
 
 function storageKeys(keys: string[]) {
 	const proxyKeys = [];
-
 	/*escapeWithProxyOrigin
 	for (let key of keys) {
 		const prefixSplit = key.split(storagePrefix());
@@ -35,6 +34,7 @@ function storageKeys(keys: string[]) {
 		if (prefixSplit[0] === storagePrefix()) null; //proxyKeys.push(prefixSplit.slice(1).join(""));
 	}
 	*/
+	Object.freeze(proxyKeys)
 
 	return proxyKeys;
 }

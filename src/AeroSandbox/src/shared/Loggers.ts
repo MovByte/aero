@@ -10,7 +10,7 @@ const aeroBubbleStyle = genBubbleStyle("#0badfb");
 const fatalErrBubbleStyle = genBubbleStyle("#db3631");
 
 // TODO: Support optionalSecondaryBubble after the branding and in the color green :)
-class GenericLogger {
+export class GenericLogger {
 	log(branding: string, msgs: string[] | string, optionalSeconaryBubble?: string): void {
 		if (!Array.isArray(msgs))
 			msgs = [msgs];
@@ -68,7 +68,7 @@ interface LoggerOptions {
 	htmlTemplatingCallback?: htmlTemplatingCallbackType;
 }
 
-class AeroLogger extends GenericLogger {
+export default class AeroLogger extends GenericLogger {
 	options: LoggerOptions;
 	debugMode: boolean;
 
@@ -117,7 +117,7 @@ class AeroLogger extends GenericLogger {
 }
 
 // TODO: Support the seconary bubbling
-class AeroSandboxLogger extends GenericLogger {
+export class AeroSandboxLogger extends GenericLogger {
 	options: LoggerOptions;
 
 	constructor(options: LoggerOptions) {
@@ -143,14 +143,17 @@ class AeroSandboxLogger extends GenericLogger {
 	}
 }
 
-export { AeroLogger, AeroSandboxLogger };
-
-/** For the log bubbles */
+/**
+ * This function generates the CSS for the log bubbles in the loggers
+ * @param color The color of the bubble
+ * TODO: Write JSDoc examples for this
+ */
 export default function genBubbleStyle(color: string): string {
-	return /* css */ `
+	return /* css */`
 color: white;
 background-color: ${color};
 padding: 3px 6px 3px 6px;
-border-radius: 3px; font: bold .8rem "Fira San", sans-serif;
+border-radius: 3px;
+font: bold .8rem "Fira San", sans-serif;
 	`;
 }

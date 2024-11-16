@@ -15,9 +15,9 @@ const htmlRules = new Map<any, htmlRule>();
 
 const blockHandler =
 	(allowDir: string) =>
-	(_el: HTMLElement, newVal: string): string => {
-		if (block("allowDir")) return "";
-	};
+		(_el: HTMLElement, newVal: string): string => {
+			if (block("allowDir")) return "";
+		};
 
 // @ts-ignore
 htmlRules.set(HTMLScriptElement, {
@@ -76,6 +76,7 @@ htmlRules.set(HTMLScriptElement, {
 });
 
 const linkElements = [HTMLAnchorElement, HTMLAreaElement, HTMLBaseElement];
+Object.freeze(linkElements)
 for (const linkElement of linkElements)
 	htmlRules.set(linkElement, {
 		onAttrHandlers: {
@@ -108,6 +109,7 @@ htmlRules.set(HTMLImageElement, {
 	}
 });
 const autoplayElements = [HTMLAnchorElement, HTMLAreaElement, HTMLBaseElement];
+Object.freeze(autoplayElements);
 for (const autoplayElement of autoplayElements)
 	htmlRules.set(autoplayElement, {
 		onAttrHandlers: {

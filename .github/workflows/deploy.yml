@@ -1,12 +1,15 @@
-name: Deploy to GitHub Pages
+name: Deploy aero.sh to GitHub Pages
 
 on:
   # Trigger the workflow every time you push to the `main` branch
   # Using a different branch name? Replace `main` with your branch’s name
   push:
     branches: [ unstable ]
+    path: ./aero.sh
+
   # Allows you to run this workflow manually from the Actions tab on GitHub.
   workflow_dispatch:
+    path: ./aero.sh
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
@@ -32,6 +35,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy aero.sh to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

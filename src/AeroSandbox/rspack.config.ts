@@ -138,7 +138,8 @@ const config: rspack.Configuration = {
 				loggers: "./src/shared/Loggers.ts",
 				replaceProxyNamespace: "./build/replaceProxyNamespace.ts",
 				// The JS rewriter
-				jsRewriter: "./src/sandboxers/JS/JSRewriter.ts"
+				jsRewriter: "./src/sandboxers/JS/JSRewriter.ts",
+				jsDiffTestData: "./src/sandboxers/JS/ProxyParse/tests/shared/testData.ts"
 			}
 			: minimalBuild
 				? {

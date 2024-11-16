@@ -5,11 +5,11 @@
 // TODO: Import Neverthrow
 
 import type {
-    AeroJSParserConfig,
-    RewriteOptions,
-    aerogelParser,
-    astParser,
-    astWalker
+	AeroJSParserConfig,
+	RewriteOptions,
+	aerogelParser,
+	astParser,
+	astWalker
 } from "../../../types/rewriters/js";
 
 import ASTRewriter from "./backends/AST";
@@ -57,6 +57,7 @@ import AeroGel from "./backends/AeroGel";
  *  const aeroSandbox = new AeroSandbox({
  *      config: {
  *          proxyNamespace: testProxyNamespace,
+ * 			escapeProxyNamespace: true,
  *          ourNamespace,
  *          configKey: "config",
  *          bundles: {
@@ -80,53 +81,53 @@ import AeroGel from "./backends/AeroGel";
  *  });
 */
 export default class JSRewriter {
-    config: AeroJSParserConfig;
-    constructor(config: AeroJSParserConfig) {
-        this.config = config;
-    }
-    applyNewConfig(config: AeroJSParserConfig) {
-        this.config = config;
-    }
-    rewriteScript(script: string, rewriteOptions: RewriteOptions): string {
-        if (rewriteOptions.isModule) {
-            if (this.config.modeModule === "aerojet")
-                return this.astRewrite(script, rewriteOptions.isModule);
-            if (this.config.modeModule === "aerogel")
-                return this.aerogelRewrite(script, rewriteOptions.isModule);
-        } else {
-            if (this.config.modeDefault === "aerojet")
-                return this.astRewrite(script, rewriteOptions.isModule);
-            if (this.config.modeDefault === "aerogel")
-                return this.aerogelRewrite(script, rewriteOptions.isModule);
-        }
-        return script;
-    }
-    /** Calls the AeroJet with the config that you provided in the constructor earlier */
-    astRewrite(script: string, isModule: boolean): string {
-        // TODO: Call with the config
-        const astRewriter = new AeroJet();
-        return astRewriter.rewriteScript(script, isModule);
-    }
-    /**
-     * Calls AeroGel with the config that you provided in the constructor earlier
-     */
-    aerogelRewrite(script: string, isModule: boolean): string {
-        // TODO: Call with the config
-        const aerogelRewriter = new AeroGel();
-        return aerogelRewriter.jailScript(script, isModule);
-    }
-    /** This is the method you want to use in your proxy */
-    wrapScript(script: string, rewriteOptions: RewriteOptions): string {
-        const lines = this.rewriteScript(script, rewriteOptions).split("\n");
+	config: AeroJSParserConfig;
+	constructor(config: AeroJSParserConfig) {
+		this.config = config;
+	}
+	applyNewConfig(config: AeroJSParserConfig) {
+		this.config = config;
+	}
+	rewriteScript(script: string, rewriteOptions: RewriteOptions): string {
+		if (rewriteOptions.isModule) {
+			if (this.config.modeModule === "aerojet")
+				return this.astRewrite(script, rewriteOptions.isModule);
+			if (this.config.modeModule === "aerogel")
+				return this.aerogelRewrite(script, rewriteOptions.isModule);
+		} else {
+			if (this.config.modeDefault === "aerojet")
+				return this.astRewrite(script, rewriteOptions.isModule);
+			if (this.config.modeDefault === "aerogel")
+				return this.aerogelRewrite(script, rewriteOptions.isModule);
+		}
+		return script;
+	}
+	/** Calls the AeroJet with the config that you provided in the constructor earlier */
+	astRewrite(script: string, isModule: boolean): string {
+		// TODO: Call with the config
+		const astRewriter = new AeroJet();
+		return astRewriter.rewriteScript(script, isModule);
+	}
+	/**
+	 * Calls AeroGel with the config that you provided in the constructor earlier
+	 */
+	aerogelRewrite(script: string, isModule: boolean): string {
+		// TODO: Call with the config
+		const aerogelRewriter = new AeroGel();
+		return aerogelRewriter.jailScript(script, isModule);
+	}
+	/** This is the method you want to use in your proxy */
+	wrapScript(script: string, rewriteOptions: RewriteOptions): string {
+		const lines = this.rewriteScript(script, rewriteOptions).split("\n");
 
-        const [first] = lines;
+		const [first] = lines;
 
-        const _meta = rewriteOptions.isModule
-            ? `${this.config.proxyNamespace}.moduleScripts.resolve`
-            : "";
+		const _meta = rewriteOptions.isModule
+			? `${this.config.proxyNamespace}.moduleScripts.resolve`
+			: "";
 
-        lines[0] = rewriteOptions.insertCode + _meta + first;
+		lines[0] = rewriteOptions.insertCode + _meta + first;
 
-        return lines.join("\n");
-    }
+		return lines.join("\n");
+	}
 }

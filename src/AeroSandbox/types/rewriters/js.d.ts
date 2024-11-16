@@ -4,47 +4,53 @@ import type { overwriteRecordsType } from "./generic";
 export type rewriterMode = "aerogel" | "aerojet";
 
 export interface RewriteOptions {
-    /** Whether the script is a module script */
-    isModule: boolean;
-    /** The code to insert */
-    insertCode?: string;
+	/** Whether the script is a module script */
+	isModule: boolean;
+	/** The code to insert */
+	insertCode?: string;
 }
 
 export interface AeroGelConfigFull {
-    aeroGelConfig: AeroGelConfig;
-    keywordGenConfig: {
-        supportStrings: boolean;
-        supportTemplateLiterals: boolean;
-        supportRegex: boolean;
-    },
-    trackers: {
-        blockDepth: boolean;
-        propertyChain: boolean;
-        proxyApply: boolean;
-    }
+	aeroGelConfig: AeroGelConfig;
+	keywordGenConfig: {
+		supportStrings: boolean;
+		supportTemplateLiterals: boolean;
+		supportRegex: boolean;
+	},
+	trackers: {
+		blockDepth: boolean;
+		propertyChain: boolean;
+		proxyApply: boolean;
+	}
 }
 export interface AeroGelConfig extends GenericJSParserConfig {
-    propTrees: {
-        fakeLet: string;
-        fakeConst: string;
-    }
-    proxified: {
-        evalFunc: string;
-        window: string;
-        location: string;
-    }
-    checkFunc: string;
+	propTrees: {
+		fakeLet: string;
+		fakeConst: string;
+	}
+	proxified: {
+		evalFunc: string;
+		window: string;
+		location: string;
+	}
+	checkFunc: string;
 }
 export interface AeroJetRewriterConfig extends GenericJSParserConfig {
-    checkFuncPropTree: string;
+	checkFuncPropTree: string;
+}
+export interface GenericJSParserConfig {
+	proxyNamespace: string;
+	escapeProxyNamespace: boolean
 }
 export interface AeroJSParserConfig {
-    proxyNamespace: string;
-    /** EST parsing recommended */
-    modeDefault: rewriterMode;
-    /** AeroGel recommended */
-    modeModule: rewriterMode;
-    modeConfigs: {
-        generic: GenericJSParserConfig;
-    };
+	proxyNamespace: string;
+	/** This isolates the references to those global namespaces, where it will return an escaped version */
+	escapeProxyNamespace: boolean;
+	/** EST parsing recommended */
+	modeDefault: rewriterMode;
+	/** AeroGel recommended */
+	modeModule: rewriterMode;
+	modeConfigs: {
+		generic: GenericJSParserConfig;
+	};
 }

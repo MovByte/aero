@@ -50,14 +50,17 @@ export default async function checkoutRepo(repoURL: string, rootDir: string, rep
 }
 
 // TODO: Make an exported function that supports sparse checkouts and use it in `jsTest.ts`
-export async function checkoutDirSparsely(repoURL: string, repoName: string, dirs: {
-	dirs: {
-		rootDir: string,
-		checkoutsDir: string,
-	}
+export async function checkoutDirSparsely(repoURL: string, repoDirName: string, dirs: {
+	rootDir: string,
+	checkoutsDirName: string,
 }, sparsePaths: string[]): Promise<ResultAsync<void, Error>> {
 	// TODO: Implement
-	const checkoutDirPathRes = path.resolve(rootDir, repoName);
+	let checkoutDirPath: string;
+	try {
+		const checkoutDirPath = path.resolve(dirs.rootDir, dirs.checkoutsDirName);
+	} catch (err) {
+		return errrAsync(new Error(`Failed to resolve the checkout directory path: ${err.message}`));
+	}
 
 	/*
 		// TODO: Remove this code and instead call 

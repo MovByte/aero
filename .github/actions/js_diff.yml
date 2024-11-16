@@ -6,9 +6,15 @@
     workflow_dispatch:
       inputs: 
         jsDiffBaseCommand:
-          description: The base command to runthe JS-Diff CLI
+          description: The base command to run the JS-Diff CLI
           required: false
           default: npx run aero-sandbox/tests/jsdiff
+        jsDiffTestDataPath:
+          description: The path to your JS-Diff test data bundle (required to try the JS Rewriters)
+          required: true
+        resultsDirName:
+          description: The directory where the CSV results are stored (inside of the rootDir)
+          required: true
         # Flags for the CLI
         proxyURL:
           description: The URL to your web proxy
@@ -41,4 +47,10 @@
             node-version: 21
 
         - name: Run JS Diff
-          run: ${{ github.event.inputs.jsDiffBaseCommand --proxyURL ${{ github.event.inputs.proxyURL }} --webkitRepo ${{ github.event.inputs.webkitRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}"
+          run: ${{ github.event.inputs.jsDiffBaseCommand --jsDiffTestDataPath ${{ github.event.inputs.jsDiffTestDataPath }} --proxyURL ${{ github.event.inputs.proxyURL }} --webkitRepo ${{ github.event.inputs.webkitRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}" --outputDir=$${ github.event.inputs.rootDir }}/${{ github.event.inputs.resultsDir }}/jsDiffResults.csv
+
+        - name: Upload the results as an artifact
+          uses: actions/upload-artifact@v4
+          with:
+            name: js-diff-results
+            path: $${ github.event.inputs.rootDir }}/${{ github.event.inputs.resultsDir }}/jsDiffResults.csv
