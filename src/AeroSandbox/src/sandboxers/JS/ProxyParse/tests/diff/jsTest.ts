@@ -105,7 +105,6 @@ export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExt
  * @param bench The Bench to be used to get the benchmark results from
  * @returns The CSV wrapped behind a `ResultAsync` object from *Neverthrow*
  */
-// TODO: Use this in the GitHub Action
 export async function processJSTestBenchToCSV(bench: Bench, strictValidate = true, verbose = true): Promise<ResultAsync<string, Error>> {
 	// Process the bench results into a CSV
 	let csvOut = "jsRewriterName,passed,totalTime,mean,median,min,max\n";
