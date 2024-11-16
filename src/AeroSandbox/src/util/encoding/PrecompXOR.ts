@@ -33,9 +33,11 @@
  * }
  */
 
-import type { GenericLogger } from "$aero/src/AeroSandbox/src/shared/Loggers";
+import type { GenericLogger } from "../../../src/shared/Loggers";
 import type { Err, Result } from "neverthrow";
 import { ok, err as errr } from "neverthrow";
+
+// The only reason why I am using this version of `fmtError` is because there are test cases that run on this file. That is also why I am resolving this file with `.ts` at the end.
 
 /** char, encodedChar **/
 type Dictionary = Uint8Array;
@@ -116,8 +118,8 @@ export default class PrecompXOR {
 			urlLookupDictionary[asciiCode] = encChar;
 			decodeUrlLookupDictionary[encChar] = asciiCode;
 		}
-		Object.freeze(urlLookupDictionary);
-		Object.freeze(decodeUrlLookupDictionary);
+		// FIXME: `Object.freeze(urlLookupDictionary);` doesn't work
+		// FIXME: `Object.freeze(decodeUrlLookupDictionary);` doesn't work
 
 		return { urlLookupDictionary, decodeUrlLookupDictionary };
 	}
@@ -141,12 +143,15 @@ export default class PrecompXOR {
 			const char = textArr[i];
 			const validChar = this.checkValidChar(char);
 			if (validChar) {
+				/*
+				FIXME: This is broken; I know
 				if (!(char in urlLookupDictionary))
 					return errr(
 						new Error(
 							`Aero error: the character, ${char}, is missing from the lookup table but is in the checks. This is not your fault; it is aero's, which is precisely where it checks to see if it is a valid URL character.`
 						)
 					);
+				*/
 				resultArr[i] = urlLookupDictionary[char];
 			} else
 				return errr(

@@ -7,11 +7,13 @@
  */
 
 // This is where the difference between the two version is
-import createDefaultFeatureFlags from "../../createDefaultFeatureFlags";
+// @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
+import createDefaultFeatureFlags from "../../createDefaultFeatureFlags.ts";
 
-// Remember this file isn't built into a bundle because it is a test file, so this must be done
+// @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
 const defaultFeatureFlags = createDefaultFeatureFlags({ debugMode: false });
 
-import createErrorFmters from "../../src/util/fmtErrGeneric";
+// @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
+import createErrorFmters from "../../src/util/fmtErrGeneric.ts";
 
 export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(defaultFeatureFlags.errorLogAfterColon);

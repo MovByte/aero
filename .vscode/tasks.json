@@ -13,7 +13,7 @@
 			"type": "npm",
 			"group": "build",
 			"label": "aero: start build",
-			"script": "liveBuildSW"
+			"script": "livebuild:sw"
 		},
 		{
 			"type": "npm",

@@ -2,6 +2,7 @@
 	"name": "aero-sandbox",
 	"version": "0.0.2",
 	"description": "The sandboxing library for aero",
+  "homepage": "https://aero.sh",
 	"main": "dist/sandbox.js",
 	"exports": {
 		".": {
@@ -10,7 +11,7 @@
 				"require": "./extras/node/aeroSandboxPath.cjs"
 			}
 		},
-    "./tests/jsdiff": "./tests/jsdiff.js",
+		"./tests/jsdiff": "./tests/jsdiff.js",
 		"./configTypes": "./types/config.d.ts",
 		"./contextualIdentities": "./src/apis/contextualIdentities.ts",
 		"./ElectronControlView": "./src/apis/ControlView/ElectronControlView.ts",
@@ -30,14 +31,15 @@
 		"formatBiome": "biome format --write",
 		"formatDeno": "deno fmt",
 		"serve": "rspack serve",
-		"build": "node --import-tsx ./build/build.ts",
+		"build": "node --no-warnings --experimental-strip-types -- ./build/build.ts",
 		"buildRaw": "BUILD_CONFIG_PATH=./buildConfigs/aero && rspack build",
 		"initApis": "node --import=tsx ./scripts/initApis.ts",
 		"initApiTypes": "node --import=tsx ./scripts/initApiTypes.ts",
 		"initDist": "node --import=tsx ./scripts/InitDist.ts",
-		"initGlobalsBiome": "node --import-tsx ./scripts/initGlobalsBiome.ts",
-		"initGlobalsTs": "node --import-tsx ./scripts/initGlobalsTs.ts",
-    "test:jsdiff": "node --import-tsx ./tests/jsdiff.ts"
+		"init-globals:biome": "node --no-warnings --experimental-strip-types -- ./scripts/init-globals:biome.ts",
+		"init-globals:ts": "node --no-warnings --experimental-strip-types -- ./scripts/init-globals:ts.ts",
+		"test:jsdiff": "node --no-warnings --experimental-strip-types -- ./tests/jsdiff.ts",
+    "bench:encodingMethods": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(pathToFileURL(\"./tests/shared/httpsHooks.mjs\"));' --no-warnings --experimental-strip-types -- ./tests/encodingMethods.ts"
 	},
 	"author": "Ryan Wilson",
 	"license": "AGPL-3.0-or-later",
@@ -65,6 +67,7 @@
 		"@types/trusted-types": "^2.0.7",
 		"@types/webpack": "^5.28.5",
 		"htmlparser2": "^9.1.0",
+		"tinybench": "^3.0.6",
 		"traverse-the-universe": "^2.1.2",
 		"typia": "^6.12.0"
 	}

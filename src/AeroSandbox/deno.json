@@ -15,22 +15,21 @@
 	},
 	"tasks": {
 		"rsdoctor": "kill $(lsof -t -i:3301) & rsdoctor analyze --profile src/AeroSandbox/dist/debug/.rsdoctor/manifest.json --port 3301",
-		"check": "biome check --write",
-		"formatBiome": "biome format --write",
+		"format:biome": "biome format --write && biome check --write",
 		"serve": "rspack serve",
     "build": "deno run --allow-all ./build/build.ts",
 		"buildRaw": "BUILD_CONFIG_PATH=./buildConfigs/aero && rspack build",
-		"initApis": "deno run ./scripts/initApis.ts",
-		"initApiTypes": "deno run --allow-write ./scripts/initApiTypes.ts",
-		"initDist": "deno run --allow-read --allow-write ./scripts/InitDist.ts",
-		"initGlobalsBiome": "deno run --allow-read --allow-write ./scripts/initGlobalsBiome.ts",
-		"initGlobalsTs": "deno run --allow-read --allow-write ./scripts/initGlobalsTs.ts"
+		"init:apis": "deno run ./scripts/initApis.ts",
+		"init:api-types": "deno run --allow-write ./scripts/initApiTypes.ts",
+		"init:dist": "deno run --allow-read --allow-write ./scripts/InitDist.ts",
+		"init-globals:biome": "deno run --allow-read --allow-write ./scripts/init-globals:biome.ts",
+		"init-globals:ts": "deno run --allow-read --allow-write ./scripts/initGlobalsTs.ts"
 	},
 	"include": ["scripts/**/*.ts"],
 	"exclude": ["scripts/runtime/**/*.ts"],
 	"lint": {
 		"include": ["scripts/**/*.ts"],
-		"exclude": ["scripts/runtime/**/*.ts"],
+		"exclude": ["scripts/runtime/**/*.ts"]
 	},
 	"fmt": {
 		"include": ["scripts/**/*.ts"],
