@@ -29,6 +29,6 @@ export default function fmtError(explanation: string, originalErr: string): Erro
  * @param originalErr The original error that was caught
  * @returns The formatted *Neverthrow* error
  */
-export function neverthrowFmtError(explanation: string, originalErr: string): Err<void, Error> {
+export function fmtNeverthrowErr(explanation: string, originalErr: string): Err<void, Error> {
 	return errr(fmtError(explanation, originalErr));
 }

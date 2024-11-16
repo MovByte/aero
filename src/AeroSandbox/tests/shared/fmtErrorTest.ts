@@ -14,4 +14,4 @@ const defaultFeatureFlags = createDefaultFeatureFlags({ debugMode: false });
 
 import createErrorFmters from "../../src/util/fmtErrorGeneric";
 
-export const { fmtError, neverthrowFmtError } = createErrorFmters(defaultFeatureFlags.errorLogAfterColon);
+export const { fmtError, fmtNeverthrowErr } = createErrorFmters(defaultFeatureFlags.errorLogAfterColon);

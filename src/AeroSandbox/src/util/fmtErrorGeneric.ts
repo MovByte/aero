@@ -12,7 +12,7 @@ import { Err, err as errr, errAsync as errrAsync } from "neverthrow";
  * @returns The methods for formatting errors
  * 
  * @example
- * export const { fmtError, neverthrowFmtError } = createErrorFmters(ERROR_LOG_AFTER_COLON);
+ * export const { fmtError, fmtNeverthrowErr } = createErrorFmters(ERROR_LOG_AFTER_COLON);
  */
 const createErrorFmters = (errorLogAfterColon: string) => ({
 	/**
@@ -29,6 +29,6 @@ const createErrorFmters = (errorLogAfterColon: string) => ({
 	 * @returns The formatted *Neverthrow* error
 	 */
 	// @ts-ignore
-	neverthrowFmtError: (explanation: string, originalErr: string, async = false): Err<void, Error> => (async ? errrAsync : errr)(this.fmtError(explanation, originalErr))
+	fmtNeverthrowErr: (explanation: string, originalErr: string, async = false): Err<void, Error> => (async ? errrAsync : errr)(this.fmtError(explanation, originalErr))
 });
 export default createErrorFmters;

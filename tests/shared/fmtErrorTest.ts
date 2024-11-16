@@ -15,4 +15,4 @@ const defaultFeatureFlags = createDefaultFeatureFlags({ debugMode: false });
 // biome-ignore lint/nursery/useImportRestrictions: This is fundementally how aero works and it keeps the code clean. I will continue to ignore this rule.
 import createErrorFmters from "../../src/AeroSandbox/src/util/fmtErrorGeneric";
 
-export const { fmtError, neverthrowFmtError } = createErrorFmters(defaultFeatureFlags.errorLogAfterColon);
+export const { fmtError, fmtNeverthrowErr } = createErrorFmters(defaultFeatureFlags.errorLogAfterColon);

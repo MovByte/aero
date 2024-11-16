@@ -5,4 +5,4 @@
 
 import createErrorFmters from "./fmtErrorGeneric";
 
-export const { fmtError, neverthrowFmtError } = createErrorFmters(ERROR_LOG_AFTER_COLON);
+export const { fmtError, fmtNeverthrowErr } = createErrorFmters(ERROR_LOG_AFTER_COLON);
