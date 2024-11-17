@@ -9,9 +9,10 @@
 import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
 
-import test from "node:test";
+// TODO: I will use ava instead
+// import test from "node:test";
 
-import { Bench } from "tinybench";
+import { Bench, nToMs } from "tinybench";
 import type { Options } from "tinybench";
 
 // @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
@@ -23,43 +24,33 @@ import getUrlTestData from "./shared/getUrlTestData.ts";
 // @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
 import PrecompXOR from "../src/util/encoding/PrecompXOR.ts";
 
+interface encodeDecodeUVGeneric {
+	encode: encodeFuncUVGeneric;
+	decode: encodeFuncUVGeneric;
+}
 type encodeFuncUVGeneric = (str: string) => string;
+type encodeFactoryMeteorGeneric = (key: string) => encodeFuncUVGeneric;
 interface BobCodecsMod {
-	default: {
-		encode: encodeFuncUVGeneric,
-		decode: encodeFuncUVGeneric,
-	}
+	default: encodeDecodeUVGeneric;
 }
 interface MeteorCodecsMod {
 	default: {
-		encode: encodeFuncUVGeneric,
-		decode: encodeFuncUVGeneric,
+		encode: encodeFactoryMeteorGeneric,
+		decode: encodeFactoryMeteorGeneric,
 	}
 }
 interface UVCodecsMod {
-	none: {
-		encode: encodeFuncUVGeneric;
-		decode: encodeFuncUVGeneric;
-	}
-	plain: {
-		encode: encodeFuncUVGeneric;
-		decode: encodeFuncUVGeneric;
-	}
-	xor: {
-		encode: encodeFuncUVGeneric;
-		decode: encodeFuncUVGeneric;
-	};
-	base64: {
-		encode: encodeFuncUVGeneric;
-		decode: encodeFuncUVGeneric;
-	};
+	none: encodeDecodeUVGeneric;
+	plain: encodeDecodeUVGeneric;
+	xor: encodeFuncUVGeneric;
+	base64: encodeFuncUVGeneric;
 }
 type UVCodecsNebelForkMod = UVCodecsMod & {
 	getOrSetIdb: (storeName: string, key: string) => void;
-	nebelcrypt: {
-		encode: encodeFuncUVGeneric;
-		decode: encodeFuncUVGeneric;
-	}
+	nebelcrypt: encodeFuncUVGeneric;
+}
+interface CompCodecsMod {
+	comp: encodeDecodeUVGeneric;
 }
 
 async function testEncodingMethods() {
@@ -89,14 +80,17 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
 	const uvCodecs: UVCodecsMod = await import("https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
 	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
-	const uvCodecsNebelFork: UVCodecsNebelForkMod = await import("https://raw.githubusercontent.com/Nebelung-Dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
+	//const uvCodecsNebelFork: UVCodecsNebelForkMod = await import("https://raw.githubusercontent.com/Nebelung-Dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
+	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
+	const compCodecs: CompCodecsMod = await import("https://raw.githubusercontent.com/Eclipse-Proxy/Eclipse/refs/heads/main/src/codecs/comp.ts");
 	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
 	const bobCodecs: BobCodecsMod = await import("https://gist.githubusercontent.com/theogbob/89bfd228d7ec646bac14db867f33b8b2/raw/09cac229de8fa84db84111218ed8cbc020627e44/sillyxor.js");
 	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
 	const meteorCodecs: MeteorCodecsMod = await import("https://raw.githubusercontent.com/MeteorProxy/meteor/refs/heads/main/src/codecs/locvar.ts")
 	const doNothingWithUrl = (url: string) => url;
 
-	bench.add("Precomputed XOR (with key `2`)", () => {
+	const sharedKey = "2";
+	bench.add(`Precomputed XOR (with key "${sharedKey}")`, () => {
 		for (const testUrl of testUrls) {
 			const encUrlRes = precompXOR.encodeUrl(testUrl, "2");
 			if (encUrlRes.isErr())
@@ -112,10 +106,12 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 			bobCodecs.default.decode(encUrl);
 		}
 	});
-	bench.add("Meteor Codecs - Base64 (not from aero)", () => {
+	// FIXME: For some unknown reason the fake-indexeddb import is not working
+	bench.add(`Meteor Codecs - Base64 shuffled (with key "${sharedKey}") (not from aero)`, () => {
 		for (const testUrl of testUrls) {
-			const encUrl = meteorCodecs.default.encode(testUrl);
-			meteorCodecs.default.decode(encUrl);
+			const { encode, decode } = meteorCodecs.default(sharedKey);
+			const encUrl = encode(testUrl);
+			decode(encUrl);
 		}
 	});
 	bench.add("UV Codec - XOR (not from aero)", () => {
@@ -145,6 +141,12 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 		}
 	})
 	*/
+	bench.add("Eclipse - Comp Codec (not from aero)", () => {
+		for (const testUrl of testUrls) {
+			const encUrl = compCodecs.comp.encode(testUrl);
+			compCodecs.comp.decode(encUrl);
+		}
+	});
 	// To establish a baseline
 	bench.add("Nothing", () => {
 		for (const testUrl of testUrls) {
@@ -166,15 +168,27 @@ const isCLI =
 
 if (isCLI) {
 	(async () => {
-		// TODO: Add a feature flag for iterations
+		// TODO: Add a flag for iterations
 		const benchEncodingMethodsResRes = await createBenchEncodingMethods({
-			iterations: 1000
+			iterations: 1000,
 		});
-		if (benchEncodingMethodsResRes.isErr()) {
+		if (benchEncodingMethodsResRes.isErr())
 			throw fmtErr("Failed to create the benchmarks for encoding methods", benchEncodingMethodsResRes.error.message);
-		}
 		const benchEncodingMethodsRes = benchEncodingMethodsResRes.value;
 		await benchEncodingMethodsRes.run()
-		console.table(benchEncodingMethodsRes.table());
+		const table = benchEncodingMethodsRes.table();
+		const tableMs = table.map((row) => {
+			// @ts-ignore
+			for (const [testName, val] of Object.entries(row)) {
+				if (testName === "Latency median (ns)") {
+					// @ts-ignore
+					row[testName] = "Latency median (ms)";
+					// @ts-ignore
+					row[val] = `${nToMs(val)}ms`;
+				}
+			}
+			return row;
+		})
+		console.table(tableMs);
 	})();
 }
