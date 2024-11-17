@@ -64,8 +64,13 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 			encode: (str: string) => string,
 			decode: (str: string) => string,
 		};
+		getOrSetIdb: (storeName: string, key: string) => void;
+		nebelcrypt: {
+			encode: (str: string) => string,
+			decode: (str: string) => string,
+		}
 		// @ts-ignore: Node can import from URLs with `httpHooks.js` pre-imported like how it is done in the package.json script to run this file
-	} = await import("https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet/5def57050d0941041bff9eea7eeaebb2c4b9d107/src/rewrite/codecs.js");
+	} = await import("https://raw.githubusercontent.com/Nebelung-Dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
 	const doNothingWithURL = (str: string) => str;
 
 	bench.add("Precomputed XOR (with key `2`)", () => {
@@ -80,8 +85,8 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 	});
 	bench.add("UV Codec - XOR (not from aero)", () => {
 		for (const testUrl of testUrls) {
-			const encUrl = uvCodecs.xor.encode(testUrl);
-			uvCodecs.xor.decode(encUrl);
+			//const encUrl = uvCodecs.xor.encode(testUrl);
+			//uvCodecs.xor.decode(encUrl);
 		}
 	});
 	bench.add("UV Codec - Base64 (not from aero)", () => {
@@ -96,6 +101,15 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 			uvCodecs.plain.decode(encUrl);
 		}
 	});
+	// Nebelcrypt itself is broken right now unfortunately, so this test is disabled
+	/*
+	bench.add("Nebelcrypt", async () => {
+		for (const testUrl of testUrls) {
+			const encUrl = await uvCodecs.nebelcrypt.encode(testUrl);
+			await uvCodecs.nebelcrypt.decode(encUrl);
+		}
+	})
+	*/
 	// To establish a baseline
 	bench.add("Nothing", () => {
 		for (const testUrl of testUrls) {

@@ -2,7 +2,7 @@
 	"name": "aero-sandbox",
 	"version": "0.0.2",
 	"description": "The sandboxing library for aero",
-  "homepage": "https://aero.sh",
+	"homepage": "https://aero.sh",
 	"main": "dist/sandbox.js",
 	"exports": {
 		".": {
@@ -39,7 +39,7 @@
 		"init-globals:biome": "node --no-warnings --experimental-strip-types -- ./scripts/init-globals:biome.ts",
 		"init-globals:ts": "node --no-warnings --experimental-strip-types -- ./scripts/init-globals:ts.ts",
 		"test:jsdiff": "node --no-warnings --experimental-strip-types -- ./tests/jsdiff.ts",
-    "bench:encodingMethods": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(pathToFileURL(\"./tests/shared/httpsHooks.mjs\"));' --no-warnings --experimental-strip-types -- ./tests/encodingMethods.ts"
+		"bench:encodingMethods": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(pathToFileURL(\"./tests/shared/customImportResolveHooks.mjs\"));' --no-warnings --experimental-strip-types -- ./tests/encodingMethods.ts"
 	},
 	"author": "Ryan Wilson",
 	"license": "AGPL-3.0-or-later",
@@ -66,7 +66,9 @@
 		"@rsbuild/core": "^1.0.15",
 		"@types/trusted-types": "^2.0.7",
 		"@types/webpack": "^5.28.5",
+		"fake-indexeddb": "^6.0.0",
 		"htmlparser2": "^9.1.0",
+		"idb": "^8.0.0",
 		"tinybench": "^3.0.6",
 		"traverse-the-universe": "^2.1.2",
 		"typia": "^6.12.0"

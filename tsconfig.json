@@ -1,85 +1,56 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
-    "baseUrl": "./",
-    "lib": [
-      "ESNext",
-      "WebWorker",
-      "WebWorker.ImportScripts"
-    ],
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "paths": {
-      "$aero/*": [
-        "*"
-      ],
-      "$sandbox/*": [
-        "src/AeroSandbox/src/*"
-      ],
-      "$src/*": [
-        "src/*"
-      ],
-      "$sw/*": [
-        "src/this/*"
-      ],
-      "$shared/*": [
-        "src/shared/*"
-      ],
-      "$alt_backends/*": [
-        "src/altBackends/*"
-      ],
-      "$util/*": [
-        "src/this/util/*"
-      ],
-      "$rewriters/*": [
-        "src/this/rewriters/*"
-      ],
-      "$nested_sws/*": [
-        "src/this/nestedSWs/*"
-      ],
-      "$cors/*": [
-        "src/this/isolation/*"
-      ],
-      "$embeds/*": [
-        "src/this/embeds/*"
-      ],
-      "$handlers/*": [
-        "src/this/handlers/*"
-      ],
-      "$types/*": [
-        "types/*"
-      ]
-    },
-    "types": [
-      "./types/index.d.ts",
-      "./src/AeroSandbox/types/index.d.ts",
-      "@types/serviceworker",
-      "@types/web-app-manifest"
-    ],
-    "plugins": [
-      {
-        "transform": ["ts-runtime-checks", "typia/lib/transform"]
-      }
-    ],
-    "strictNullChecks": true,
-    "strict": true
-  },
-  "include": [
-    "src/**/*.ts",
-    "./src/AeroSandbox/src/shared/*.ts",
-    "types/**/*.ts",
-    "src/AeroSandbox/types/aeroSandbox.d.ts",
-    "examples/config.js",
-    "src/AeroSandbox/src/defaultConfig.js"
-  ],
-  "exclude": [
-    "rspack.config.ts",
-    "./src/this/nestedSW",
-    "./src/AeroSandbox/src",
-    "./src/AeroSandbox/rsbuild.config.ts",
-    "./src/AeroSandbox/build"
-  ]
+	"compilerOptions": {
+		"target": "ESNext",
+		"moduleResolution": "NodeNext",
+		"module": "NodeNext",
+		"baseUrl": "./",
+		"lib": ["ESNext", "WebWorker", "WebWorker.ImportScripts"],
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"sourceMap": true,
+		"paths": {
+			"$aero/*": ["*"],
+			"$sandbox/*": ["src/AeroSandbox/src/*"],
+			"$src/*": ["src/*"],
+			"$sw/*": ["src/this/*"],
+			"$shared/*": ["src/shared/*"],
+			"$alt_backends/*": ["src/altBackends/*"],
+			"$util/*": ["src/this/util/*"],
+			"$rewriters/*": ["src/this/rewriters/*"],
+			"$nested_sws/*": ["src/this/nestedSWs/*"],
+			"$cors/*": ["src/this/isolation/*"],
+			"$embeds/*": ["src/this/embeds/*"],
+			"$handlers/*": ["src/this/handlers/*"],
+			"$types/*": ["types/*"]
+		},
+		"types": [
+			"./types/index.d.ts",
+			"./src/AeroSandbox/types/index.d.ts",
+			"@types/serviceworker",
+			"@types/web-app-manifest"
+		],
+		"plugins": [
+			{
+				"transform": ["ts-runtime-checks", "typia/lib/transform"]
+			}
+		],
+		"strictNullChecks": true,
+		"strict": true
+	},
+	"include": [
+		"src/**/*.ts",
+		"./src/AeroSandbox/src/shared/*.ts",
+		"types/**/*.ts",
+		"src/AeroSandbox/types/aeroSandbox.d.ts",
+		"examples/config.js",
+		"src/AeroSandbox/src/defaultConfig.js",
+		"src/AeroSandbox/tests/shared/importHooks.mjs
+, "src/AeroSandbox/tests/shared/customImportResolveHooks.mjs"	],
+	"exclude": [
+		"rspack.config.ts",
+		"./src/this/nestedSW",
+		"./src/AeroSandbox/src",
+		"./src/AeroSandbox/rsbuild.config.ts",
+		"./src/AeroSandbox/build"
+	]
 }
