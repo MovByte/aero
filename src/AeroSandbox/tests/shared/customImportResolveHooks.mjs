@@ -53,6 +53,11 @@ export function load(url, _ctx, nextLoad) {
             newLines.push("export default bobXORfunctions")
             data = newLines.join("\n");
           }
+          else if (url.startsWith("https://raw.githubusercontent.com/MeteorProxy/meteor/refs/heads/main/src/codecs/locvar.ts")) {
+            let newLines = data.split("\n");
+            newLines.push("export default factory")
+            data = newLines.join("\n");
+          }
 					resolve({
 						format: "module",
 						shortCircuit: true,

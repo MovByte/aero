@@ -24,6 +24,18 @@ import getUrlTestData from "./shared/getUrlTestData.ts";
 import PrecompXOR from "../src/util/encoding/PrecompXOR.ts";
 
 type encodeFuncUVGeneric = (str: string) => string;
+interface BobCodecsMod {
+	default: {
+		encode: encodeFuncUVGeneric,
+		decode: encodeFuncUVGeneric,
+	}
+}
+interface MeteorCodecsMod {
+	default: {
+		encode: encodeFuncUVGeneric,
+		decode: encodeFuncUVGeneric,
+	}
+}
 interface UVCodecsMod {
 	none: {
 		encode: encodeFuncUVGeneric;
@@ -47,12 +59,6 @@ type UVCodecsNebelForkMod = UVCodecsMod & {
 	nebelcrypt: {
 		encode: encodeFuncUVGeneric;
 		decode: encodeFuncUVGeneric;
-	}
-}
-interface BobCodecsMod {
-	default: {
-		encode: encodeFuncUVGeneric,
-		decode: encodeFuncUVGeneric,
 	}
 }
 
@@ -86,6 +92,8 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 	const uvCodecsNebelFork: UVCodecsNebelForkMod = await import("https://raw.githubusercontent.com/Nebelung-Dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
 	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
 	const bobCodecs: BobCodecsMod = await import("https://gist.githubusercontent.com/theogbob/89bfd228d7ec646bac14db867f33b8b2/raw/09cac229de8fa84db84111218ed8cbc020627e44/sillyxor.js");
+	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
+	const meteorCodecs: MeteorCodecsMod = await import("https://raw.githubusercontent.com/MeteorProxy/meteor/refs/heads/main/src/codecs/locvar.ts")
 	const doNothingWithUrl = (url: string) => url;
 
 	bench.add("Precomputed XOR (with key `2`)", () => {
@@ -102,6 +110,12 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 		for (const testUrl of testUrls) {
 			const encUrl = bobCodecs.default.encode(testUrl);
 			bobCodecs.default.decode(encUrl);
+		}
+	});
+	bench.add("Meteor Codecs - Base64 (not from aero)", () => {
+		for (const testUrl of testUrls) {
+			const encUrl = meteorCodecs.default.encode(testUrl);
+			meteorCodecs.default.decode(encUrl);
 		}
 	});
 	bench.add("UV Codec - XOR (not from aero)", () => {
