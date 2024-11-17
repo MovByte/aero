@@ -32,10 +32,10 @@ export function load(url, _ctx, nextLoad) {
 				res.setEncoding("utf8");
 				res.on("data", (chunk) => data += chunk);
 				res.on("end", async () => {
+          const resolveFilename = url.split("/").at(-1)
 					// Process the code if needed
 					for (const targetFilename of filenamesToResolveWithNPM) {
-						const resolveFilename = url.split("/").at(-1)
-						if (targetFilename.startsWith(resolveFilename)) {
+						if (resolveFilename.startsWith(targetFilename)) {
 							for (const [targetFilenameInjDeps, importRest] of Object.entries(injDeps))
 								if (url.endsWith(targetFilenameInjDeps))
 									// Inject this dependency into the source code because the original source code was meant to be run in a browser environment
@@ -44,6 +44,15 @@ export function load(url, _ctx, nextLoad) {
 							data = transformImports(data, url);
 						}
 					}
+          if (url.startsWith("https://gist.githubusercontent.com/theogbob/89bfd228d7ec646bac14db867f33b8b2/raw/09cac229de8fa84db84111218ed8cbc020627e44/sillyxor.js")) {
+            /** @type {String[]} */
+            let newLines = [];
+            for (const line of data.split("\n"))
+              if (!line.startsWith("console.log"))
+                newLines.push(line);
+            newLines.push("export default bobXORfunctions")
+            data = newLines.join("\n");
+          }
 					resolve({
 						format: "module",
 						shortCircuit: true,

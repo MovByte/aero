@@ -23,6 +23,39 @@ import getUrlTestData from "./shared/getUrlTestData.ts";
 // @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
 import PrecompXOR from "../src/util/encoding/PrecompXOR.ts";
 
+type encodeFuncUVGeneric = (str: string) => string;
+interface UVCodecsMod {
+	none: {
+		encode: encodeFuncUVGeneric;
+		decode: encodeFuncUVGeneric;
+	}
+	plain: {
+		encode: encodeFuncUVGeneric;
+		decode: encodeFuncUVGeneric;
+	}
+	xor: {
+		encode: encodeFuncUVGeneric;
+		decode: encodeFuncUVGeneric;
+	};
+	base64: {
+		encode: encodeFuncUVGeneric;
+		decode: encodeFuncUVGeneric;
+	};
+}
+type UVCodecsNebelForkMod = UVCodecsMod & {
+	getOrSetIdb: (storeName: string, key: string) => void;
+	nebelcrypt: {
+		encode: encodeFuncUVGeneric;
+		decode: encodeFuncUVGeneric;
+	}
+}
+interface BobCodecsMod {
+	default: {
+		encode: encodeFuncUVGeneric,
+		decode: encodeFuncUVGeneric,
+	}
+}
+
 async function testEncodingMethods() {
 	// TODO: Implement...
 }
@@ -47,31 +80,13 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 
 	// Init the encoders
 	const precompXOR = new PrecompXOR(["2"]);
-	const uvCodecs: {
-		none: {
-			encode: (str: string) => string;
-			decode: (str: string) => string;
-		}
-		plain: {
-			encode: (str: string) => string,
-			decode: (str: string) => string,
-		}
-		xor: {
-			encode: (str: string) => string,
-			decode: (str: string) => string,
-		};
-		base64: {
-			encode: (str: string) => string,
-			decode: (str: string) => string,
-		};
-		getOrSetIdb: (storeName: string, key: string) => void;
-		nebelcrypt: {
-			encode: (str: string) => string,
-			decode: (str: string) => string,
-		}
-		// @ts-ignore: Node can import from URLs with `httpHooks.js` pre-imported like how it is done in the package.json script to run this file
-	} = await import("https://raw.githubusercontent.com/Nebelung-Dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
-	const doNothingWithURL = (str: string) => str;
+	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
+	const uvCodecs: UVCodecsMod = await import("https://raw.githubusercontent.com/titaniumnetwork-dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
+	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
+	const uvCodecsNebelFork: UVCodecsNebelForkMod = await import("https://raw.githubusercontent.com/Nebelung-Dev/Ultraviolet/refs/heads/main/src/rewrite/codecs.js");
+	// @ts-ignore: Node can import from URLs with `customImportResolveHooks.mjs` pre-imported like how it is done in the package.json script to run this file
+	const bobCodecs: BobCodecsMod = await import("https://gist.githubusercontent.com/theogbob/89bfd228d7ec646bac14db867f33b8b2/raw/09cac229de8fa84db84111218ed8cbc020627e44/sillyxor.js");
+	const doNothingWithUrl = (url: string) => url;
 
 	bench.add("Precomputed XOR (with key `2`)", () => {
 		for (const testUrl of testUrls) {
@@ -83,10 +98,16 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 			//console.log(encUrl);
 		}
 	});
+	bench.add("Oh? On Xor? (not from aero)", () => {
+		for (const testUrl of testUrls) {
+			const encUrl = bobCodecs.default.encode(testUrl);
+			bobCodecs.default.decode(encUrl);
+		}
+	});
 	bench.add("UV Codec - XOR (not from aero)", () => {
 		for (const testUrl of testUrls) {
-			//const encUrl = uvCodecs.xor.encode(testUrl);
-			//uvCodecs.xor.decode(encUrl);
+			const encUrl = uvCodecs.xor.encode(testUrl);
+			uvCodecs.xor.decode(encUrl);
 		}
 	});
 	bench.add("UV Codec - Base64 (not from aero)", () => {
@@ -105,7 +126,7 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 	/*
 	bench.add("Nebelcrypt", async () => {
 		for (const testUrl of testUrls) {
-			const encUrl = await uvCodecs.nebelcrypt.encode(testUrl);
+			const encUrl = await uvCodecsNebelFork.nebelcrypt.encode(testUrl);
 			await uvCodecs.nebelcrypt.decode(encUrl);
 		}
 	})
@@ -113,8 +134,8 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 	// To establish a baseline
 	bench.add("Nothing", () => {
 		for (const testUrl of testUrls) {
-			const encUrl = doNothingWithURL(testUrl);
-			doNothingWithURL(encUrl);
+			const encUrl = doNothingWithUrl(testUrl);
+			doNothingWithUrl(encUrl);
 		}
 	})
 
