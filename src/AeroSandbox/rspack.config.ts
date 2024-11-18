@@ -170,6 +170,17 @@ const config: rspack.Configuration = {
 						loader: "builtin:swc-loader"
 					}
 				]
+			},
+			{
+				test: /\.val\.ts$/,
+				use: [
+					{
+						loader: "val-loader",
+						options: {
+							compiler: "@swc-node/register"
+						}
+					}
+				]
 			}
 		]
 	},
