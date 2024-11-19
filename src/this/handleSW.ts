@@ -25,9 +25,9 @@ self.logger = new AeroLogger();
 const tryImportingItMessage = ". Try importing the bundle.";
 
 /**
- * Handles the requests
- * @param - The event
- * @returns  The proxified response
+ * Handles the requests that are routed to aero
+ * @param event The passthrough Fetch event
+ * @returns The proxified response
  */
 async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
 	// Sanity checks to ensure that everything has been initalized properly
@@ -55,8 +55,8 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		return okAsync(await fetch(req.url));
 	}
 
-	// Develop a context for the utility methods
-	/** the search params for the request */
+	// Develop a context for the utility methods called here
+	/** The search params for the request */
 	const reqParams = reqUrl.searchParams;
 	/** Used to determine if the request was made to load the homepage; this is needed so that the proxy will know when to rewrite the html files. For example, you wouldn't want it to rewrite a fetch request. */
 	const isNavigate =
@@ -66,7 +66,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	const isiFrame = req.destination === "iframe";
 	/** If the request is intended for a script, and the script is intended to be a module (recieved through request URL passthrough) */
 	let isMod: boolean;
-	/**  If the request is intended for a script */
+	/** If the request is intended for a script */
 	const isScript = req.destination === "script";
 	if (isScript) {
 		const isModParam = getPassthroughParam(reqParams, "isMod");
@@ -196,7 +196,13 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	return okAsync(rewrittenResp);
 }
 
+/**
+ * Aero's main handler; this is what you call in your SW when aero should be routed. Ideally, you would determine when it should be routed with `routeAero`
+ */
 self.aeroHandle = handle;
-self.routeAero = (event: Assert<FetchEvent>): boolean => {
-	return event.request.url.startsWith(location.origin + aeroConfig.prefix);
-};
+/**
+ * Check if the current path should route to aero using the prefix you set in the config
+ * @param event 
+ * @returns If `aeroHandle` should be called
+ */
+self.routeAero = (event: Assert<FetchEvent>): boolean => event.request.url.startsWith(location.origin + aeroConfig.prefix);
