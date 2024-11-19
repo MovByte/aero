@@ -20,8 +20,6 @@ import { AeroLogger } from "$sandbox/shared/Loggers";
 
 self.logger = new AeroLogger();
 
-const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
-
 /**
  * Handles the requests
  * @param - The event
@@ -110,8 +108,9 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		logger: AeroLogger,
 		reqHeaders: req.headers,
 		proxyUrl
-		// @ts-ignore
-	}, sec);
+	},
+		// @ts-ignore: The types are compatible
+		sec);
 	if (corsStatusRes.isErr())
 		return fmtNeverthrowErr("Failed to perform CORS emulation/testing", corsStatusRes.error.message);
 	const corsStatus = corsStatusRes.value;
@@ -120,10 +119,8 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	const cacheMan = corsStatus.cacheMan;
 
 	const rewrittenReqOptsRes = await formRequestOpts({
-		reqHeaders: req.headers,
-		reqMethod: req.method,
-		clientUrl,
-		BareMux
+		req,
+		clientUrl
 	});
 	if (rewrittenReqOptsRes.isErr())
 		return fmtNeverthrowErr("Failed to create the the request options", rewrittenReqOptsRes.error.message);
@@ -138,22 +135,29 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	if (!resp) return errrAsync(new Error("No response found"));
 	if (resp instanceof Error) return errrAsync(Error);
 
-	// TODO: `response.ts`
 	const rewriteRespRes = await rewriteResp({
 		originalResp: resp,
+		rewrittenReqHeaders: rewrittenReqOpts.headers,
+		reqDestination: req.destination,
 		proxyUrl,
 		clientUrl,
-		BareMux,
-		jsRewriter,
 		isNavigate,
+		isMod,
 		sec
 	});
 	if (rewriteRespRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the response", rewriteRespRes.error.message);
-	const { rewrittenBody, rewrittenHeaders, rewrittenStatus } = rewriteRespRes.value;
+	const { rewrittenBody, rewrittenRespHeaders, rewrittenStatus } = rewriteRespRes.value;
 
 	if (FEATURE_ENC_BODY_EMULATION)
-		perfEncBodyEmu(body, resp.headers);
+		// This will modify the resp headers
+		perfEncBodyEmu(originalResp, rewriteRespHeaders);
+
+	const rewrittenResp = new Response(resp.status === 204 ? null : rewrittenBody, {
+		headers: rewrittenRespHeaders,
+		status: rewrittenStatus
+	});
+
 	if (FEATURE_CACHES_EMULATION) {
 		const perfCacheSettingRes = perfCacheSetting({
 			reqUrlHref: reqUrl.href,
@@ -165,10 +169,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	}
 
 	// Return the response
-	return okAsync(new Response(resp.status === 204 ? null : rewrittenBody, {
-		headers: rewrittenHeaders,
-		status: rewrittenStatus
-	}));
+	return okAsync(rewrittenResp);
 }
 
 self.aeroHandle = handle;

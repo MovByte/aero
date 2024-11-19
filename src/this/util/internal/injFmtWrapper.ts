@@ -1,6 +1,6 @@
 // Neverthrow
 import type { Result } from "neverthrow";
-import { ok, err as errr } from "neverthrow";
+import { ok } from "neverthrow";
 import { fmtNeverthrowErr } from "$sandbox/util/fmtErr";
 
 type simpleReplacement = { [search: string]: string };
@@ -29,5 +29,5 @@ export default function injFmtWrapper(valString: string, htmlTemplating: simpleR
 			return fmtNeverthrowErr(`Failed to perform replacement to the JS in the val string ("/**{{${search}}}*\/" -> "${search}")`, err.message);
 		}
 	}
-	return code;
+	return ok(code);
 }

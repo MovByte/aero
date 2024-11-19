@@ -27,7 +27,7 @@ const ignoredHeaders = [
 ];
 
 function rewriteLocation(url: string): string {
-	return self.location.origin + self.config.prefix + url;
+	return self.location.origin + aeroConfig.prefix + url;
 }
 
 // TODO: Rewrite https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/SourceMap

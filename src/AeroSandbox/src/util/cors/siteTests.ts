@@ -10,8 +10,6 @@ import { fmtNeverthrowErr } from "../fmtErr";
 
 import type BareClient from "@mercuryworkshop/bare-mux";
 
-import type { fetchPublicSuffixPriorityType } from "$aero/build/featureFlags";
-
 /** The site directives as per @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site#directives */
 type sameSiteDirectives = "cross-site" | "same-origin" | "same-site" | "none";
 

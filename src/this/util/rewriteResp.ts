@@ -5,7 +5,7 @@ import { fmtNeverthrowErr } from "$sharedUtil/fmtErr";
 
 import injFmtWrapper from "$aero/src/this/util/internal/injFmtWrapper";
 // Preprocessor
-import mainFmt from "../../preprocessors/mainInjBundle/mainFmtHTML.val";
+import mainFmtHTML from "../../preprocessors/mainInjBundle/mainFmtHTML.val";
 import mainInjFmtXSLT from "$preprocessors/mainInjFmtXSLT";
 
 // Utility
@@ -16,30 +16,32 @@ import escapeJS from "$util/escapeJS";
 import rewriteRespHeaders from "$rewriters/respHeaders";
 import rewriteCacheManifest from "$rewriters/cacheManifest";
 import rewriteManifest from "$rewriters/webAppManifest";
-import type JSRewriter from "$sandbox/sandboxers/JS/JSRewriter";
+import JSRewriter from "$sandbox/sandboxers/JS/JSRewriter";
 
-// Passthrough types
-import type { BareMux } from "@mercuryworkshop/bare-mux";
+const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
 
 export default async function rewriteResp({
 	originalResp,
+	rewrittenReqHeaders: Header,
+	reqDestination,
 	proxyUrl,
 	clientUrl,
-	BareMux,
-	jsRewriter,
 	isNavigate,
+	isMod,
 	sec
 }: {
 	originalResp: Response;
+	rewrittenReqHeaders: Header,
+	/** If you are making a server-only implementation, you could infer this from the mime type and file type */
+	reqDestination: string;
 	proxyUrl: URL;
 	clientUrl: string;
-	BareMux: BareMux;
-	jsRewriter: JSRewriter;
 	isNavigate: boolean;
+	isMod: boolean;
 	sec: Sec;
 }): Promise<ResultAsync<{
 	rewrittenBody: string | ReadableStream;
-	rewrittenHeaders: Headers,
+	rewrittenRespHeaders: Headers,
 	rewrittenStatus: number
 }, Error>> {
 	// Rewrite the response headers
@@ -52,7 +54,7 @@ export default async function rewriteResp({
 		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespHeadersRes.error.message);
 	const rewrittenRespHeaders = rewrittenRespHeadersRes.value;
 
-	const type = resp.headers.get("content-type");
+	const type = originalResp.headers.get("content-type");
 
 	// For modules
 	const isModWorker =
@@ -67,7 +69,7 @@ export default async function rewriteResp({
 	// Rewrite the body
 	if (REWRITER_HTML && isNavigate && html) {
 		const body = await originalResp.text();
-		const rewrittenBodyBeforeImport = injFmtWrapper(body, {
+		const rewrittenBodyBeforeImport = injFmtWrapper(mainFmtHTML, {
 			"BUNDLES_SANDBOX_INIT": aeroConfig.bundles.sandboxInitAero,
 			"BUNDLES_SANDBOX_END": aeroConfig.bundles.sandboxEndAero,
 			"BUNDLES_LOGGER_CLIENT": aeroConfig.bundles.loggerClient,
@@ -86,78 +88,77 @@ export default async function rewriteResp({
 		rewrittenBody = injFmtWrapper(rewrittenBodyBeforeImport, {}, {
 			"IMPORT": rewrittenBodyBeforeImport
 		});
+		// Finally, apply the original body untouched
+		rewrittenBody += `\n${body}`;
 	} else if (
 		REWRITER_XSLT &&
 		isNavigate &&
 		(type.startsWith("text/xml") || type.startsWith("application/xml"))
 	) {
-		const body = await resp.text();
+		const body = await originalResp.text();
 		rewrittenBody = body;
 
 		// TODO: Update this to support modern aero
 
 		rewrittenBody = `${mainInjFmtXSLT}\n${body}`;
 	} else if (REWRITER_JS && isScript) {
-		const script = await resp.text();
+		const script = await originalResp.text();
 
 		if (FEATURE_INTEGRITY_EMULATION) {
-			body = jsRewriter.wrapScript(script, {
+			rewrittenBody = jsRewriter.wrapScript(script, {
 				isModule: isMod,
-				insertCode: /* js *\/ `
-  {
+				insertCode: /* js\ */ `
+{
 	const bak = decodeURIComponent(escape(atob(\`${escapeJS(script)}\`)));
 	${integrityMainCheck(isMod)}
-  }
-  `
+}
+`
 			});
 			// @ts-ignore
 		} else
-			body = jsRewriter.wrapScript(script, {
+			rewrittenBody = jsRewriter.wrapScript(script, {
 				isModule: isMod
 			});
+	} else if (REWRITER_CACHE_MANIFEST && reqDestination === "manifest") {
+		const body = await resp.text();
 
-	} */ else if(REWRITER_CACHE_MANIFEST && req.destination === "manifest") {
-				const body = await resp.text();
+		// Safari exclusive
+		if (SUPPORT_LEGACY && type.includes("text/cache-manifest")) {
+			const isFirefox =
+				rewrittenReqHeaders["user-agent"].includes("Firefox");
 
-				// Safari exclusive
-				if (SUPPORT_LEGACY && type.includes("text/cache-manifest")) {
-					const isFirefox =
-						rewrittenReqHeaders["user-agent"].includes("Firefox");
-
-					rewrittenBody = rewriteCacheManifest(body, isFirefox);
-				} else rewrittenBody = rewriteManifest(body, proxyUrl);
-			} // TODO: Bring back worker support in aero
-	/*else if (SUPPORT_WORKER && req.destination === "worker") {
+			rewrittenBody = rewriteCacheManifest(body, isFirefox);
+		} else rewrittenBody = rewriteManifest(body, proxyUrl);
+	} // TODO: Bring back worker support in aero
+	else if (SUPPORT_WORKER && reqDestination === "worker")
 		rewrittenBody = isModWorker
-			? /* js *\/ `
-	import { proxyLocation } from "${prefix}worker/worker";
+			? /* js */ `
+	import { proxyLocation } from "${aeroConfig.aeroPrefix}worker/worker";
 	import { FeatureFlags } from '../featureFlags';
 	self.location = proxyLocation;
 	`
 			: `
-	importScripts("${prefix}worker/worker.js");
+	importScripts("${aeroConfig.aeroPrefix}worker/worker.js");
 		
 	${body}
 		`;
-	else if (SUPPORT_WORKER && req.destination === "sharedworker")
+	else if (SUPPORT_WORKER && reqDestination === "sharedworker")
 		body = isModWorker
-			? /* js *\/ `
-	import { proxyLocation } from "${prefix}worker/worker";
+			? /* js */ `
+	import { proxyLocation } from "${aeroConfig.aeroPrefix}worker/worker";
 	self.location = proxyLocation;
 	`
-			: /* js *\/ `
-	importScripts("${prefix}worker/worker.js");
-	importScripts("${prefix}worker/sharedworker.js");
-		
+			: /* js */ `
+	importScripts("${aeroConfig.aeroPrefix}worker/worker.js");
+	importScripts("${aeroConfig.aeroPrefix}worker/sharedworker.js");
 	${body}
-		`;
-	*/
+	`;
 	// No rewrites are needed; proceed as normal
 	else rewrittenBody = resp.body;
 
-			return okAsync({
-				rewrittenBody,
-				rewrittenHeaders,
-				rewrittenStatus
-			})
-		}
+	return okAsync({
+		rewrittenBody,
+		rewrittenRespHeaders,
+		rewrittenStatus
+	})
+}
