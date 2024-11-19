@@ -55,6 +55,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 				"cache-control": "private"
 			};
 		}
+		logger.log("aero bundle found! Not rewriting (will proceed normally)");
 		return okAsync(await fetch(req.url));
 	}
 
@@ -90,12 +91,15 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		catchAllClientsValid,
 		isNavigate
 	})
-	if (clientUrlRes.isErr())
-		return fmtNeverthrowErr("Failed to get the client URL with aero's context", clientUrlRes.error.message);
+	if (clientUrlRes.isErr()) {
+		return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);
+	}
 	/** This client URL is used when forming the proxy URL and in various uses for emulation */
 	const clientUrl = clientUrlRes.value;
-	if (clientUrl === "skip")
+	if (clientUrl === "skip") {
+		logger.log("Skipping the request");
 		return okAsync(await fetch(req.url));
+	}
 
 	// Get the proxy URL
 	const getProxyURLRes = await getProxyURL({
@@ -108,8 +112,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		return fmtNeverthrowErr("Failed to get the proxy URL", getProxyURLRes.error.message);
 	/** The proxy URL used for fetching the site under the proxy */
 	const proxyUrl = getProxyURLRes.value;
-
-	// Log request
+	// Log the request
 	logger.log(
 		req.destination === ""
 			? `${req.method} ${proxyUrl.href}`
@@ -131,8 +134,10 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	if (corsStatusRes.isErr())
 		return fmtNeverthrowErr("Failed to perform CORS emulation/testing", corsStatusRes.error.message);
 	const corsStatus = corsStatusRes.value;
-	if ("cachedResponse" in corsStatus)
+	if ("cachedResponse" in corsStatus) {
+		logger.log("Returning cached response found through Cache Emulation");
 		return okAsync(corsStatus.cachedResponse);
+	}
 	/** The manager used for getting and setting emulated caches for Cache Emulation */
 	let cacheMan: CacheManager;
 	if (FEATURES_CACHE_EMULATION && "cacheMan" in corsStatus)
@@ -155,8 +160,12 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		rewrittenReqOpts
 	);
 	// Sanity checks for if the response is invalid
-	if (!resp) return errrAsync(new Error("No response found"));
-	if (resp instanceof Error) return errrAsync(Error);
+	if (!resp) return errrAsync(new Error("No response found! The response is invalid"));
+	if (resp instanceof Error) {
+		if (resp instanceof NetworkError)
+			return fmtNeverthrowErr("Failed to fetch the response from the proxy server backend", Error);
+		return fmtNeverthrowErr("Failed to fetch the response from the BareMux transport", resp.message);
+	}
 
 	// Rewrite the response
 	const rewrittenRespRes = await rewriteResp({
