@@ -23,9 +23,9 @@ type sameSiteDirectives = "cross-site" | "same-origin" | "same-site" | "none";
  * @param bc The bare-mux instance to use to fetch the public suffix list
  * @returns The site directive. It will never return `none`, since you should return `none` if it is the same on the original header
  */
-export default function getSiteDirective(originProxyUrl: URL, clientURL: URL, bc: BareClient = $aero.bc): sameSiteDirectives {
-	if (new URL(originProxyUrl).origin === new URL(clientURL).origin) return "same-origin";
-	if (isSameSite(originProxyUrl, clientURL, bc)) return "same-site";
+export default function getSiteDirective(proxyUrl: URL, clientURL: URL, bc: BareClient = $aero.bc): sameSiteDirectives {
+	if (new URL(proxyUrl).origin === new URL(clientURL).origin) return "same-origin";
+	if (isSameSite(proxyUrl, clientURL, bc)) return "same-site";
 	return "cross-site";
 }
 
