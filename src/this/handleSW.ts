@@ -3,6 +3,7 @@ import { ResultAsync, okAsync, errAsync as errrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$sharedUtil/fmtErr";
 
 import type { Sec } from "$aero/types";
+import type CacheManager from "./isolation/CacheManager";
 
 // Abstracted req/resp rewriter abstractions
 import getProxyURL from "$util/getProxyURL";
@@ -17,12 +18,13 @@ import rewriteResp from "$util/rewriteResp";
 import { getPassthroughParam } from "$sharedUtil/getPassthroughParam";
 // Cosmetic
 import { AeroLogger } from "$sandbox/shared/Loggers";
-import CacheManager from "./isolation/CacheManager";
 
 /** aero's SW logger */
 self.logger = new AeroLogger();
 
-const tryImportingItMessage = ". Try importing the bundle.";
+// Shared strings
+/** A message for when the user fails to import a bundle */
+const tryImportingItMsg = ". Try importing the bundle.";
 
 /**
  * Handles the requests that are routed to aero
@@ -32,11 +34,12 @@ const tryImportingItMessage = ". Try importing the bundle.";
 async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
 	// Sanity checks to ensure that everything has been initalized properly
 	if (!("logger" in self))
-		return errrAsync(new Error(`The logger hasn't been initalized!${tryImportingItMessage}`));
+		return errrAsync(new Error(`The logger hasn't been initalized!${tryImportingItMsg}`));
 	if (!("BareMux" in self))
-		throw errrAsync(new Error(`There is no bare client provided!${tryImportingItMessage}`));
+		throw errrAsync(new Error(`There is no bare client (likely BareMux) provided!${tryImportingItMsg}`));
 	if (!("aeroConfig" in self))
 		return errrAsync(new Error("There is no config provided. You need to create one."));
+
 	// Develop a context
 	/** The incoming request */
 	const req = event.request;
@@ -135,13 +138,14 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	if (FEATURES_CACHE_EMULATION && "cacheMan" in corsStatus)
 		cacheMan = corsStatus.cacheMan;
 
-	// Get the request options that will be used to fetch the site under the proxy
+	// Get the request options
 	const rewrittenReqOptsRes = await formRequestOpts({
 		req,
 		clientUrl
 	});
 	if (rewrittenReqOptsRes.isErr())
 		return fmtNeverthrowErr("Failed to create the the request options", rewrittenReqOptsRes.error.message);
+	/** The request options that will be used to fetch the site under the proxy*/
 	const rewrittenReqOpts = rewrittenReqOptsRes.value;
 
 	// Make the request to the proxy
@@ -150,7 +154,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		new URL(proxyUrl).href,
 		rewrittenReqOpts
 	);
-	// Sanity checks for if the resopnse is invalid
+	// Sanity checks for if the response is invalid
 	if (!resp) return errrAsync(new Error("No response found"));
 	if (resp instanceof Error) return errrAsync(Error);
 
