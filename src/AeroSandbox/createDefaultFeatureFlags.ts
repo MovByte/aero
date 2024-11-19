@@ -12,10 +12,11 @@ export default (ctx: CtxType) =>
 		htmlUseNavEvents: false,
 		featureEmuSecureCtx: false,
 		featureHashURL: false,
+		supportIntegrityEmu: false,
 		fetchPublicSuffixPriority: "compile-time",
 		fetchPublicSuffixHaveFallback: true,
 		publicSuffixApi: "https://publicsuffix.org/list/public_suffix_list.dat",
 		failedToFetchSuffixErrMsg: "Failed to fetch the public suffixes list for use in determining if the two URLs are the same site",
-		errorLogAfterColon: ":\n\t",
+		errLogAfterColon: ":\n\t",
 		debug: ctx.debugMode
 	}) as FeatureFlags;

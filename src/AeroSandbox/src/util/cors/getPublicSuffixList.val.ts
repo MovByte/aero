@@ -8,7 +8,7 @@ import createErrorFmters from "../fmtErrGeneric";
 /* These should be passed in the options of the `val-loader` plugin instance */
 interface ValOptions {
 	/* This is from the feature flags */
-	errorLogAfterColon: string;
+	errLogAfterColon: string;
 	/* This is from the feature flags */
 	publicSuffixApi: string;
 	/* This is from the feature flags */
@@ -17,12 +17,12 @@ interface ValOptions {
 
 /**
  * Gets the parsed public suffix list from the public suffix API
- * @param errorLogAfterColon 
+ * @param errLogAfterColon 
  * @returns 
  * @throws {Error} Throws an error the public suffixes list could not be fetched. The reason why this Error isn't wrapped with *Neverthrow* is because this is a compile-time method and the error should be thrown at compile-time. There is no need for invalid builds.
  */
-export default async function ({ errorLogAfterColon, publicSuffixApi, failedToFetchSuffixErrMsg }: ValOptions): string[] {
-	const { fmtErr } = createErrorFmters(errorLogAfterColon);
+export default async function ({ errLogAfterColon, publicSuffixApi, failedToFetchSuffixErrMsg }: ValOptions): string[] {
+	const { fmtErr } = createErrorFmters(errLogAfterColon);
 
 	// Try to get the public suffixes list
 	let publicSuffixesRes: Response;

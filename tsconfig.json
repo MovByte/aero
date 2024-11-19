@@ -11,6 +11,7 @@
 		"paths": {
 			"$aero/*": ["*"],
 			"$sandbox/*": ["src/AeroSandbox/src/*"],
+      "$sharedUtil/*": ["src/AeroSandbox/src/util/*"],
 			"$src/*": ["src/*"],
 			"$sw/*": ["src/this/*"],
 			"$shared/*": ["src/shared/*"],
@@ -19,7 +20,7 @@
 			"$rewriters/*": ["src/this/rewriters/*"],
 			"$nested_sws/*": ["src/this/nestedSWs/*"],
 			"$cors/*": ["src/this/isolation/*"],
-			"$embeds/*": ["src/this/embeds/*"],
+			"$embeds/*": ["src/this/preprocessors/*"],
 			"$handlers/*": ["src/this/handlers/*"],
 			"$types/*": ["types/*"]
 		},

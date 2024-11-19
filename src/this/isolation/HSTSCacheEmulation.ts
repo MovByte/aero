@@ -74,7 +74,7 @@ export default class HSTSCacheEmulation extends Cache {
 		try {
 			directives = hsts.toLowerCase().split(";");
 		} catch (err) {
-			return errrAsync(new Error(`${failedToFormVar("directives", "string array")} ${processHSTSAction}${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`${failedToFormVar("directives", "string array")} ${processHSTSAction}${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 
 		let includeSubdomains: boolean;
@@ -84,7 +84,7 @@ export default class HSTSCacheEmulation extends Cache {
 			);
 			includeSubdomains = includeSubdomainsDirective !== undefined;
 		} catch (err) {
-			return errrAsync(new Error(`${failedToFormVar("includeSubdomains", "boolean")} ${processHSTSAction}${ERROR_LOG_AFTER_COLON}${err.message}`));
+			return errrAsync(new Error(`${failedToFormVar("includeSubdomains", "boolean")} ${processHSTSAction}${ERR_LOG_AFTER_COLON}${err.message}`));
 		}
 
 		let maxAge: string;
@@ -95,17 +95,17 @@ export default class HSTSCacheEmulation extends Cache {
 			const maxAge = maxAgeDirective?.split("=")?.[1];
 		}
 		catch (err) {
-			return errrAsync(new Error(`${failedToFormVar("maxAge", "string")} ${processHSTSAction}${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`${failedToFormVar("maxAge", "string")} ${processHSTSAction}${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 
 		if (maxAge === "0") {
 			const deleteEntryRes = await this.deleteEntry();
 			if (deleteEntryRes.isErr())
-				return errrAsync(new Error(`Failed to delete the entry when trying to ${processHSTSAction}${ERROR_LOG_AFTER_COLON}${deleteEntryRes.error.message} `));
+				return errrAsync(new Error(`Failed to delete the entry when trying to ${processHSTSAction}${ERR_LOG_AFTER_COLON}${deleteEntryRes.error.message} `));
 		} else if (maxAge) {
 			const storeEntryRes = await this.storeEntry(maxAge, includeSubdomains);
 			if (storeEntryRes.isErr())
-				return errrAsync(new Error(`Failed to store the entry when trying to ${processHSTSAction}${ERROR_LOG_AFTER_COLON}${storeEntryRes.error.message} `));
+				return errrAsync(new Error(`Failed to store the entry when trying to ${processHSTSAction}${ERR_LOG_AFTER_COLON}${storeEntryRes.error.message} `));
 		}
 
 		return okAsync(undefined);
@@ -119,7 +119,7 @@ export default class HSTSCacheEmulation extends Cache {
 	 * @example
 	 * const redirectRes = await hstsCacheEmulator.redirect();
 	 * if (redirectRes.isErr()) {
-	 *  const redirectResErr = new Error(`Failed to determine if the client should redirect when using the cache emulator${ERROR_LOG_AFTER_COLON}${redirectRes.error.message}`)
+	 *  const redirectResErr = new Error(`Failed to determine if the client should redirect when using the cache emulator${ERR_LOG_AFTER_COLON}${redirectRes.error.message}`)
 	 *  ...(handle the error accordingly)
 	 * } else {
 	 * ...(your logic to redirect to the HTTPS version of your proxy URL)
@@ -132,7 +132,7 @@ export default class HSTSCacheEmulation extends Cache {
 				const domain = domains.slice(i).join(".");
 				const secRes = await this.getEntry(domain);
 				if (secRes.isErr())
-					return errrAsync(new Error(`Failed to get the entry for the domain, ${domain}, while trying to determine if the redirect to HTTPS should be done${ERROR_LOG_AFTER_COLON}${err.message} `))
+					return errrAsync(new Error(`Failed to get the entry for the domain, ${domain}, while trying to determine if the redirect to HTTPS should be done${ERR_LOG_AFTER_COLON}${err.message} `))
 				// TODO: Use Zod instead and have getEntry fail if it isn't validated properly instead of having to check externally like here for Runtime type checking for `secRes.value.result...` (validation)
 				if (typeof secRes.value?.result?.subdomains === "undefined")
 					return errrAsync(new Error("The entry for the domain, ${domain}, does not have the subdomains field defined"));
@@ -144,7 +144,7 @@ export default class HSTSCacheEmulation extends Cache {
 			const sec = await this.getEntry(this.proxyHostname);
 			return okAsync(super.isFresh(sec?.result?.age));
 		} catch (err) {
-			return errrAsync(new Error(`Failed to determine if the redirect to HTTPS should be done${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`Failed to determine if the redirect to HTTPS should be done${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 	}
 
@@ -165,7 +165,7 @@ export default class HSTSCacheEmulation extends Cache {
 			idbReq.onerror = (): void => reject(idbReq.error);
 		});
 		if (deleteRes instanceof Error)
-			return errrAsync(new Error(`Failed to delete the HSTS entry ${this.proxyHostname}${ERROR_LOG_AFTER_COLON}${deleteRes.message} `));
+			return errrAsync(new Error(`Failed to delete the HSTS entry ${this.proxyHostname}${ERR_LOG_AFTER_COLON}${deleteRes.message} `));
 		if (deleteRes === "success")
 			return okAsync(undefined);
 		return errrAsync(new Error(`Failed to determine if the attempt to delete the HSTS entry was successful.${unexpectedPromiseResRetErrorExplanation} `));
@@ -186,7 +186,7 @@ export default class HSTSCacheEmulation extends Cache {
 	async storeEntry(age: string, includeSubdomains: boolean): Promise<ResultAsync<void, Error>> {
 		const dbRes = await this.safeOpenDatabase();
 		if (dbRes.isErr())
-			return errrAsync(new Error(`Failed to open the IndexedDB database used for storing the HSTS entry${ERROR_LOG_AFTER_COLON}${dbRes.error.message} `))
+			return errrAsync(new Error(`Failed to open the IndexedDB database used for storing the HSTS entry${ERR_LOG_AFTER_COLON}${dbRes.error.message} `))
 		const db = dbRes.value;
 
 		let tx: IDBTransaction;
@@ -195,7 +195,7 @@ export default class HSTSCacheEmulation extends Cache {
 			tx = db.transaction(this.proxyHostname, "readwrite");
 			store = tx.objectStore(this.proxyHostname);
 		} catch (err) {
-			return errrAsync(new Error(`Failed get the store for the HSTS entry${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`Failed get the store for the HSTS entry${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 
 		const idbReqPromise = await new Promise<"success" | Error>((reject, resolve) => {
@@ -207,7 +207,7 @@ export default class HSTSCacheEmulation extends Cache {
 			idbReq.onerror = (): void => reject(idbReq.error);
 		});
 		if (idbReqPromise instanceof Error)
-			return errrAsync(new Error(`Failed to store the HSTS entry${ERROR_LOG_AFTER_COLON}${idbReqPromise.message} `));
+			return errrAsync(new Error(`Failed to store the HSTS entry${ERR_LOG_AFTER_COLON}${idbReqPromise.message} `));
 
 		const firstPromise = await Promise.race([
 			new Promise<"success" | Error>((reject, resolve) => {
@@ -231,7 +231,7 @@ export default class HSTSCacheEmulation extends Cache {
 		})
 			return errrAsync(new Error("The transaction used for storing the HSTS entry unexpectedly timed out"));
 		if (firstPromise instanceof Error)
-			return errrAsync(new Error(`Failed to close the transaction used for storing the HSTS entry${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`Failed to close the transaction used for storing the HSTS entry${ERR_LOG_AFTER_COLON}${err.message} `));
 		if (firstPromise === "success")
 			return okAsync(undefined);
 		return errrAsync(new Error(`Failed to determine if the attempt to store the HSTS entry was successful.${unexpectedPromiseResRetErrorExplanation} `));
@@ -252,7 +252,7 @@ export default class HSTSCacheEmulation extends Cache {
 			const store = tx.objectStore(hostname);
 			const hostnameStore = store.get(hostname);
 		} catch (err) {
-			return errrAsync(new Error(`Failed to get the object store for the hostname used for getting entries${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`Failed to get the object store for the hostname used for getting entries${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 
 		return okAsync(hostnameStore);
@@ -279,7 +279,7 @@ export default class HSTSCacheEmulation extends Cache {
 			});
 			return okAsync(db);
 		} catch (err) {
-			return errrAsync(new Error(`Failed to open the IndexedDB database${ERROR_LOG_AFTER_COLON}${err.message} `));
+			return errrAsync(new Error(`Failed to open the IndexedDB database${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 	}
 }

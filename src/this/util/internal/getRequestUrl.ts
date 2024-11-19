@@ -65,7 +65,7 @@ export default function getRequestUrl(
                     `${err instanceof TypeError
                         ? "Failed to parse the URL after the prefix"
                         : "Unknown error when trying to parse the URL after the prefix"
-                    }:${ERROR_LOG_AFTER_COLON}${err}`
+                    }:${ERR_LOG_AFTER_COLON}${err}`
                 )
             );
         }

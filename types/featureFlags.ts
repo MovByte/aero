@@ -21,7 +21,7 @@ export interface FeatureFlags {
     /** @warning currently unsupported */
     supportWorker: boolean;
     debug: boolean;
-    errorLogAfterColon: string;
+    errLogAfterColon: string;
 }
 
 /** Used exclusively for the overrides */

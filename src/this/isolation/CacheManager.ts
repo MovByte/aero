@@ -119,7 +119,7 @@ export default class extends Cache {
             } catch (err) {
                 return errrAsync(
                     new Error(
-                        `Failed to parse cache control header for the max age${ERROR_LOG_AFTER_COLON}${err.message}`
+                        `Failed to parse cache control header for the max age${ERR_LOG_AFTER_COLON}${err.message}`
                     )
                 );
             }
@@ -173,7 +173,7 @@ export default class extends Cache {
                 await cache.put(path, resp);
             } catch (err) {
                 const action = "to put the response into the cache";
-                return errrAsync(new Error(err instanceof TypeError ? `The URL for the path ${action} is invalid: ${err.message}` : `Uncaught error while trying ${action}${ERROR_LOG_AFTER_COLON}${err.message}`));
+                return errrAsync(new Error(err instanceof TypeError ? `The URL for the path ${action} is invalid: ${err.message}` : `Uncaught error while trying ${action}${ERR_LOG_AFTER_COLON}${err.message}`));
             }
         } else {
             // TODO: If in verbose/debug mode, log that nothing was put into the cache
@@ -195,7 +195,7 @@ export default class extends Cache {
         try {
             date = Date.parse(expiry)
         } catch (err) {
-            return errr(new Error(`Failed to parse the date for the expiry HTTP header${ERROR_LOG_AFTER_COLON}${err.message}`));
+            return errr(new Error(`Failed to parse the date for the expiry HTTP header${ERR_LOG_AFTER_COLON}${err.message}`));
         }
         return (date / 1000) | 0;
     }

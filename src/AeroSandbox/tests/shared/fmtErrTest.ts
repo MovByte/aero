@@ -16,4 +16,4 @@ const defaultFeatureFlags = createDefaultFeatureFlags({ debugMode: false });
 // @ts-ignore This is a module inside of a test, which means it isn't built, but run directly by node, so ignore what the linter says
 import createErrorFmters from "../../src/util/fmtErrGeneric.ts";
 
-export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(defaultFeatureFlags.errorLogAfterColon);
+export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(defaultFeatureFlags.errLogAfterColon);

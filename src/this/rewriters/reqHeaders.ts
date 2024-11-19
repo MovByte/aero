@@ -3,25 +3,25 @@
  * Aero's response headers rewriter
  */
 
+// Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$aero/src/AeroSandbox/tests/shared/fmtErrTest";
 
+// Individual header rewritiers
 //import { rewriteGetCookie } from "$sandbox/shared/cookie";
 import { rewriteAuthClient } from "./auth";
-import { afterPrefix } from "$sandbox/shared/getProxyUrl";
 
-import getSiteDirective from "$sandbox/util/cors/siteTests";
+// Utility
+import { afterPrefix } from "$sharedUtil/getProxyUrl";
+import getSiteDirective from "$sharedUtil/cors/siteTests";
 
 import type BareClient from "@mercuryworkshop/bare-mux";
-
-
 /** Things that are required to be passed in to rewrite the headers in the methods that are called from here */
 interface Context {
 	/** The proxy URL for reference in rewriting the headers */
 	proxyUrl: URL;
-	/** Also known as the full referrer URL */
-	originFullUrl: URL;
+	clientUrl: URL;
 	bc: BareClient;
 }
 
@@ -59,7 +59,7 @@ export default async (headers: Headers, ctx: Context): Promise<ResultAsync<void,
 		if (key === "sec-fetch-site") {
 			if (value === "none")
 				continue;
-			const proxifiedDirectiveRes = await getSiteDirective(ctx.proxyUrl, ctx.originFullUrl, ctx.bc);
+			const proxifiedDirectiveRes = await getSiteDirective(ctx.proxyUrl, ctx.clientUrl, ctx.bc);
 			if (proxifiedDirectiveRes.isErr())
 				// @ts-ignore
 				return fmtNeverthrowErr("Failed to create and get the proxified site directive for rewriting the header Sec-Fetch-Site", proxifiedDirectiveRes.error.message);

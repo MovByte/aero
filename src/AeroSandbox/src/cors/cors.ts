@@ -4,4 +4,5 @@ if ($aero.sec.clear)
 // TODO: Parse and use in perms.ts
 $aero.sec.perms = $aero.sec.perms.split(";");
 
+// TODO: Use a proper immutable library for deep freezing
 Object.seal($aero.sec);

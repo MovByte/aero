@@ -12,16 +12,16 @@ import { Err, err as errr, errAsync as errrAsync } from "neverthrow";
  * @returns The methods for formatting errors
  * 
  * @example
- * export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(ERROR_LOG_AFTER_COLON);
+ * export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(ERR_LOG_AFTER_COLON);
  */
-const createErrorFmters = (errorLogAfterColon: string) => ({
+const createErrorFmters = (errLogAfterColon: string) => ({
 	/**
 	 * Formats an error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted error
 	 */
-	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${explanation}${errorLogAfterColon}${originalErr}`),
+	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${explanation}${errLogAfterColon}${originalErr}`),
 	/**
 	 * Formats a *Neverthrow* error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`

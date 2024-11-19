@@ -19,13 +19,13 @@ type sameSiteDirectives = "cross-site" | "same-origin" | "same-site" | "none";
  * Gets the site directive of a URL by using the origin proxy URL as a reference
  * This function is made for emulating the `Sec-Fetch-Site` header 
  * @param proxyUrl The current navigation URL of the proxy (the proxy URL retrieved from the origin)
- * @param originUrl The URL to test against the proxy URL to see if the request is for the same origin
+ * @param clientURL The URL to test against the proxy URL to see if the request is for the same origin
  * @param bc The bare-mux instance to use to fetch the public suffix list
  * @returns The site directive. It will never return `none`, since you should return `none` if it is the same on the original header
  */
-export default function getSiteDirective(originProxyUrl: URL, originUrl: URL, bc: BareClient = $aero.bc): sameSiteDirectives {
-	if (new URL(originProxyUrl).origin === new URL(originUrl).origin) return "same-origin";
-	if (isSameSite(originProxyUrl, originUrl, bc)) return "same-site";
+export default function getSiteDirective(originProxyUrl: URL, clientURL: URL, bc: BareClient = $aero.bc): sameSiteDirectives {
+	if (new URL(originProxyUrl).origin === new URL(clientURL).origin) return "same-origin";
+	if (isSameSite(originProxyUrl, clientURL, bc)) return "same-site";
 	return "cross-site";
 }
 
@@ -43,7 +43,7 @@ export async function isSameSite(url1: URL, url2: URL, bc: BareClient = $aero.bc
 	let publicSuffixes: string[];
 	if (FETCH_PUBLIC_SUFFIX_PRIORITY === "compile-time") {
 		const { default: getPublicSuffixListCompileTime } = await import("./getPublicSuffixList.val");
-		publicSuffixes = getPublicSuffixListCompileTime({ errorLogAfterColon: ERROR_LOG_AFTER_COLON, publicSuffixApi: PUBLIC_SUFFIX_API, failedToFetchSuffixErrMsg: FAILED_TO_FETCH_SUFFIX_ERR_MSG });
+		publicSuffixes = getPublicSuffixListCompileTime({ errLogAfterColon: ERR_LOG_AFTER_COLON, publicSuffixApi: PUBLIC_SUFFIX_API, failedToFetchSuffixErrMsg: FAILED_TO_FETCH_SUFFIX_ERR_MSG });
 	}
 	else if (FETCH_PUBLIC_SUFFIX_PRIORITY === "run-time") {
 		const publicSuffixesRes = await getPublicSuffixList(bc);

@@ -22,6 +22,6 @@ export default (ctx: CtxType) =>
 		// Feel free to change this default if you are making a fork of aero
 		githubRepo: "https://github.com/vortexdeveloperlabs/aero",
 		// Debug
-		errorLogAfterColon: JSON.stringify("\\n\\t"),
+		errLogAfterColon: JSON.stringify("\\n\\t"),
 		debug: JSON.stringify(ctx.debugMode)
 	}) as FeatureFlagsRspack;

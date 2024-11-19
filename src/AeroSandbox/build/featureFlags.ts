@@ -12,6 +12,8 @@ export interface FeatureFlags {
 	htmlUseNavEvents: boolean;
 	/** @warning currently unsupported */
 	featureEmuSecureCtx: boolean;
+	/** Integrity emulation is extremely slow, because it blocks the main thread to syncronously run a `Promise`. Very few to no sites will use integrity emulation as a means to detect aero. */
+	supportIntegrityEmu: boolean;
 	fetchPublicSuffixPriority: fetchPublicSuffixPriorityType;
 	/** Fall back to the other option. Realistically, you would only disable this if you want to have a minimal bundle size. */
 	fetchPublicSuffixHaveFallback: boolean;
@@ -21,7 +23,7 @@ export interface FeatureFlags {
 	 * TODO: This will make the URL proceed after the hash, evading all peeping by extension filters.
 	 * @warning currently unsupported */
 	featureHashURL: boolean;
-	errorLogAfterColon: string;
+	errLogAfterColon: string;
 	debug: boolean;
 }
 
