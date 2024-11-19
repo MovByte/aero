@@ -1,10 +1,9 @@
 // Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as errrAsync } from "neverthrow";
-import { fmtNeverthrowErr } from "$util/fmtErr";
+import { fmtNeverthrowErr } from "$sharedUtil/fmtErr";
 
-// Passthrough
-import type { AeroLogger } from "$aero/src/AeroSandbox/build/Logger";
+// Passthrough types
 import { Sec } from "$aero/types";
 
 // Security
@@ -16,7 +15,7 @@ import HSTSCacheEmulation from "./isolation/HSTSCacheEmulation";
 import CacheManager from "$aero/src/this/isolation/CacheManager";
 
 // Utility
-import redir from "./util/redir";
+import redir from "$util/redir";
 
 /**
  * This method also modifies the `sec` object you pass in accordingly
@@ -24,19 +23,19 @@ import redir from "./util/redir";
  * @returns An object containing every thing that is needed to continue, including the rewritten request and the client URL for later processing in `response.ts`
  */
 export default async function getCORSStatus({
+	reqUrl,
 	reqHeaders,
-	logger,
 	proxyUrl,
 }: {
 	/** The headers from the original request */
-	logger: AeroLogger,
 	reqHeaders: Headers;
+	reqUrl: URL;
 	proxyUrl: URL;
 }, sec: Sec): Promise<ResultAsync<{
 	cachedResponse: Response
 } | {
 	cacheMan: CacheManager
-}, Error>> {
+} | {}, Error>> {
 	// Ensure the request isn't blocked by CORS
 	if (FEATURES_CACHE_EMULATION) {
 		const reqBlockedRes = await block(proxyUrl.href);
@@ -90,7 +89,7 @@ export default async function getCORSStatus({
 	*/
 
 	/** The manager for storing information needed for Cache Emulation */
-	let cacheMan: CacheManager;
+	let cacheMan: CacheManager | undefined;
 	if (FEATURES_CACHE_EMULATION) {
 		cacheMan = new CacheManager(reqHeaders);
 
@@ -106,5 +105,7 @@ export default async function getCORSStatus({
 		if (cachedResp) return okAsync({ cachedResp: cachedResp });
 	}
 
+	if (cacheMan)
+		return okAsync({});
 	return okAsync({ cacheMan });
 }

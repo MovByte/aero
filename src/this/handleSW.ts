@@ -17,8 +17,12 @@ import rewriteResp from "$util/rewriteResp";
 import { getPassthroughParam } from "$sharedUtil/getPassthroughParam";
 // Cosmetic
 import { AeroLogger } from "$sandbox/shared/Loggers";
+import CacheManager from "./isolation/CacheManager";
 
+/** aero's SW logger */
 self.logger = new AeroLogger();
+
+const tryImportingItMessage = ". Try importing the bundle.";
 
 /**
  * Handles the requests
@@ -28,12 +32,15 @@ self.logger = new AeroLogger();
 async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
 	// Sanity checks to ensure that everything has been initalized properly
 	if (!("logger" in self))
-		return errrAsync(new Error("The logger hasn't been initalized!"));
+		return errrAsync(new Error(`The logger hasn't been initalized!${tryImportingItMessage}`));
+	if (!("BareMux" in self))
+		throw errrAsync(new Error(`There is no bare client provided!${tryImportingItMessage}`));
 	if (!("aeroConfig" in self))
-		throw errrAsync(new Error("There is no config provided. You need tocreate one."));
-
+		return errrAsync(new Error("There is no config provided. You need to create one."));
 	// Develop a context
+	/** The incoming request */
 	const req = event.request;
+	/** The request URL */
 	const reqUrl = new URL(req.url);
 
 	// Don't rewrite the requests for aero's own bundles
@@ -48,18 +55,21 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		return okAsync(await fetch(req.url));
 	}
 
-	// Develop a context
-	const params = reqUrl.searchParams;
+	// Develop a context for the utility methods
+	/** the search params for the request */
+	const reqParams = reqUrl.searchParams;
 	/** Used to determine if the request was made to load the homepage; this is needed so that the proxy will know when to rewrite the html files. For example, you wouldn't want it to rewrite a fetch request. */
 	const isNavigate =
 		req.mode === "navigate" &&
 		["document", "iframe"].includes(req.destination);
 	/** If the client is an iframe. This is used for determining the request url. */
 	const isiFrame = req.destination === "iframe";
+	/** If the request is intended for a script, and the script is intended to be a module (recieved through request URL passthrough) */
 	let isMod: boolean;
+	/**  If the request is intended for a script */
 	const isScript = req.destination === "script";
 	if (isScript) {
-		const isModParam = getPassthroughParam(params, "isMod");
+		const isModParam = getPassthroughParam(reqParams, "isMod");
 		isMod = isModParam && isModParam === "true";
 	}
 
@@ -73,16 +83,18 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		reqUrl,
 		reqHeaders: req.headers,
 		clientId: event.clientId,
-		params,
+		params: reqParams,
 		catchAllClientsValid,
 		isNavigate
 	})
 	if (clientUrlRes.isErr())
 		return fmtNeverthrowErr("Failed to get the client URL with aero's context", clientUrlRes.error.message);
+	/** This client URL is used when forming the proxy URL and in various uses for emulation */
 	const clientUrl = clientUrlRes.value;
 	if (clientUrl === "skip")
 		return okAsync(await fetch(req.url));
 
+	// Get the proxy URL
 	const getProxyURLRes = await getProxyURL({
 		reqUrl,
 		clientUrl,
@@ -91,6 +103,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	});
 	if (getProxyURLRes.isErr())
 		return fmtNeverthrowErr("Failed to get the proxy URL", getProxyURLRes.error.message);
+	/** The proxy URL used for fetching the site under the proxy */
 	const proxyUrl = getProxyURLRes.value;
 
 	// Log request
@@ -100,12 +113,13 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 			: `${req.method} ${proxyUrl.href} (${req.destination})`
 	);
 
-	// Get sec out of here too
+	/** This is an object meant for passthrough that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
 	const sec: Partial<Sec> = {};
 
-	// Get the cache if it exists, and return it if it does or return null (use `Nullable` type from Option<t>) (make it so that you have to pass in the cache manager class as well)
+	// This will apply all of the necessary rewriting to the headers for cors emulation, so it will modify the request headers
+	// Performs CORS Emulation and it might return the cached response if one exists in Cache Emulation
 	const corsStatusRes = await getCORSStatus({
-		logger: AeroLogger,
+		reqUrl,
 		reqHeaders: req.headers,
 		proxyUrl
 	},
@@ -116,8 +130,12 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	const corsStatus = corsStatusRes.value;
 	if ("cachedResponse" in corsStatus)
 		return okAsync(corsStatus.cachedResponse);
-	const cacheMan = corsStatus.cacheMan;
+	/** The manager used for getting and setting emulated caches for Cache Emulation */
+	let cacheMan: CacheManager;
+	if (FEATURES_CACHE_EMULATION && "cacheMan" in corsStatus)
+		cacheMan = corsStatus.cacheMan;
 
+	// Get the request options that will be used to fetch the site under the proxy
 	const rewrittenReqOptsRes = await formRequestOpts({
 		req,
 		clientUrl
@@ -127,15 +145,17 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	const rewrittenReqOpts = rewrittenReqOptsRes.value;
 
 	// Make the request to the proxy
+	/** The raw response after being fetched from a BareMux transport */
 	const resp = await new BareMux.BareClient().fetch(
 		new URL(proxyUrl).href,
 		rewrittenReqOpts
 	);
-
+	// Sanity checks for if the resopnse is invalid
 	if (!resp) return errrAsync(new Error("No response found"));
 	if (resp instanceof Error) return errrAsync(Error);
 
-	const rewriteRespRes = await rewriteResp({
+	// Rewrite the response
+	const rewrittenRespRes = await rewriteResp({
 		originalResp: resp,
 		rewrittenReqHeaders: rewrittenReqOpts.headers,
 		reqDestination: req.destination,
@@ -145,23 +165,27 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		isMod,
 		sec
 	});
-	if (rewriteRespRes.isErr())
-		return fmtNeverthrowErr("Failed to rewrite the response", rewriteRespRes.error.message);
-	const { rewrittenBody, rewrittenRespHeaders, rewrittenStatus } = rewriteRespRes.value;
+	if (rewrittenRespRes.isErr())
+		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespRes.error.message);
+	const { rewrittenBody, rewrittenRespHeaders, rewrittenStatus } = rewrittenRespRes.value;
 
+	// Perform encoded body emulation
 	if (FEATURE_ENC_BODY_EMULATION)
 		// This will modify the resp headers
 		perfEncBodyEmu(originalResp, rewriteRespHeaders);
 
+	/** The rewritten response */
 	const rewrittenResp = new Response(resp.status === 204 ? null : rewrittenBody, {
 		headers: rewrittenRespHeaders,
 		status: rewrittenStatus
 	});
 
+	// Perform Cache Emulation
 	if (FEATURE_CACHES_EMULATION) {
 		const perfCacheSettingRes = perfCacheSetting({
 			reqUrlHref: reqUrl.href,
 			rewrittenResp,
+			// @ts-ignore: This is created under an if statement of `FEATURES_CACHE_EMULATION`, so we are fine
 			cacheMan
 		})
 		if (perfCacheSettingRes.isErr())
