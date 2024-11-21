@@ -1,6 +1,6 @@
 {
 	"$schema": "../node_modules/@biomejs/biome/configuration_schema.json",
-	"extends": ["../src/AeroSandbox/base.biome.json"],
+	"extends": ["../AeroSandbox/base.biome.json"],
 	"files": {
 		"ignore": [
 			"extras/deno",
@@ -8,7 +8,7 @@
 			"scripts/**/*.ts",
 			"tests/deno/**/*.ts",
 			"dev-server",
-			"src/AeroSandbox"
+			"AeroSandbox"
 		]
 	}
 }

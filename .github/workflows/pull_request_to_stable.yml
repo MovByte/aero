@@ -22,7 +22,7 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
-          workdir: "src/AeroSandbox" 
+          workdir: "AeroSandbox" 
   tsc:
     name: runner / tsc
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           level: warning
-          workdir: src/AeroSandbox
+          workdir: AeroSandbox
   # FIXME: This doesn't quite work
   #linter_name:
     #name: runner / LanguageTool

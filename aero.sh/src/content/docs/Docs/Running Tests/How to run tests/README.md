@@ -9,8 +9,8 @@ description: This directory contains docs for how to run specific tests or bench
 
 ## To run benchmarks
 
-you can use `npm run test:<test name>` in `aero` or `src/AeroSandbox`
+you can use `npm run test:<test name>` in `aero` or `AeroSandbox`
 
 ## To run tests
 
-you can use `npm run bench:<test name>` in `aero` or `src/AeroSandbox`
+you can use `npm run bench:<test name>` in `aero` or `AeroSandbox`

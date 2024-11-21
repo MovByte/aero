@@ -10,7 +10,7 @@
 			"webRoot": "${workspaceFolder}/dev-server/demo-site",
 			"resolveSourceMapLocations": [
 				"${workspaceFolder}/dist/sw",
-				"${workspaceFolder}/src/AeroSandbox/dist"
+				"${workspaceFolder}/AeroSandbox/dist"
 			],
 			"preLaunchTask": "aero: start live build",
 			"server": {

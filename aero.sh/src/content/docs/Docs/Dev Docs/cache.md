@@ -10,6 +10,6 @@ HTTP caches are emulated by a system using aero's SW's cache stores. This allows
 TODO: Document how it works
 
 # Cache Manifest Rewriting
-Aero rewrites the paths in the Cache Manifests files using the [src rewriter](../../../../../src/AeroSandbox/src/shared/src.ts)
+Aero rewrites the paths in the Cache Manifests files using the [src rewriter](../../../../../AeroSandbox/src/shared/src.ts)
 
 > This web feature is deprecated but is still supported in Safari.

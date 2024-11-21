@@ -1,0 +1,35 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"moduleResolution": "NodeNext",
+		"module": "NodeNext",
+		"baseUrl": "./",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"sourceMap": true,
+		"paths": {
+			"$aero/*": ["*"],
+			"$aero_sw/*": ["../../*"],
+			"$src/*": ["src/*"],
+			"$sandbox/*": ["src/sandboxers/*"],
+			"$apis/*": ["src/apis/*"],
+			"$cors/*": ["src/cors/*"],
+      "$fetchUtil": ["src/shared/fetchHandlers/util/*"],
+      "$fetchSubsystems": ["src/shared/fetchHandlers/subsystems/*"],
+      "$injPreprocessors": ["src/shared/fetchHandlers/preprocessors/*"],
+      "$corsIsolation": ["src/shared/fetchHandlers/isolation/*"],
+			"$util/*": ["src/util/*"],
+			"$shared/*": ["src/shared/*"],
+			"$types/*": ["types/*"]
+		},
+		"types": ["@types/websql"]
+	},
+	"include": [
+		"rspack.config.ts",
+		"src/**/*.ts",
+		"types/**/*.d.ts",
+		"src/defaultConfig.js",
+		"internal/featureFlags.ts",
+		"types/contextualIdentities.ts",
+		"types/featureMembers.ts"
+, "../aeroSW/src/this/util/getClientURLAeroWrapper.ts", "../aeroSW/src/this/util/getClientURL.ts"	]
+}

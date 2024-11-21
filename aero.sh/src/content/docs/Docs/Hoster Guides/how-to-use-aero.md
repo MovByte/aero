@@ -152,4 +152,4 @@ end
 
 1. Create `/sw.js` (in your static folder) with the contents of `/examples/swWithExtras.js` (in this git repo) and modify that file to your liking
 2. Copy the contents of `/examples/config.js` (in this Git repo) to `/aero/config.js` (in your static folder) and modify that file to your liking
-3. Copy the contents of `/src/AeroSandbox/examples/config.js` (in this Git repo) to `/aero/sandbox/config.js` (in your static folder) and modify that file to your liking
+3. Copy the contents of `/AeroSandbox/examples/config.js` (in this Git repo) to `/aero/sandbox/config.js` (in your static folder) and modify that file to your liking

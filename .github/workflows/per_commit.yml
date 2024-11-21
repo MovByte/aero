@@ -1,7 +1,7 @@
 name: Code quality checks
 
-on:
-  push:
+#on:
+  #push:
 
 jobs:
   quality:

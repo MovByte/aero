@@ -6,13 +6,13 @@
 
 ### Method 1: Selective test
 
-`cd src/AeroSandbox && npm run tests:js-diff`
+`cd AeroSandbox && npm run tests:js-diff`
 
 ### Method 2: Master tests
 
 This would run all tests including JS-Diff
 
-`cd src/AeroSandbox && npm run tests:all`
+`cd AeroSandbox && npm run tests:all`
 
 ### Method 3: Manually through the CLI
 
