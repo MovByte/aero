@@ -1,4 +1,5 @@
 // Better type-safe handling
+/// For runtime type validation
 import type { Assert } from "ts-runtime-checks";
 import typia from "typia";
 /// Neverthrow
@@ -47,9 +48,9 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		return errrAsync(new Error("There is no config provided. You need to create one."));
 	/// Runtime type validations
 	if (!loggerValidation.success)
-		return fmtNeverthrowErr("The logger bundle provided is invalid (perhaps you imported the wrong one?)", ...loggerValidation.errors);
+		return fmtNeverthrowErr("The logger bundle you provided is invalid (perhaps you imported the wrong one?)", ...loggerValidation.errors);
 	if (!configValidation.success)
-		return fmtNeverthrowErr("The config provided is invalid", ...configValidation.errors);
+		return fmtNeverthrowErr("The config you provided is invalid", ...configValidation.errors);
 
 	// Develop a context
 	/** The incoming request */
