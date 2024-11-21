@@ -1,26 +1,32 @@
-// Neverthrow
-import { ResultAsync, okAsync, errAsync as errrAsync } from "neverthrow";
+// Better type-safe handling
+import type { Assert } from "ts-runtime-checks";
+import typia from "typia";
+/// Neverthrow
+import type { ResultAsync } from "neverthrow";
+import { okAsync, errAsync as errrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 import type { Sec } from "$aero/types";
-import type CacheManager from "../../../AeroSandbox/src/shared/fetchHandlers/isolation/CacheManager";
+// For runtime type validation
+import type { Config } from "$aero/config";
 
-// Abstracted req/resp rewriter abstractions
-import getProxyURL from "$util/getProxyURL";
-import getClientURLAeroWrapper from "$fetchHandlers/util/getClientURLAeroWrapper";
-import getCORSStatus from "$fetchHandlers/util/getCORSStatus";
-import formRequestOpts from "$fetchHandlers/util/formRequestOpts";
+// Abstracted rewriter abstractions
+/// Req
+import getClientURLAeroWrapper from "$fetchHandlers/util/getClientURLAeroWrapper";;
+/// Resp
+import rewriteResp from "$fetchHandlers/util/rewriteResp";
 import perfEncBodyEmu from "$fetchHandlers/util/perfEncBodyEmu";
 import perfCacheSetting from "$fetchHandlers/util/perfCacheSetting";
-import rewriteResp from "$fetchHandlers/util/rewriteResp";
 
 // Utility
 import { getPassthroughParam } from "$shared/getPassthroughParam";
-// Cosmetic
+/// Cosmetic
 import { AeroLogger } from "$shared/Loggers";
 
 /** aero's SW logger */
 self.logger = new AeroLogger();
+const loggerValidation = typia.validate<AeroLogger>(logger);
+const configValidation = typia.validate<Config>(aeroConfig);
 
 // Shared strings
 /** A message for when the user fails to import a bundle */
@@ -39,6 +45,11 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		throw errrAsync(new Error(`There is no bare client (likely BareMux) provided!${tryImportingItMsg}`));
 	if (!("aeroConfig" in self))
 		return errrAsync(new Error("There is no config provided. You need to create one."));
+	/// Runtime type validations
+	if (!loggerValidation.success)
+		return fmtNeverthrowErr("The logger bundle provided is invalid (perhaps you imported the wrong one?)", ...loggerValidation.errors);
+	if (!configValidation.success)
+		return fmtNeverthrowErr("The config provided is invalid", ...configValidation.errors);
 
 	// Develop a context
 	/** The incoming request */
@@ -67,9 +78,8 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
-	if (catchAllClientsValid && SERVER_ONLY) {
+	if (catchAllClientsValid && SERVER_ONLY)
 		return errrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
-	}
 	const clientUrlRes = await getClientURLAeroWrapper({
 		reqUrl,
 		reqHeaders: req.headers,
@@ -78,9 +88,8 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		catchAllClientsValid,
 		isNavigate
 	})
-	if (clientUrlRes.isErr()) {
+	if (clientUrlRes.isErr())
 		return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);
-	}
 	/** This client URL is used when forming the proxy URL and in various uses for emulation */
 	const clientUrl = clientUrlRes.value;
 	if (clientUrl === "skip") {
@@ -88,7 +97,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		return okAsync(await fetch(req.url));
 	}
 
-	/** This is an object meant for passthrough that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
+	/** This is an object meant for passthrough, ultimately to the response rewriter, that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
 	const sec: Partial<Sec> = {};
 
 	const rewrittenReqValsRes = await rewriteReq({
@@ -117,12 +126,10 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		rewrittenReqOpts
 	);
 	// Sanity checks for if the response is invalid
-	if (!resp) return errrAsync(new Error("No response found! The response is invalid"));
-	if (resp instanceof Error) {
-		if (resp instanceof NetworkError)
-			return fmtNeverthrowErr("Failed to fetch the response from the proxy server backend", Error);
-		return fmtNeverthrowErr("Failed to fetch the response from the BareMux transport", resp.message);
-	}
+	const validateRespRes = validateResp(resp);
+	if (validateRespRes.isErr())
+		// Propogate the error (`validateResp` is already meant to handle errors itself)
+		return validateRespRes;
 
 	// Rewrite the response
 	const rewrittenRespRes = await rewriteResp({
@@ -156,7 +163,8 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 			reqUrlHref: reqUrl.href,
 			rewrittenResp,
 			// @ts-ignore: This is created under an if statement of `FEATURES_CACHE_EMULATION`, so we are fine
-			cacheMan
+			cacheMan,
+			cache
 		})
 		if (perfCacheSettingRes.isErr())
 			return fmtNeverthrowErr("Failed to cache the response", perfCacheSettingRes.error.message);

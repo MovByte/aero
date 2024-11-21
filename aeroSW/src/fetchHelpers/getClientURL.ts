@@ -31,7 +31,11 @@ export default async function getClientUrlThroughClient(clientId: string): Promi
  * This client URL is used when forming the proxy URL and in various uses for emulation
  * @returns The `URL` of the client wrapped in a `ResultAsync` for better error handling from *Neverthrow*
  */
-export async function getClientUrlThroughForcedReferrer(pass: {
+export async function getClientUrlThroughForcedReferrer({
+	params,
+	referrerPolicyParamName,
+	referrerPolicy
+}: {
 	params: string,
 	referrerPolicyParamName: string,
 	referrerPolicy: string,

@@ -1,11 +1,18 @@
 /**
+ * @module
  * You must have the proper feature flags from aeroSW and aeroConfig declared in the global scope 
  */
 
-import { Config } from "$aeroSWTypes/config";
-import { Sec } from "$aeroSWTypes/cors";
+// Passthrough types
+import type { Config } from "$aeroSWTypes/config";
+import type { Sec } from "$aeroSWTypes/cors";
 import type { CacheManager } from "$fetchHandlers/isolation/CacheManager";
-import { eitherLogger } from "$sandboxTypes/loggers";
+import type { eitherLogger } from "$sandboxTypes/loggers";
+
+// Abstracted req abstractions
+import getProxyURL from "$fetchHandlers/util/getProxyURL";
+import getCORSStatus from "$fetchHandlers/util/getCORSStatus";
+import formRequestOpts from "$fetchHandlers/util/formRequestOpts"
 
 interface Passthrough {
 	logger: eitherLogger
