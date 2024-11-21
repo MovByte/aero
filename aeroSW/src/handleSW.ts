@@ -1,15 +1,13 @@
 // Better type-safe handling
 /// For runtime type validation
 import type { Assert } from "ts-runtime-checks";
-import typia from "typia";
 /// Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as errrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
+import troubleshoot from "./fetchHelpers/troubleshoot";
 
 import type { Sec } from "$aero/types";
-// For runtime type validation
-import type { Config } from "$aero/config";
 
 // Abstracted rewriter abstractions
 /// Req
@@ -26,12 +24,6 @@ import { AeroLogger } from "$shared/Loggers";
 
 /** aero's SW logger */
 self.logger = new AeroLogger();
-const loggerValidation = typia.validate<AeroLogger>(logger);
-const configValidation = typia.validate<Config>(aeroConfig);
-
-// Shared strings
-/** A message for when the user fails to import a bundle */
-const tryImportingItMsg = ". Try importing the bundle.";
 
 /**
  * Handles the requests that are routed to aero
@@ -39,18 +31,11 @@ const tryImportingItMsg = ". Try importing the bundle.";
  * @returns The proxified response
  */
 async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
-	// Sanity checks to ensure that everything has been initalized properly
-	if (!("logger" in self))
-		return errrAsync(new Error(`The logger hasn't been initalized!${tryImportingItMsg}`));
-	if (!("BareMux" in self))
-		throw errrAsync(new Error(`There is no bare client (likely BareMux) provided!${tryImportingItMsg}`));
-	if (!("aeroConfig" in self))
-		return errrAsync(new Error("There is no config provided. You need to create one."));
-	/// Runtime type validations
-	if (!loggerValidation.success)
-		return fmtNeverthrowErr("The logger bundle you provided is invalid (perhaps you imported the wrong one?)", ...loggerValidation.errors);
-	if (!configValidation.success)
-		return fmtNeverthrowErr("The config you provided is invalid", ...configValidation.errors);
+	const troubleshootRes = troubleshoot();
+	if (troubleshootRes.isErr())
+		// Propogate the error result up the chain (`troubleshoot` is already meant to handle errors itself)
+		// @ts-ignore: This is a neverthrow error, so we are fine
+		return troubleshootRes;
 
 	// Develop a context
 	/** The incoming request */
@@ -129,7 +114,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	// Sanity checks for if the response is invalid
 	const validateRespRes = validateResp(resp);
 	if (validateRespRes.isErr())
-		// Propogate the error (`validateResp` is already meant to handle errors itself)
+		// Propogate the error result up the chain (`validateResp` is already meant to handle errors itself)
 		return validateRespRes;
 
 	// Rewrite the response
