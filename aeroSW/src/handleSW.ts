@@ -13,11 +13,12 @@ import troubleshoot, { troubleshootJustConfigs, troubleshootingStrs } from "./fe
 
 import type { Sec } from "$aero/types";
 
+import rewriteReq from "$fetchHandlers/rewriteReq";
 // Abstracted rewriter abstractions
 /// Req
 import getClientURLAeroWrapper from "$fetchHandlers/util/getClientURLAeroWrapper";;
 /// Resp
-import rewriteResp from "$fetchHandlers/util/rewriteResp";
+import rewriteResp from "$fetchHandlers/rewriteResp";
 import perfEncBodyEmu from "$fetchHandlers/util/perfEncBodyEmu";
 import perfCacheSetting from "$fetchHandlers/util/perfCacheSetting";
 
@@ -47,11 +48,8 @@ async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>
 		return troubleshootRes;
 
 	// Develop a context
-	/** The incoming request */
 	const req = event.request;
-	/** The request URL */
 	const reqUrl = new URL(req.url);
-	/** The search params for the request */
 	const reqParams = reqUrl.searchParams;
 	/** Used to determine if the request was made to load the homepage; this is needed so that the proxy will know when to rewrite the html files. For example, you wouldn't want it to rewrite a fetch request. */
 	const isNavigate =
@@ -115,20 +113,19 @@ async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>
 	const { rewrittenReqOpts, proxyUrl, cacheMan } = rewrittenReqVals;
 
 	// Make the request to the proxy
-	/** The raw response after being fetched from a BareMux transport */
-	const resp = await new BareMux.BareClient().fetch(
+	const proxyResp = await new BareMux.BareClient().fetch(
 		proxyUrl,
 		rewrittenReqOpts
 	);
 	// Sanity checks for if the response is invalid
-	const validateRespRes = validateResp(resp);
+	const validateRespRes = validateResp(proxyResp);
 	if (validateRespRes.isErr())
 		// Propogate the error result up the chain (`validateResp` is already meant to handle errors itself)
 		return validateRespRes;
 
 	// Rewrite the response
 	const rewrittenRespRes = await rewriteResp({
-		originalResp: resp,
+		originalResp: proxyResp,
 		rewrittenReqHeaders: rewrittenReqOpts.headers,
 		reqDestination: req.destination,
 		proxyUrl,
@@ -147,7 +144,7 @@ async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>
 		perfEncBodyEmu(originalResp, rewriteRespHeaders);
 
 	/** The rewritten response */
-	const rewrittenResp = new Response(resp.status === 204 ? null : rewrittenBody, {
+	const rewrittenResp = new Response(proxyResp.status === 204 ? null : rewrittenBody, {
 		headers: rewrittenRespHeaders,
 		status: rewrittenStatus
 	});
