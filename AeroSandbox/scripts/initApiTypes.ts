@@ -3,7 +3,7 @@ import { access, mkdir } from "node:fs/promises";
 import { writeFileSync } from "node:fs";
 
 import type Result from "neverthrow";
-import { err as errr, ok } from "neverthrow";
+import { err as nErr, ok } from "neverthrow";
 
 /**
  * Detect if the script is being ran as a CLI script and not as a module
@@ -109,7 +109,7 @@ export default function genWebIDL(
 
 				// Parity check: if the string is blank
 				if (tsString === "")
-					return errr(new Error("The ts string is invalid"));
+					return nErr(new Error("The ts string is invalid"));
 
 				if (logStatus) console.log(`Writing the WebIDL for ${apiName}`);
 				writeFileSync(

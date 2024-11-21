@@ -3,7 +3,7 @@
 import type { Assert } from "ts-runtime-checks";
 /// Neverthrow
 import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as errrAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 import troubleshoot from "./fetchHelpers/troubleshoot";
 
@@ -65,7 +65,7 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
 	if (catchAllClientsValid && SERVER_ONLY)
-		return errrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
+		return nErrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
 	const clientUrlRes = await getClientURLAeroWrapper({
 		reqUrl,
 		reqHeaders: req.headers,

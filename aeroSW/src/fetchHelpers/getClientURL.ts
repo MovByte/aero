@@ -6,7 +6,7 @@
 
 // Neverthrow
 import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as errrAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
 
 // Utility
 import { afterPrefix } from "$shared/getProxyUrl";
@@ -23,7 +23,7 @@ export default async function getClientUrlThroughClient(clientId: string): Promi
 	if (client)
 		// Get the url after the prefix
 		return okAsync(new URL(afterPrefix(client.url)));
-	return errrAsync(new Error("Failed to get the window client required to get the client URL"));
+	return nErrAsync(new Error("Failed to get the window client required to get the client URL"));
 }
 
 /**
@@ -47,5 +47,5 @@ export async function getClientUrlThroughForcedReferrer({
 		referrerPolicy
 	);
 	// TODO: Implement
-	return errrAsync(new Error("Not implemented yet"));
+	return nErrAsync(new Error("Not implemented yet"));
 }

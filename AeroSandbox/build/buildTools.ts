@@ -4,7 +4,7 @@
  */
 
 import type { Result, AsyncResult } from "neverthrow";
-import { ok, err as errr, okAsync, errAsync as errrAsync } from "neverthrow";
+import { ok, err as nErr, okAsync, errAsync as nErrAsync } from "neverthrow";
 
 import InitDist from "../scripts/InitDist";
 import genWebIDL from "../scripts/initApiTypes";
@@ -45,13 +45,13 @@ export async function initAll(
 
 	const initDistRes = await initDist.init()
 	if (initDistRes.isErr())
-		return errrAsync(new Error(`Failed to initialize the dist folder: ${initDistRes.error}`));
+		return nErrAsync(new Error(`Failed to initialize the dist folder: ${initDistRes.error}`));
 	const genWebIDLRes = genWebIDL(miscRequiredArgs.verboseMode);
 	if (genWebIDLRes.isErr())
-		return errrAsync(new Error(`Failed to generate WebIDL: ${genWebIDLRes.error}`));
+		return nErrAsync(new Error(`Failed to generate WebIDL: ${genWebIDLRes.error}`));
 	const initApisRes = initApis();
 	if (initApisRes.isErr())
-		return errrAsync(new Error(`Failed to initialize the API Bitwise Enum: ${initApisRes.error}`));
+		return nErrAsync(new Error(`Failed to initialize the API Bitwise Enum: ${initApisRes.error}`));
 
 	return okAsync(undefined);
 }
@@ -66,7 +66,7 @@ export function importFeatureFlagOverrides(): Result<
 		).default;
 		return ok(featureFlagOverrides);
 	} catch (err) {
-		return errr(err);
+		return nErr(err);
 	}
 }
 

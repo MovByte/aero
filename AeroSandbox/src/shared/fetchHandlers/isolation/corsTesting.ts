@@ -10,7 +10,7 @@
  *  return new Response("Blocked by CORS", { status: 500 });
  */
 
-import { ResultAsync, okAsync, errAsync as errrAsync } from "neverthrow";}
+import { ResultAsync, okAsync, errAsync as nErrAsync } from "neverthrow";}
 
 /**
  * Tests to see if the request would be blocked due to cors rules

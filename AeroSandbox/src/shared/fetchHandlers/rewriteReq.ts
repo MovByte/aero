@@ -53,7 +53,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientUrl, aeroP
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
 	if (catchAllClientsValid && SERVER_ONLY)
-		return errrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
+		return nErrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
 
 	if (clientUrlRes.isErr())
 		return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);

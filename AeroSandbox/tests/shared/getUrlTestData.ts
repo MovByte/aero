@@ -1,5 +1,5 @@
 import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as errrAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
 
 interface UrlTests {
 	input: string,
@@ -30,6 +30,6 @@ export default async function getUrlTestData(jsSafe = true): Promise<ResultAsync
 		return okAsync(["https://example.com"]);
 		//return okAsync(urlTestData.map((urlTests: UrlTests) => urlTests.input));
 	} catch (err: any) {
-		return errrAsync(new Error(`Failed to fetch the test URLs from urltestdata.json from WPT: ${err.message}`));
+		return nErrAsync(new Error(`Failed to fetch the test URLs from urltestdata.json from WPT: ${err.message}`));
 	}
 }

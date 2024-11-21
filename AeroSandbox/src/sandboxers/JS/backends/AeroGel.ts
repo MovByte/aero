@@ -9,7 +9,7 @@ import type {
 } from "neverthrow";
 import {
 	ok,
-	err as errr
+	err as nErr
 } from "neverthrow";
 
 import type AeroConfig from "./types/config.js";
@@ -118,7 +118,7 @@ export default class AeroGel extends AeroGelGeneric {
  * // Assuming `this` is from this class or any class extending AeroGelGeneric
  * const rewrittenScriptRes = this.rewriteScript(script);
  * if (rewrittenScriptRes.isErr())
- *  return errr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
+ *  return nErr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
  * return ok( /* js *\/ `
  *  !(window = ${objPaths.proxy.window},
  *	 globalThis = ${config.objPaths.proxy.window}
@@ -207,7 +207,7 @@ export function rewriteScript(script: string, config: AeroConfig): Result<string
 			res += char;
 		})
 	} catch (err) {
-		return errr(new Error(`Failed to rewrite the script: ${err}`));
+		return nErr(new Error(`Failed to rewrite the script: ${err}`));
 	}
 	return ok(undefined);
 

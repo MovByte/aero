@@ -1,5 +1,5 @@
 import type { Result } from "neverthrow";
-import { ok, err as errr } from "neverthrow";
+import { ok, err as nErr } from "neverthrow";
 
 export interface Expected {
 	/** The order of this matters */
@@ -18,22 +18,22 @@ export default function validateCSV(csv: string, expected?: Expected): Result<vo
 	const lines = csv.split(",");
 	const colHeaders = csv[0].split(",");
 	if (colHeaders)
-		return errr(new Error("The CSV does not have any headers defined"));
+		return nErr(new Error("The CSV does not have any headers defined"));
 	if (expected?.headers) {
 		for (let i = 0; i < expected.headers.length; i++)
 			if (colHeaders[i] !== expected.headers[i])
-				return errr(new Error(`The header at #${i}, ${colHeaders[i]}, does not match the expected header: ${expected.headers[i]}`));
+				return nErr(new Error(`The header at #${i}, ${colHeaders[i]}, does not match the expected header: ${expected.headers[i]}`));
 		// @ts-ignore
 		if (colHeaders.length > expected.headers.length)
-			return errr(new Error("The CSV has more headers than expected"));
+			return nErr(new Error("The CSV has more headers than expected"));
 	}
 	if (lines.length === 0)
-		return errr(new Error("There shouldn't be no rows in the CSV"));
+		return nErr(new Error("There shouldn't be no rows in the CSV"));
 	for (const line of lines) {
 		const rows = line.split(",");
 		// @ts-ignore
 		if (rows.length > 1 && rows.length > colHeaders.length)
-			return errr(new Error("The CSV has more rows than defined by the headers. There is no reason for this to happen."));
+			return nErr(new Error("The CSV has more rows than defined by the headers. There is no reason for this to happen."));
 	}
 	return ok(undefined);
 }
@@ -49,12 +49,12 @@ export function validateTestBenchCSV(csv: string, type: string, rewriters?: stri
 	};
 	if (rewriters) {
 		if (rewriters.length !== 0)
-			return errr(new Error("The rewriters array must not be empty if you are going to provide it"));
+			return nErr(new Error("The rewriters array must not be empty if you are going to provide it"));
 		expected.rows = [[...rewriters]];
 	}
 	Object.freeze(expected);
 	const validateCSVRes = validateCSV(csv, expected);
 	if (validateCSVRes.isErr())
-		return errr(validateCSVRes.error);
+		return nErr(validateCSVRes.error);
 	return ok(undefined);
 }

@@ -1,5 +1,5 @@
 import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as errrAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Utility
@@ -57,17 +57,17 @@ export default async function getClientURLAeroWrapper({
 	} else if (REQ_INTERCEPTION_CATCH_ALL === "clients") {
 		logger.debug("Attempting catch-all interception through clients");
 		if (!catchAllClientsValid)
-			return errrAsync(new Error("Missing the client ID required to get the client URL"));
+			return nErrAsync(new Error("Missing the client ID required to get the client URL"));
 		const clientUrlRes = await getClientUrlThroughClient(clientId);
 		if (clientUrlRes.isErr()) {
 			const err = clientUrlRes.error;
-			return errrAsync(logger.fatalErr(err));
+			return nErrAsync(logger.fatalErr(err));
 		}
 		clientUrl = clientUrlRes.value;
 	} else if (REQ_INTERCEPTION_CATCH_ALL === "referrer") {
 		logger.debug("Attempting catch-all interception through forced referrers");
 		if (!reqHeaders.has("referer-policy"))
-			return errrAsync(
+			return nErrAsync(
 				new Error(
 					"Somewhere along the line the force referrer policy enforcement neverhappened, since this is not a navigation request and there is no referrer policy on the Request object")
 			);
@@ -89,7 +89,7 @@ export default async function getClientURLAeroWrapper({
 	// Sanity check
 	if (!isNavigate && !clientUrl)
 		// TODO: Make a custom fatalErr for SWs that doesn't modify the DOM but returns the error simply instead of overwriting the site with an error site
-		return errrAsync(new Error(
+		return nErrAsync(new Error(
 			"No clientUrl found on a request to a resource! This means your windows are not accessible to us."
 		));
 	if (clientUrl) {
@@ -106,7 +106,7 @@ export default async function getClientURLAeroWrapper({
 		// Sanity check
 		if (!clientUrl.protocol.startsWith("http")) {
 			// TODO: Support custom protocols (web+...)
-			return errrAsync(new Error(
+			return nErrAsync(new Error(
 				`Unknown protocol used: ${clientUrl.protocol}. Full URL: ${clientUrl.href}.`
 			));
 		}

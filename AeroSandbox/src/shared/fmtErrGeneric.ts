@@ -4,7 +4,7 @@
  * It is intended to be used in the `fmtErr.ts` files for aero and AeroSandbox and is simplify an abstraction for them
  */
 
-import { Err, err as errr, errAsync as errrAsync } from "neverthrow";
+import { Err, err as nErr, errAsync as nErrAsync } from "neverthrow";
 
 /**
  * I could've used a class for this, but I felt it would be overkill for its intended use case.
@@ -29,6 +29,6 @@ const createErrorFmters = (errLogAfterColon: string) => ({
 	 * @returns The formatted *Neverthrow* error
 	 */
 	// @ts-ignore I want to do this method switching, and it doesn't matter what the first template type is in `Err` from *Neverthrow*, because this method is meant to be generic
-	fmtNeverthrowErr: (explanation: string, originalErr: string, async = false): Err<any, Error> => (async ? errrAsync : errr)(this.fmtErr(explanation, originalErr))
+	fmtNeverthrowErr: (explanation: string, originalErr: string, async = false): Err<any, Error> => (async ? nErrAsync : nErr)(this.fmtErr(explanation, originalErr))
 });
 export default createErrorFmters;

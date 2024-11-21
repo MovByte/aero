@@ -4,7 +4,7 @@
  */
 
 import type { ResultAsync } from "neverthrow";
-import { errAsync as errrAsync, okAsync } from "neverthrow";
+import { errAsync as nErrAsync, okAsync } from "neverthrow";
 
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
@@ -39,8 +39,8 @@ export async function safeExec(cmd: string, cwd: any): Promise<ResultAsync<void,
 		const { stderr } = await promisify(exec)(cmd, cwd);
 		if (stderr) console.error(stderr);
 		// biome-ignore lint/suspicious/noExplicitAny: error catching
-	} catch (errr: any) {
-		return errrAsync(errr);
+	} catch (nErr: any) {
+		return nErrAsync(nErr);
 	}
 	return okAsync(undefined);
 }

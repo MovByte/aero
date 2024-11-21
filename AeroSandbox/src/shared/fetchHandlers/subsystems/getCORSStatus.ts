@@ -1,6 +1,6 @@
 // Neverthrow
 import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as errrAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Passthrough types
@@ -94,7 +94,7 @@ export default async function getCORSStatus({
 		cacheMan = new CacheManager(reqHeaders);
 
 		if (cacheMan.mode === "only-if-cached")
-			return errrAsync(new Error("Can't find an emulated cached response");
+			return nErrAsync(new Error("Can't find an emulated cached response");
 
 		const cacheAge = cacheMan.getAge(
 			reqHeaders.get("cache-control"),

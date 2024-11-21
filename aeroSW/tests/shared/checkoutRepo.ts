@@ -4,7 +4,7 @@
  */
 
 import type { Result, ResultAsync } from "neverthrow";
-import { ok, err as errr, okAsync, errAsync as errrAsync } from "neverthrow";
+import { ok, err as nErr, okAsync, errAsync as nErrAsync } from "neverthrow";
 
 import path from "node:path";
 
@@ -16,19 +16,19 @@ import safeExec from "./safeExec";
  * Note: this does not support sparse checkouts
  */
 export default async function checkoutRepo(repoURL: string, rootDir: string, repoName: string): Promise<ResultAsync<void, Error>> {
-	function fmtErrRes(errMsg: string): ResultAsync<void, Error> {
-		return errrAsync(new Error(`Failed to checkout the repo: ${errMsg}`));
+	function fmtnErres(errMsg: string): ResultAsync<void, Error> {
+		return nErrAsync(new Error(`Failed to checkout the repo: ${errMsg}`));
 	}
 
 	const checkoutDirRes = checkoutDirPath(rootDir, "checkouts");
 	if (checkoutDirRes.isErr())
-		return fmtErrRes(checkoutDirRes.error.message);
+		return fmtnErres(checkoutDirRes.error.message);
 	const checkoutDir = checkoutDirRes.value;
 	const repoDir = repoDirPath(checkoutDir, repoName);
 
 	const createCheckoutDirRes = await createCheckoutDir(checkoutDir);
 	if (createCheckoutDirRes.isErr())
-		return fmtErrRes(createCheckoutDirRes.error.message);
+		return fmtnErres(createCheckoutDirRes.error.message);
 
 	try {
 		await access(repoDir);
@@ -59,7 +59,7 @@ export async function checkoutDirSparsely(repoURL: string, repoDirName: string, 
 	try {
 		const checkoutDirPath = path.resolve(dirs.rootDir, dirs.checkoutsDirName);
 	} catch (err) {
-		return errrAsync(new Error(`Failed to resolve the checkout directory path: ${err.message}`));
+		return nErrAsync(new Error(`Failed to resolve the checkout directory path: ${err.message}`));
 	}
 
 	/*

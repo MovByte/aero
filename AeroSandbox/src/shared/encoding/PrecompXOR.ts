@@ -19,14 +19,14 @@
  * 	encodeUrl: (url) => {
  * 	  const encodedUrlRes = precompXOR.encodeUrl(url, yourKey);
  * 	  if (encodedUrlRes.isErr()) {
- *		return errr(new Error(`Failed to encode the URL, ${url}: ${encodedUrlRes.error}`));
+ *		return nErr(new Error(`Failed to encode the URL, ${url}: ${encodedUrlRes.error}`));
  *    }
  *    return ok(encodedUrlRes.value);
  * 	},
  * 	decodeUrl: (encUrl) => {
  * 	  const decodedUrlRes = precompXOR.decodeUrl(encUrl, yourKey);
  * 	  if (decodedUrlRes.isErr()) {
- * 		return errr(new Error(`Failed to decode the URL, ${encUrl}: ${decodedUrlRes.error}`));
+ * 		return nErr(new Error(`Failed to decode the URL, ${encUrl}: ${decodedUrlRes.error}`));
  * 	  }
  * 	  return ok(decodedUrlRes.value);
  *   }
@@ -35,7 +35,7 @@
 
 import type { GenericLogger } from "../Loggers";
 import type { Err, Result } from "neverthrow";
-import { ok, err as errr } from "neverthrow";
+import { ok, err as nErr } from "neverthrow";
 
 // The only reason why I am using this version of `fmtError` is because there are test cases that run on this file. That is also why I am resolving this file with `.ts` at the end.
 
@@ -146,7 +146,7 @@ export default class PrecompXOR {
 				/*
 				FIXME: This is broken; I know
 				if (!(char in urlLookupDictionary))
-					return errr(
+					return nErr(
 						new Error(
 							`Aero error: the character, ${char}, is missing from the lookup table but is in the checks. This is not your fault; it is aero's, which is precisely where it checks to see if it is a valid URL character.`
 						)
@@ -154,7 +154,7 @@ export default class PrecompXOR {
 				*/
 				resultArr[i] = urlLookupDictionary[char];
 			} else
-				return errr(
+				return nErr(
 					new Error(
 						`User error: the character you provided, ${char}, is not in the lookup table. Perhaps it is not a valid URL character.`
 					)
@@ -244,7 +244,7 @@ export default class PrecompXOR {
 	 */
 	fmtErrNotValidChar(char: number): Err<string, Error> {
 		const charStr = String.fromCharCode(char);
-		return errr(
+		return nErr(
 			new Error(
 				`Aero error: the character, ${charStr}, is missing from the lookup table but is in the checks. This is not your fault; it is aero's, which is precisely where it checks to see if it is a valid URL character.`
 			)
@@ -258,7 +258,7 @@ export default class PrecompXOR {
 	 */
 	fmtErrNotInLookupTable(char: number): Err<string, Error> {
 		const charStr = String.fromCharCode(char);
-		return errr(
+		return nErr(
 			new Error(
 				`User error: the character you provided, ${charStr}, is not in the lookup table. Perhaps it is not a valid URL character.`
 			)

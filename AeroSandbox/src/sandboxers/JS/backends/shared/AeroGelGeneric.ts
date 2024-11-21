@@ -3,7 +3,7 @@ import type {
 } from "neverthrow";
 import {
 	ok,
-	err as errr
+	err as nErr
 } from "neverthrow";
 
 import type AeroConfig from "../types/config.js";
@@ -30,7 +30,7 @@ export default class AeroGelGeneric extends RewriterGeneric {
 			trackProxyApply: config.trackers.proxyApply
 		});
 		if (rewrittenScriptRes.isErr())
-			return errr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
+			return nErr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
 		return ok( /* js */ `
 		!(window = ${config.globalsConfig.aeroGel.propTrees.proxified.window || "null"},
 			globalThis = ${config.globalsConfig.aeroGel.propTrees.proxified.window || "null"}

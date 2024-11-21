@@ -4,7 +4,7 @@ import { default as createDefaultFeatureFlags_ } from "../createDefaultFeatureFl
 import featureFlagsBuilder from "../featureFlagsBuilder";
 
 import type { Result } from "neverthrow";
-import { err as errr, ok } from "neverthrow";
+import { err as nErr, ok } from "neverthrow";
 
 export default function initGlobalsTs(
 	output: "../types/dist/globals.d.ts",
@@ -22,14 +22,14 @@ export default function initGlobalsTs(
 			if (valType === "number" || valType === "string") {
 				lines.push(`\tconst ${featureFlag}: ${valType};`);
 			} else {
-				return errr(
+				return nErr(
 					new SyntaxError(
 						`Unexpected type for feature flag, ${featureFlag}, ${valType}`,
 					),
 				);
 			}
 		} catch (err) {
-			return errr(err);
+			return nErr(err);
 		}
 	}
 	lines.push("}");

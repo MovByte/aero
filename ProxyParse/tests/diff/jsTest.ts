@@ -8,7 +8,7 @@
 // TODO: Make a GitHub Action that runs this script and logs the results to a CSV file
 
 import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as errrAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
 
 import * as flags from "flags";
 // @ts-ignore: This package is installed
@@ -61,7 +61,7 @@ export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExt
 			ignore: [...ignoreExternalTestsList, `${jsTestEnvContext.webkitDir}/**/*.js.map`]
 		});
 	} catch (err: any) {
-		return errrAsync(new Error(`Failed to glob the files from JSTest (perhaps the checkout failed?): ${err.message}`));
+		return nErrAsync(new Error(`Failed to glob the files from JSTest (perhaps the checkout failed?): ${err.message}`));
 	}
 
 	let combBundle = "";
@@ -70,7 +70,7 @@ export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExt
 			const fileData = await readFile(jsFile, "utf-8");
 			combBundle += fileData;
 		} catch (err: any) {
-			return errrAsync(new Error(`Failed to retrieve a file from the glob": ${err.message}`));
+			return nErrAsync(new Error(`Failed to retrieve a file from the glob": ${err.message}`));
 		}
 	}
 
@@ -88,12 +88,12 @@ export async function benchJSTest(jsTestEnvContext: JSTestEnvContext, excludeExt
 			});
 		}
 	} catch (err: any) {
-		return errrAsync(new Error(`Failed to initialize the test bench: ${err.message}`));
+		return nErrAsync(new Error(`Failed to initialize the test bench: ${err.message}`));
 	}
 	try {
 		await bench.run();
 	} catch (err: any) {
-		return errrAsync(new Error(`Failed to run the test bench: ${err.message}`));
+		return nErrAsync(new Error(`Failed to run the test bench: ${err.message}`));
 	}
 
 	return okAsync(bench);
@@ -116,7 +116,7 @@ export async function processJSTestBenchToCSV(bench: Bench, strictValidate = tru
 		// @ts-ignore: No, it should only expect one key
 		const validateTestBenchCSVRes = validateTestBenchCSV(csvOut, "js", Object.keys(tryRewritersAero));
 		if (validateTestBenchCSVRes.isErr())
-			return errrAsync(new Error(`The validation CSV of the csv failed: ${validateTestBenchCSVRes.error}${verbose ? `\nThe CSV in question is: ${csvOut}` : ""}`));
+			return nErrAsync(new Error(`The validation CSV of the csv failed: ${validateTestBenchCSVRes.error}${verbose ? `\nThe CSV in question is: ${csvOut}` : ""}`));
 	}
 
 	return okAsync(csvOut)
@@ -129,7 +129,7 @@ export async function processJSTestBenchToCSV(bench: Bench, strictValidate = tru
 export default async function testJSTest(excludeExternalTests: boolean): Promise<ResultAsync<void, Error>> {
 	// TODO: Add the arguments to allow you to provide
 	// TODO: Patch the CLI to run JSTest to make it run inside of a proxy context and compare the results with and without the proxy like I do on WPT-diff and publish that as a GitHub Action on the GitHub Marketplace as well
-	return errrAsync(new Error("This is a stub!"));
+	return nErrAsync(new Error("This is a stub!"));
 }
 
 // @ts-ignore
@@ -144,7 +144,7 @@ export async function checkoutJSTestDir(jsTestEnvContext: JSTestEnvContext): Pro
 		checkoutsDir: jsTestEnvContext.checkoutsDir,
 	}, ["JSTests"])
 	if (checkoutSpareRepoRes.isErr())
-		return errrAsync(new Error(`Failed to execute a command for initializing the JSTests dir: ${checkoutSpareRepoRes.error.message} `));
+		return nErrAsync(new Error(`Failed to execute a command for initializing the JSTests dir: ${checkoutSpareRepoRes.error.message} `));
 	return okAsync(undefined);
 }
 

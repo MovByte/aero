@@ -4,7 +4,7 @@
  * Neverthrow is used here because it contains potentially dangerous RegExp code
  */
 
-import { Result, ok, err as errr, Err } from "neverthrow";
+import { Result, ok, err as nErr, Err } from "neverthrow";
 
 /**
  * Rewrites the `cookie` header
@@ -58,7 +58,7 @@ function rewriteSetCookie(cookie: string, proxyLoc: URL, prefix: string): Result
  * This is a helper method meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
  */
 function fmtErrfailedToRewriteAHeader(headerType: string, errMsg: string): Err<string, Error> {
-	return errr(new Error(`Failed to rewrite the ${headerType} header (most likely a RegExp error)${ERR_LOG_AFTER_COLON}${errMsg}`));
+	return nErr(new Error(`Failed to rewrite the ${headerType} header (most likely a RegExp error)${ERR_LOG_AFTER_COLON}${errMsg}`));
 }
 
 export { rewriteGetCookie, rewriteSetCookie };

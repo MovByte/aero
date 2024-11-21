@@ -1,6 +1,6 @@
 // Neverthrow for improved error handling
 import type { Result } from "neverthrow"
-import { err as errr } from "neverthrow";
+import { err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // For runtime type validation
@@ -37,13 +37,13 @@ Ensure the bundles are in this order:
 export default function troubleshoot(): Result<void, Error> {
 	// Sanity checks to ensure that everything has been initalized properly
 	if (!("logger" in self))
-		return errr(new Error(`${troubleshootingStrs.devErrorTag}The logger hasn't been initalized!${troubleshootingStrs.tryImportingItMsg}`));
+		return nErr(new Error(`${troubleshootingStrs.devErrorTag}The logger hasn't been initalized!${troubleshootingStrs.tryImportingItMsg}`));
 	if (!("BareMux" in self))
-		throw errr(new Error(`${troubleshootingStrs.devErrorTag}There is no bare client (likely BareMux) provided!${troubleshootingStrs.tryImportingItMsg}`));
+		throw nErr(new Error(`${troubleshootingStrs.devErrorTag}There is no bare client (likely BareMux) provided!${troubleshootingStrs.tryImportingItMsg}`));
 	if (!("aeroConfig" in self)) {
 		if ("defaultConfig" in self)
-			return errr(new Error(`${troubleshootingStrs.devErrorTag}There is no default config provided! You need to create one other than the default`));
-		return errr(new Error(`${troubleshootingStrs.devErrorTag}There is no config provided!${troubleshootingStrs.tryImportingItMsg}`));
+			return nErr(new Error(`${troubleshootingStrs.devErrorTag}There is no default config provided! You need to create one other than the default`));
+		return nErr(new Error(`${troubleshootingStrs.devErrorTag}There is no config provided!${troubleshootingStrs.tryImportingItMsg}`));
 	}
 	/// Runtime type validations
 	if (!baremuxValidation.success)

@@ -5,7 +5,7 @@
  */
 
 import type { Result } from "neverthrow";
-import { ok, err as errr } from "neverthrow";
+import { ok, err as nErr } from "neverthrow";
 
 /**
  * Gets the url that will actually be fetched
@@ -61,7 +61,7 @@ export default function getRequestUrl(
 		try {
 			urlAfterPrefix = new URL(noPrefix);
 		} catch (err) {
-			return errr(
+			return nErr(
 				new Error(
 					`${err instanceof TypeError
 						? "Failed to parse the URL after the prefix"
