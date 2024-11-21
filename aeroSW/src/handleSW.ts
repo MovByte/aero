@@ -31,6 +31,7 @@ self.logger = new AeroLogger();
  * @returns The proxified response
  */
 async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
+	// Give troubleshooting instructions if a sanity check occurs at the fault of how the proxy site developer set up the main SW
 	const troubleshootRes = troubleshoot();
 	if (troubleshootRes.isErr())
 		// Propogate the error result up the chain (`troubleshoot` is already meant to handle errors itself)
@@ -64,7 +65,6 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
-	//@ts-ignore
 	if (catchAllClientsValid && SERVER_ONLY)
 		return nErrAsync(new Error(`${troubleshootingStrs.devErrTag}Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can't be set to "clients" when "SERVER_ONLY" is enabled.`));
 	const clientUrlRes = await getClientURLAeroWrapper({
@@ -72,7 +72,6 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 		reqHeaders: req.headers,
 		clientId: event.clientId,
 		params: reqParams,
-
 		catchAllClientsValid,
 		isNavigate
 	})
