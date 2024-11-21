@@ -4,7 +4,11 @@
  * It is intended to be used in the `fmtErr.ts` files for aero and AeroSandbox and is simplify an abstraction for them
  */
 
-import { Err, err as nErr, errAsync as nErrAsync } from "neverthrow";
+import type { Err } from "neverthrow";
+import { err as nErr, errAsync as nErrAsync } from "neverthrow";
+import createGenericTroubleshootingStrs from "./createGenericTroubleshootingStrs";
+
+const aeroErr = createGenericTroubleshootingStrs(ERR_LOG_AFTER_COLON).aeroErrTag;
 
 /**
  * I could've used a class for this, but I felt it would be overkill for its intended use case.
@@ -21,7 +25,7 @@ const createErrorFmters = (errLogAfterColon: string) => ({
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted error
 	 */
-	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${explanation}${errLogAfterColon}${originalErr}`),
+	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${aeroErr}${explanation}${errLogAfterColon}${originalErr}`),
 	/**
 	 * Formats a *Neverthrow* error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`

@@ -5,7 +5,7 @@ import type { Assert } from "ts-runtime-checks";
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
-import troubleshoot from "./fetchHelpers/troubleshoot";
+import troubleshoot, { troubleshootingStrs } from "./fetchHelpers/troubleshoot";
 
 import type { Sec } from "$aero/types";
 
@@ -64,18 +64,20 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
+	//@ts-ignore
 	if (catchAllClientsValid && SERVER_ONLY)
-		return nErrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
+		return nErrAsync(new Error(`${troubleshootingStrs.devErrTag}Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can't be set to "clients" when "SERVER_ONLY" is enabled.`));
 	const clientUrlRes = await getClientURLAeroWrapper({
 		reqUrl,
 		reqHeaders: req.headers,
 		clientId: event.clientId,
 		params: reqParams,
+
 		catchAllClientsValid,
 		isNavigate
 	})
 	if (clientUrlRes.isErr())
-		return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);
+		return fmtNeverthrowErr(`${troubleshootingStrs.userErrTag}Failed to get the client URL. You have probably made a typo.`, clientUrlRes.error.message);
 	/** This client URL is used when forming the proxy URL and in various uses for emulation */
 	const clientUrl = clientUrlRes.value;
 	if (clientUrl === "skip") {
