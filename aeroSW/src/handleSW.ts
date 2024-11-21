@@ -1,11 +1,15 @@
+/**
+ * Aero's main handler; this is what you call in your SW when aero should be routed. Ideally, you would determine when it should be routed with. This gets build to the bundle `aeroSW/dist/sw.js`. You must also include the other bundles in your SW with `importScripts` before this one.
+ */
+
 // Better type-safe handling
 /// For runtime type validation
-import type { Assert } from "ts-runtime-checks";
+import { is } from "ts-runtime-checks";
 /// Neverthrow
-import type { ResultAsync } from "neverthrow";
-import { okAsync, errAsync as nErrAsync } from "neverthrow";
+import type { ResultAsync, Result } from "neverthrow";
+import { okAsync, errAsync as nErrAsync, ok, err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
-import troubleshoot, { troubleshootingStrs } from "./fetchHelpers/troubleshoot";
+import troubleshoot, { troubleshootJustConfigs, troubleshootingStrs } from "./fetchHelpers/troubleshoot";
 
 import type { Sec } from "$aero/types";
 
@@ -30,8 +34,12 @@ self.logger = new AeroLogger();
  * @param event The passthrough Fetch event
  * @returns The proxified response
  */
-async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, Error>> {
-	// Give troubleshooting instructions if a sanity check occurs at the fault of how the proxy site developer set up the main SW
+async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>> {
+	// Sanity check: Ensure the handler is being ran in a SW
+	if (!is<FetchEvent>(event))
+		return nErr(troubleshootingStrs.noFetchEvent);
+
+	// Give troubleshooting instructions if a sanity check occurs at the fault of how the proxy site developer set up the main SW where they didn't initialize things properly
 	const troubleshootRes = troubleshoot();
 	if (troubleshootRes.isErr())
 		// Propogate the error result up the chain (`troubleshoot` is already meant to handle errors itself)
@@ -162,12 +170,24 @@ async function handle(event: Assert<FetchEvent>): Promise<ResultAsync<Response, 
 }
 
 /**
- * Aero's main handler; this is what you call in your SW when aero should be routed. Ideally, you would determine when it should be routed with `routeAero`
+ * Aero's main handler; this is what you call in your SW when aero should be routed. Ideally, you would determine when it should be routed with `routeAero`. This also internally wraps `handleAssertReturning` to add on detail to the errors from `https://github.com/GoogleFeud/ts-runtime-checks`.
  */
-self.aeroHandle = handle;
+self.aeroHandle = handleSW;
 /**
  * Check if the current path should route to aero using the prefix you set in the config
  * @param event 
  * @returns If `aeroHandle` should be called
  */
-self.routeAero = (event: Assert<FetchEvent>): boolean => event.request.url.startsWith(location.origin + aeroConfig.prefix);
+self.routeAero = (event: Assert<FetchEvent>): Result<boolean, Error> => {
+	// Sanity check: Ensure the handler is being ran in a SW
+	if (!is<FetchEvent>(event))
+		return nErr(troubleshootingStrs.noFetchEventMsg);
+
+	// Give troubleshooting instructions if a sanity check occurs at the fault of how the proxy site developer set up the main SW where they didn't initialize things properly
+	const troubleshootJustConfigsRes = troubleshootJustConfigs();
+	if (troubleshootJustConfigsRes.isErr())
+		// Propogate the error result up the chain (`troubleshootJustConfigs` is already meant to handle errors itself)
+		return troubleshootJustConfigsRes;
+
+	return ok(event.request.url.startsWith(location.origin + aeroConfig.prefix));
+}

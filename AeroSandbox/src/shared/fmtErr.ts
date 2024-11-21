@@ -3,6 +3,6 @@
  * This module is for formatting errors in a consistent way.
  */
 
-import createErrorFmters from "./fmtErrGeneric";
+import createErrFmters from "./fmtErrGeneric";
 
-export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(ERR_LOG_AFTER_COLON);
+export const { fmtErr, fmtNeverthrowErr } = createErrFmters(ERR_LOG_AFTER_COLON);

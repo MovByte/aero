@@ -18,14 +18,14 @@ const aeroErr = createGenericTroubleshootingStrs(ERR_LOG_AFTER_COLON).aeroErrTag
  * @example
  * export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(ERR_LOG_AFTER_COLON);
  */
-const createErrorFmters = (errLogAfterColon: string) => ({
+const createErrorFmters = (errLogAfterColon: string, customFaultTag?: string) => ({
 	/**
 	 * Formats an error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted error
 	 */
-	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${aeroErr}${explanation}${errLogAfterColon}${originalErr}`),
+	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${customFaultTag || aeroErr}${explanation}${errLogAfterColon}${originalErr}`),
 	/**
 	 * Formats a *Neverthrow* error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`

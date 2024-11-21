@@ -20,6 +20,7 @@ const configValidation = typia.validate<Config>(aeroConfig);
 // TODO: Make something like this for AeroSandbox
 export const troubleshootingStrs = {
 	...createGenericTroubleshootingStrs(ERR_LOG_AFTER_COLON),
+	noFetchEventMsg: `${this.devErrTag}Can't validate the fetch event argument passed inside of aero's SW handler. This probably means you are using aero's SW handler outside of the SW, which is improper use. Perhaps you should look at the server-only docs for aero if you want to run it on the server?`,
 	/** A message for when the user fails to import a bundle properly or not at all */
 	tryImportingItMsg: `. Try importing the bundle. Perhaps you ordered the bundles wrong (with importScripts)?
 Ensure the bundles are in this order:
@@ -41,11 +42,10 @@ export default function troubleshoot(): Result<void, Error> {
 		return nErr(new Error(`${troubleshootingStrs.devErrTag}The logger hasn't been initalized!${troubleshootingStrs.tryImportingItMsg}`));
 	if (!("BareMux" in self))
 		throw nErr(new Error(`${troubleshootingStrs.devErrTag}There is no bare client (likely BareMux) provided!${troubleshootingStrs.tryImportingItMsg}`));
-	if (!("aeroConfig" in self)) {
-		if ("defaultConfig" in self)
-			return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no default config provided! You need to create one other than the default`));
-		return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no config provided!${troubleshootingStrs.tryImportingItMsg}`));
-	}
+	const troubleshootJustConfigsRes = troubleshootJustConfigs();
+	if (troubleshootJustConfigsRes.isErr())
+		// Propogate the error result up the chain (`troubleshootJustConfigs` is already meant to handle errors itself)
+		return troubleshootJustConfigsRes;
 	/// Runtime type validations
 	if (!baremuxValidation.success)
 		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The BareMux bundle you provided is invalid! You may have imported a bare client that doesn't fully support the BareMux 2.0 specification. This could happen if you are using the classic bare client from TompHTTP and not the new one from Mercury Workshop or if you haven't updated the one from Mercury Workshop to 2.0+.", ...baremuxValidation.errors`);
@@ -53,4 +53,12 @@ export default function troubleshoot(): Result<void, Error> {
 		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The logger bundle ${troubleshootingStrs.validationTarget} provided is invalid!`, ...loggerValidation.errors);
 	if (!configValidation.success)
 		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The config ${troubleshootingStrs.validationTarget} provided is invalid!`, ...configValidation.errors);
+}
+
+async function troubleshootJustConfigs(): Result<void, Err> {
+	if (!("aeroConfig" in self)) {
+		if ("defaultConfig" in self)
+			return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no default config provided! You need to create one other than the default`));
+		return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no config provided!${troubleshootingStrs.tryImportingItMsg}`));
+	}
 }
