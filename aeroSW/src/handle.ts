@@ -60,16 +60,17 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	const req = event.request;
 	const reqUrl = new URL(req.url);
 	const reqParams = reqUrl.searchParams;
+	const reqDest = SERVER_ONLY ? self.getReqDest(req.destination, reqParams) : req.destination;
 	/** Used to determine if the request was made to load the homepage; this is needed so that the proxy will know when to rewrite the html files. For example, you wouldn't want it to rewrite a fetch request. */
 	const isNavigate =
 		req.mode === "navigate" &&
-		["document", "iframe"].includes(req.destination);
+		["document", "iframe"].includes(reqDest);
 	/** If the client is an iframe. This is used for determining the request url. */
-	const isiFrame = req.destination === "iframe";
+	const isiFrame = reqDest === "iframe";
 	/** If the request is intended for a script, and the script is intended to be a module (recieved through request URL passthrough) */
 	let isMod: boolean;
 	/** If the request is intended for a script */
-	const isScript = req.destination === "script";
+	const isScript = reqDest === "script";
 	if (isScript) {
 		const isModParam = getPassthroughParam(reqParams, "isMod");
 		isMod = isModParam && isModParam === "true";
@@ -106,11 +107,11 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		reqUrl: URL,
 		clientUrl,
 		aeroPathFilter: aeroConfig.aeroPathFilter,
-		reqDestination: req.destination,
-		isNavigate: isNavigate
+		reqDestination: SERVER_ONLY ? self.getReqDest(reqDest,
+			isNavigate: isNavigate
 		isiFrame,
-		sec,
-		clients
+			sec,
+			clients
 	});
 	if (rewrittenReqValsRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error.message);
@@ -134,7 +135,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	const rewrittenRespRes = await rewriteResp({
 		originalResp: proxyResp,
 		rewrittenReqHeaders: rewrittenReqOpts.headers,
-		reqDestination: req.destination,
+		reqDestination: reqDest,
 		proxyUrl,
 		clientUrl,
 		isNavigate,

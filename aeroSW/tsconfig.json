@@ -41,11 +41,11 @@
 		"strict": true
 	},
 	"include": [
+		"../aeroCF/types/globals.d.ts",
 		"**/*.ts",
 		"../AeroSandbox/src/defaultConfig.js",
 		"../AeroSandbox/src/shared/**/*.ts",
 		"../AeroSandbox/types/aeroSandbox.d.ts",
-		"types/globals.d.ts",
 		"../AeroSandbox/tests/shared/importHooks.mjs",
 		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs",
 		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs"

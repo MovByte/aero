@@ -8,6 +8,8 @@
  * I will make a separate bundle for this, so that you can use it on the *NPM* and *JSR* for your own server-only proxies that happen to work on real SWs
  */
 
+import getPassthroughParam from "$/AeroSandbox/src/shared/getPassthroughParam";
+
 const pluginTypes: string[] = [
 	"application/x-shockwave-flash",
 	"application/pdf",
@@ -107,10 +109,15 @@ const contentTypesBasedOnReqDests: {
  * Gets the Request destination from the Response content type
  * @returns The Request destination as per the SW spec
  */
-export default function getReqDest(contentType: string): string {
+export default function getReqDest(contentType: string, reqParams: URLSearchParams): string {
 	for (const [targetReqDestType, targetContentTypes] of Object.entries(contentTypesBasedOnReqDests)) {
-		if (targetContentTypes.includes(contentType))
+		if (targetContentTypes.includes(contentType)) {
+			if (targetReqDestType === "document") {
+				if (getPassthroughParam(reqParams, "destIsIframe") === "true")
+					return "iframe";
+			}
 			return targetReqDestType;
+		}
 	}
 	return "";
 }
