@@ -2,15 +2,16 @@
 import BaseLayout from "@/layouts/Base.astro";
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-//import { Octokit } from "octokit";
-
+// Utility
+//import { Octokit } from "octokit"
 //import getGitHubURLSplit from "../../../scripts/shared/getGitHubURLSplit";
+import getPackageVersions from "../../../aeroSW/tests/shared/getNPMVersions";
 
-import packageJSON from "../../../package.json" with { type: "json" };
-
-const npmRegistry = await fetch("https://registry.npmjs.com/aero-proxy");
-const npmRegistryJSON = await npmRegistry.json();
-const packageVersions = Object.keys(npmRegistryJSON.versions).reverse();
+const packageVersionsRes = getPackageVersions();
+if (packageVersionsRes.isErr())
+  throw new Error("Failed to get the NPM package versions for aero: ", packageVersionsRes.error);
+}
+const packageVersions = packageVersionsRes.value;
 
 /*
 const octokit = new Octokit({ auth: import.meta.env.GITHUB_KEY });
