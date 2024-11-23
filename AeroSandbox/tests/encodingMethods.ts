@@ -163,9 +163,10 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
  */
 const isCLI =
 	// For Deno
-	// @ts-ignore: This is a module
-	import.meta.main || true
-
+	// @ts-ignore: This is a Deno-only feature
+	"Deno" in globalThis ? import.meta.main :
+		// For Node (this does the same thing functionally as the above)
+		import.meta.url === `file://${process.argv[1]}`;
 if (isCLI) {
 	(async () => {
 		// TODO: Add a flag for iterations

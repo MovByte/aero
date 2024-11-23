@@ -16,16 +16,6 @@ interface Dirs {
 }
 
 /**
- * Detect if the script is being ran as a CLI script and not as a module
- */
-const isCLI =
-	// For Deno
-	globalThis.Deno ? import.meta.main :
-		// For Node
-		// @ts-ignore: This is a NodeJS-only feature
-		require.main === module;
-
-/**
  * This class initializes everything in the build folder to prepare for Rspack to build into there
  * @example
  * ...
@@ -123,6 +113,15 @@ export default class InitDist {
 }
 
 // If the file is being run as a CLI script
+/**
+ * Detect if the script is being ran as a CLI script and not as a module
+ */
+const isCLI =
+	// For Deno
+	// @ts-ignore: This is a Deno-only feature
+	"Deno" in globalThis ? import.meta.main :
+		// For Node (this does the same thing functionally as the above)
+		import.meta.url === `file://${process.argv[1]}`;
 if (isCLI) {
 	const properDirType = "DEBUG" in process.env ? "debug" : "prod";
 

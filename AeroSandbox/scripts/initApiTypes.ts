@@ -6,16 +6,6 @@ import type Result from "neverthrow";
 import { err as nErr, ok } from "neverthrow";
 
 /**
- * Detect if the script is being ran as a CLI script and not as a module
- */
-const isCLI =
-	// For Deno
-	globalThis.Deno ? import.meta.main :
-		// For Node
-		// @ts-ignore: This is a NodeJS-only feature
-		require.main === module;
-
-/**
  * For WebIDL -> TS conversion
  * I shouldn't have to do this, but they forgot to include the "exports" definition inside their package.json, and I don't want to maintain a fork. They also defined exports for these modules in their index.js, which should be enough by itself, but they invoked the CLI, making this useless since that action throws an error.
  */
@@ -123,6 +113,15 @@ export default function genWebIDL(
 	return ok();
 }
 
+/**
+ * Detect if the script is being ran as a CLI script and not as a module
+ */
+const isCLI =
+	// For Deno
+	// @ts-ignore: This is a Deno-only feature
+	"Deno" in globalThis ? import.meta.main :
+		// For Node (this does the same thing functionally as the above)
+		import.meta.url === `file://${process.argv[1]}`;
 if (isCLI) {
 	// TODO: Import the error handler from `buildTools.ts` and use that for all of these CLI scripts
 	genWebIDL(webIDLUsedInAero, true);

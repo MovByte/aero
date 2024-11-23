@@ -153,12 +153,10 @@ export async function checkoutJSTestDir(jsTestEnvContext: JSTestEnvContext): Pro
  */
 const isCLI =
 	// For Deno
-	// @ts-ignore: This is a module
+	// @ts-ignore: This is a Deno-only feature
 	"Deno" in globalThis ? import.meta.main :
-		// For Node
-		// @ts-ignore: This is a NodeJS-only feature
-		require.main === module;
-
+		// For Node (this does the same thing functionally as the above)
+		import.meta.url === `file://${process.argv[1]}`;
 if (isCLI) {
 	(async () => {
 		// @ts-ignore: This is a module script

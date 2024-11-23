@@ -14,16 +14,6 @@ import { writeFileSync } from "node:fs";
 
 import { createApiInterceptorIteratorNodeSync } from "../build/createApiInterceptorIteratorNode";
 
-/**
- * Detect if the script is being ran as a CLI script and not as a module
- */
-const isCLI =
-	// For Deno
-	globalThis.Deno ? import.meta.main :
-		// For Node
-		// @ts-ignore: This is a NodeJS-only feature
-		require.main === module;
-
 const apiGlobalProps: string[] = Array.from(
 	createApiInterceptorIteratorNodeSync(),
 ).map((aI) => aI.globalProp);
@@ -72,6 +62,15 @@ function createDistDir(distDir: string, logStatus: boolean) {
 }
 
 // If the file is being ran as a CLI script
+/**
+ * Detect if the script is being ran as a CLI script and not as a module
+ */
+const isCLI =
+	// For Deno
+	// @ts-ignore: This is a Deno-only feature
+	"Deno" in globalThis ? import.meta.main :
+		// For Node (this does the same thing functionally as the above)
+		import.meta.url === `file://${process.argv[1]}`;
 if (isCLI) {
 	const output = process.env.OUTPUT;
 	const distDir = process.env.DIST_DIR;

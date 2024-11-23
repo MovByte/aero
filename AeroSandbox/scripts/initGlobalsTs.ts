@@ -93,7 +93,7 @@ const isCLI =
 	// For Deno
 	// @ts-ignore: This is a Deno-only feature
 	"Deno" in globalThis ? import.meta.main :
-		// For Node (this does the same thing functinally as the above)
+		// For Node (this does the same thing functionally as the above)
 		import.meta.url === `file://${process.argv[1]}`;
 if (isCLI) {
 	const initGlobalsTsRes = initGlobalsTs();
