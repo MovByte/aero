@@ -1,0 +1,37 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"moduleResolution": "NodeNext",
+		"module": "NodeNext",
+		"baseUrl": "../",
+		"lib": ["ESNext", "DOM", "DOM.Iterable"],
+		"sourceMap": true,
+		"paths": {
+			"$/*": ["*"],
+			"$sw/*": ["aeroSW/*"],
+			"$sandbox/*": ["src/sandboxers/*"],
+			"$apis/*": ["src/apis/*"],
+			"$cors/*": ["src/cors/*"],
+			"fetchHelpers/*": ["aeroCF/src/fetchHelpers/*"],
+			"swFetchHelpers/*": ["aeroSW/src/fetchHelpers/*"],
+			"$fetchUtil": ["aeroSW/src/fetchHandlers/util/*"],
+			"$fetchSubsystems": ["aeroSW/src/fetchHandlers/subsystems/*"],
+			"$injPreprocessors": ["aeroSW/src/fetchHandlers/preprocessors/*"],
+			"$corsIsolation": ["aeroSW/src/fetchHandlers/isolation/*"],
+			"$shared/*": ["AeroSandbox/src/shared/*"],
+			"$types/*": ["aeroCF/types/*"],
+			"$swTypes/*": ["aeroSW/types/*"]
+		},
+		"types": ["@cloudflare/workers-types"]
+	},
+	"include": [
+		"rspack.config.ts",
+		"src/**/*.ts",
+		"types/**/*.d.ts",
+		"src/defaultConfig.js",
+		"../aeroSW/src/this/util/getClientURLAeroWrapper.ts",
+		"../aeroSW/src/this/util/getClientURL.ts",
+		"../aeroSW/types/globals.d.ts",
+		"types/dist/biome/globals.ts"
+	]
+}

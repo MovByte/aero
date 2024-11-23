@@ -9,36 +9,40 @@ import { is } from "ts-runtime-checks";
 import type { ResultAsync, Result } from "neverthrow";
 import { okAsync, errAsync as nErrAsync, ok, err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
-import troubleshoot, { troubleshootJustConfigs, troubleshootingStrs } from "./fetchHelpers/troubleshoot";
 
-import type { Sec } from "$aero/types";
+// Sanity checkers
+import troubleshoot, { troubleshootJustConfigs, troubleshootingStrs } from "./fetchHelpers/troubleshoot";
+import validateResp from "$aero/aeroSW/src/fetchHandlers/validateResp";
+
+import type { Sec } from "$types/index";
 
 import rewriteReq from "$fetchHandlers/rewriteReq";
 // Abstracted rewriter abstractions
 /// Req
-import getClientURLAeroWrapper from "$fetchHandlers/util/getClientURLAeroWrapper";;
+import getClientURLAeroWrapper from "./fetchHelpers/getClientURLAeroWrapper";
 /// Resp
 import rewriteResp from "$fetchHandlers/rewriteResp";
-import perfEncBodyEmu from "$fetchHandlers/util/perfEncBodyEmu";
-import perfCacheSetting from "$fetchHandlers/util/perfCacheSetting";
+import perfEncBodyEmu from "$fetchHandlers/subsystems/perfEncBodyEmu";
+import perfCacheSetting from "$fetchHandlers/subsystems/perfCacheSetting";
 
 // Utility
-import { getPassthroughParam } from "$shared/getPassthroughParam";
+import getPassthroughParam from "$shared/getPassthroughParam";
 /// Cosmetic
 import { AeroLogger } from "$shared/Loggers";
 
 /** aero's SW logger */
-self.logger = new AeroLogger();
+self.logger = new AeroLogger(Boolean(DEBUG));
 
 /**
  * Handles the requests that are routed to aero
+ * This is only exported so that *aeroCF* can make use of it
  * @param event The passthrough Fetch event
  * @returns The proxified response
  */
-async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>> {
+export default async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>> {
 	// Sanity check: Ensure the handler is being ran in a SW
 	if (!is<FetchEvent>(event))
-		return nErr(troubleshootingStrs.noFetchEvent);
+		return nErrAsync(troubleshootingStrs.noFetchEvent);
 
 	// Give troubleshooting instructions if a sanity check occurs at the fault of how the proxy site developer set up the main SW where they didn't initialize things properly
 	const troubleshootRes = troubleshoot();
@@ -46,6 +50,11 @@ async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>
 		// Propogate the error result up the chain (`troubleshoot` is already meant to handle errors itself)
 		// @ts-ignore: This is a neverthrow error, so we are fine
 		return troubleshootRes;
+
+	if (SERVER_ONLY && !("getReqDest" in self))
+		return nErrAsync("You can't run aero's SW in server-only mode without the `getReqDest` function being defined in the global scope. This method is what is used to determine the request destination, since environments like Cloudflare Workers don't have access to `Request.destination`.");
+	if (SERVER_ONLY && !("serverFetch" in self))
+		return nErrAsync("You can't run aero's SW in server-only mode without the `serverFetch` function being defined in the global scope. This method is what is used to fetch the proxied request instead of BareMuxe, since environments like Cloudflare Workers to define their native fetch method.");
 
 	// Develop a context
 	const req = event.request;
@@ -65,8 +74,6 @@ async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>
 		const isModParam = getPassthroughParam(reqParams, "isMod");
 		isMod = isModParam && isModParam === "true";
 	}
-
-	// TODO: Abstract request logic (call anything that calls the request utility methods in one method, including doing the final fetch with bare-mux), so that I can use it inside of AeroSandbox, infact include all of `$fetchHandlers` that is related to requests (not responses) in AeroSandbox and that method, so that I could use it in `xhr.ts`. Also make the requestHandler method an entry point in AeroSandbox, so that in minimal builds aero's SW can share it with AeroSandbox. I will also make a feature flag in AeroSandbox which will be called `SYNC_XHR_REQ` that will enable SYNC XHR support and such import all of the handlers (it's a lot of heavy code for an obscure and long deprecated API). Some things like setting caches will need to use message proxies. Client URL in sync XHR would just be the real location (easy), since we are already on the window client. `isNavigate`/`isiFrame` would always be be false, `destination` would always be XHR, `isScript` would always be false, etc... 
 
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
@@ -113,7 +120,7 @@ async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>
 	const { rewrittenReqOpts, proxyUrl, cacheMan } = rewrittenReqVals;
 
 	// Make the request to the proxy
-	const proxyResp = await new BareMux.BareClient().fetch(
+	const proxyResp = (SERVER_ONLY ? self.serverFetch : await new BareMux.BareClient()).fetch(
 		proxyUrl,
 		rewrittenReqOpts
 	);

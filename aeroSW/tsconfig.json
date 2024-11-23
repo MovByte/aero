@@ -5,16 +5,17 @@
 		"module": "NodeNext",
 		"baseUrl": "../",
 		"lib": ["ESNext", "WebWorker", "WebWorker.ImportScripts"],
+		"allowImportingTsExtensions": false,
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true,
 		"sourceMap": true,
 		"paths": {
 			"$aero/*": ["*"],
 			"$sandbox/*": ["AeroSandbox/src/*"],
-      "$util/*": ["AeroSandbox/src/util/*"],
-      "$shared/*": ["aeroSW/src/shared/*"],
-      "$fetchHandler/*": ["AeroSandbox/src/shared/fetchHandlers/*"],
-      "$isolation/*": ["AeroSandbox/src/isolation/*"],
+			"$util/*": ["AeroSandbox/src/util/*"],
+			"$shared/*": ["AeroSandbox/src/shared/*"],
+			"$fetchHandlers/*": ["aeroSW/src/fetcHandlers/*"],
+			"$isolation/*": ["AeroSandbox/src/isolation/*"],
 			"$src/*": ["aeroSW/src/*"],
 			"$sw/*": ["aeroSW/src/this/*"],
 			"$alt_backends/*": ["aeroSW/src/altBackends/*"],
@@ -23,7 +24,7 @@
 			"$cors/*": ["aeroSW/src/this/fetchHandlers/internal/isolation/*"],
 			"$embeds/*": ["aeroSW/src/this/preprocessors/*"],
 			"$handlers/*": ["aeroSW/src/this/handlers/*"],
-			"$types/*": ["types/*"]
+			"$types/*": ["aeroSW/types/*"]
 		},
 		"types": [
 			"./types/index.d.ts",
@@ -40,19 +41,14 @@
 		"strict": true
 	},
 	"include": [
-		"AeroSandbox/src/shared/*.ts
-		"./AeroSandbox/src/shared/*.ts",
-		"AeroSandbox/types/aeroSandbox.d.ts
-		"AeroSandbox/types/aeroSandbox.d.ts",
-		"AeroSandbox/src/defaultConfig.js
-		"AeroSandbox/tests/shared/importHooks.mjs
-		"AeroSandbox/tests/shared/customImportResolveHooks.mjs
-, "AeroSandbox/tests/shared/customImportResolveHooks.mjs"	],
-	"exclude": [
-		"rspack.config.ts",
-		"AeroSandbox/src
-		"AeroSandbox/rsbuild.config.ts
-		"AeroSandbox/buildld.config.ts",
-		"./AeroSandbox/build"
-	]
+		"**/*.ts",
+		"../AeroSandbox/src/defaultConfig.js",
+		"../AeroSandbox/src/shared/**/*.ts",
+		"../AeroSandbox/types/aeroSandbox.d.ts",
+		"types/globals.d.ts",
+		"../AeroSandbox/tests/shared/importHooks.mjs",
+		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs",
+		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs"
+	],
+	"exclude": ["rspack.config.ts"]
 }

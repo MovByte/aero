@@ -1,0 +1,5 @@
+src="examples/deploy.js"
+minify=true
+route = [
+  { pattern = "cf.aero.sh", custom_domain = true }
+]

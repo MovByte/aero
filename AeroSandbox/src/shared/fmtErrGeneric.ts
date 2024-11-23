@@ -6,14 +6,12 @@
 
 import type { Err } from "neverthrow";
 import { err as nErr, errAsync as nErrAsync } from "neverthrow";
-import createGenericTroubleshootingStrs from "./createGenericTroubleshootingStrs";
-
-const aeroErr = createGenericTroubleshootingStrs(ERR_LOG_AFTER_COLON).aeroErrTag;
+import createGenericTroubleshootingStrs from "./createGenericTroubleshootingStrs.ts";
 
 /**
- * I could've used a class for this, but I felt it would be overkill for its intended use case.
- * @param featureFlags 
- * @returns The methods for formatting errors
+ * I could've used a class for this, but I felt it would be overkill for its intended use case
+ * @param errLogAfterColon A feature log to help with the formatting of the unpacked *Neverthrow* errors
+ * @returns The methods for formatting *Neverthrow* errors
  * 
  * @example
  * export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(ERR_LOG_AFTER_COLON);
@@ -25,7 +23,7 @@ const createErrorFmters = (errLogAfterColon: string, customFaultTag?: string) =>
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted error
 	 */
-	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${customFaultTag || aeroErr}${explanation}${errLogAfterColon}${originalErr}`),
+	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${customFaultTag || createGenericTroubleshootingStrs(errLogAfterColon).aeroErrTag}${explanation}${errLogAfterColon}${originalErr}`),
 	/**
 	 * Formats a *Neverthrow* error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`

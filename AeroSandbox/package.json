@@ -36,8 +36,8 @@
 		"initApis": "node --import=tsx ./scripts/initApis.ts",
 		"initApiTypes": "node --import=tsx ./scripts/initApiTypes.ts",
 		"initDist": "node --import=tsx ./scripts/InitDist.ts",
-		"init-globals:biome": "node --no-warnings --experimental-strip-types -- ./scripts/init-globals:biome.ts",
-		"init-globals:ts": "node --no-warnings --experimental-strip-types -- ./scripts/init-globals:ts.ts",
+		"init-globals:biome": "node --no-warnings --experimental-strip-types -- ./scripts/initGlobalsBiome.ts",
+		"init-globals:ts": "node --no-warnings --experimental-strip-types -- ./scripts/initGlobalsTs.ts",
 		"test:jsdiff": "node --no-warnings --experimental-strip-types -- ./tests/jsdiff.ts",
 		"bench:encodingMethods": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(pathToFileURL(\"./tests/shared/customImportResolveHooks.mjs\"));' --no-warnings --experimental-strip-types -- ./tests/encodingMethods.ts"
 	},

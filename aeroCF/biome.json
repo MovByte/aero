@@ -3,10 +3,7 @@
 	"extends": ["../AeroSandbox/base.biome.json"],
 	"files": {
 		"ignore": [
-			"extras/deno",
-			"tests/deno",
 			"scripts/**/*.ts",
-			"tests/deno/**/*.ts"
 		]
 	}
 }

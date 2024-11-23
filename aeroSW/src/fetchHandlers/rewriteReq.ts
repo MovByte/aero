@@ -6,7 +6,7 @@
 // Passthrough types
 import type { Config } from "$aeroSWTypes/config";
 import type { Sec } from "$aeroSWTypes/cors";
-import type { CacheManager } from "$fetchHandlers/isolation/CacheManager";
+import type { CacheManager } from "$aero/aeroSW/src/fetchHandlers/isolation/CacheManager";
 import type { eitherLogger } from "$sandboxTypes/loggers";
 
 // Abstracted req abstractions

@@ -54,7 +54,7 @@ function rewriteSetCookie(cookie: string, proxyLoc: URL, prefix: string): Result
 }
 
 /**
- * Creates `Neverthrow` Error when the rewriting of a header fails because of a RegExp error.
+ * Creates *Neverthrow* Error when the rewriting of a header fails because of a RegExp error.
  * This is a helper method meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
  */
 function fmtErrfailedToRewriteAHeader(headerType: string, errMsg: string): Err<string, Error> {

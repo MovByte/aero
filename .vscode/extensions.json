@@ -30,6 +30,9 @@
 		"denoland.vscode-deno",
 		"bierner.comment-tagged-templates",
 		"aaron-bond.better-comments",
-		"astro-build.astro-vscode"
+		"astro-build.astro-vscode",
+		"cloudflare.cloudflare-workers-bindings-extension",
+		"jaaxxx.cloudflare-vscode-devtools",
+		"norgor.capnp"
 	]
 }

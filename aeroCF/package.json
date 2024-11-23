@@ -1,0 +1,14 @@
+{
+	"name": "aero-proxy-cf",
+	"version": "0.0.1",
+	"description": "A port of aero to run server-only in CF Workers",
+	"main": "dist/handle.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Ryan Wilson",
+	"license": "AGPL-3.0-or-later",
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20241112.0"
+	}
+}

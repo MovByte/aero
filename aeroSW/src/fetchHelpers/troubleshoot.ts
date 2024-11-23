@@ -55,7 +55,7 @@ export default function troubleshoot(): Result<void, Error> {
 		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The config ${troubleshootingStrs.validationTarget} provided is invalid!`, ...configValidation.errors);
 }
 
-async function troubleshootJustConfigs(): Result<void, Err> {
+export function troubleshootJustConfigs(): Result<void, Err> {
 	if (!("aeroConfig" in self)) {
 		if ("defaultConfig" in self)
 			return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no default config provided! You need to create one other than the default`));
