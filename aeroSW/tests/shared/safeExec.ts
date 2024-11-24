@@ -32,15 +32,17 @@ export default async function safeExecUnwrapped(cmd: string, cwd: any, extraMsg 
  * @returns This is an internal function and should not be used directly. It is exported here in case you find any use for it.
  */
 // biome-ignore lint/suspicious/noExplicitAny: the argument `cwd` is being used for passthrough 
-export async function safeExec(cmd: string, cwd: any): Promise<ResultAsync<void, Error>> {
+export async function safeExec(cmd: string, cwd: any): Promise<ResultAsync<{
+	stdout: Buffer<ArrayBufferLike>
+	stderr: Buffer<ArrayBufferLike>
+}, Error>> {
 	try {
 		// TODO: Wait for the command to exit before leaving this function
 		// @ts-ignore: the types are compatible (any was correctly used above)
-		const { stderr } = await promisify(exec)(cmd, cwd);
-		if (stderr) console.error(stderr);
+		const { stdout, stderr } = await promisify(exec)(cmd, cwd);
+		return okAsync({ stdout, stderr });
 		// biome-ignore lint/suspicious/noExplicitAny: error catching
 	} catch (nErr: any) {
 		return nErrAsync(nErr);
 	}
-	return okAsync(undefined);
 }

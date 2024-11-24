@@ -1,0 +1,22 @@
+{
+	"name": "tests",
+	"version": "0.0.1",
+	"type": "module",
+	"description": "The unit tests and systems tests for aero (this will never be published)",
+	"homepage": "https://aero.sh/results",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/vortexdl/aero.git"
+	},
+	"author": "Ryan Wilson",
+	"license": "AGPL-3.0-or-later",
+	"dependencies": {
+		"envsafe": "^2.0.3",
+		"flags": "^0.2.2",
+		"yaml": "^2.6.1"
+	}
+}

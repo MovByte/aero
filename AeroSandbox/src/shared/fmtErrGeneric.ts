@@ -16,21 +16,28 @@ import createGenericTroubleshootingStrs from "./createGenericTroubleshootingStrs
  * @example
  * export const { fmtErr, fmtNeverthrowErr } = createErrorFmters(ERR_LOG_AFTER_COLON);
  */
-const createErrorFmters = (errLogAfterColon: string, customFaultTag?: string) => ({
+const createErrorFmters = (errLogAfterColon: string) => ({
 	/**
 	 * Formats an error in a consistent way
 	 * @param explanation The concise explanation of the `originalErr`
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted error
 	 */
-	fmtErr: (explanation: string, originalErr: string): Error => new Error(`${customFaultTag || createGenericTroubleshootingStrs(errLogAfterColon).aeroErrTag}${explanation}${errLogAfterColon}${originalErr}`),
+	fmtErr: (explanation: string, originalErrs: string | string[], customFaultTag?: string): Error => new Error(this.fmtRawErr(explanation, originalErrs, customFaultTag)),
 	/**
 	 * Formats a *Neverthrow* error in a consistent way
+	 * This method warps `fmtErr` in a *Neverthrow* error
 	 * @param explanation The concise explanation of the `originalErr`
 	 * @param originalErr The original error that was caught
 	 * @returns The formatted *Neverthrow* error
 	 */
 	// @ts-ignore I want to do this method switching, and it doesn't matter what the first template type is in `Err` from *Neverthrow*, because this method is meant to be generic
-	fmtNeverthrowErr: (explanation: string, originalErr: string, async = false): Err<any, Error> => (async ? nErrAsync : nErr)(this.fmtErr(explanation, originalErr))
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	fmtNeverthrowErr: (explanation: string, originalErrs: string | string[], async = false, customFaultTag?: string): Err<any, Error> => (async ? nErrAsync : nErr)(this.fmtRawErr(explanation, originalErrs, customFaultTag))
+	fmtRawErr: (explanation: string, originalErrs: string | string[], customFaultTag?: string): string => {
+		if (!Array.isArray(originalErrs))
+			originalErrs = ["", originalErrs];
+		return (`${customFaultTag || createGenericTroubleshootingStrs(errLogAfterColon).aeroErrTag}${explanation}${originalErrs.join(errLogAfterColon)}`);
+	},
 });
 export default createErrorFmters;

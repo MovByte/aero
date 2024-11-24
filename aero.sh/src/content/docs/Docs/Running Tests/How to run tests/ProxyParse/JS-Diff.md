@@ -36,14 +36,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run JS-Diff Action
-        uses: vortexdl/aero/actions/js-diff
+        uses: vortexdl/aero/actions/js_diff
         with:
           ...
 ```
 
 ### Run the CLI
 
-`npx run aero-sandbox/tests/js-diff`
+`npx run aero-sandbox/tests/js_diff`
 
 #### Args for the CLI
 

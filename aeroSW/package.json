@@ -1,6 +1,6 @@
 {
-	"name": "aero-proxy",
-	"version": "0.0.6",
+	"name": "proxy",
+	"version": "0.0.1",
 	"description": "A safe, developer-friendly, innovative interception web proxy with many features with a powerful web sandboxing library to bypass and overcome browser limitations in a secure sandbox that respects security features",
 	"homepage": "https://aero.sh",
 	"main": "extras/node/aeroPath.js",

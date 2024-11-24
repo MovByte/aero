@@ -5,10 +5,14 @@
   on:
     workflow_dispatch:
       inputs: 
-        wptDiffBaseCommand:
+        wptDiffBaseCmd:
           description: The base command to run the WPT-Diff CLI
           required: false
-          default: npx run aero-sandbox/tests/wpt-diff
+          default: npx wpt-diff --package=@aero-tests/wpt-diff
+        getRunInfoBaseCmd:
+          description: The base command to run the command for generating the the runs info
+          required: false
+          default: npx wpt-diff-runs-info --package=@aero-tests/wpt-diffs
         proxyURL:
           description: The URL to your web proxy
           required: true
@@ -16,12 +20,23 @@
           description: The URL to a git repo of WPT
           required: false
           default: "https://github.com/web-platform-tests/wpt.git"
+        browser:
+          description: The browser to run the WPT-Diff tests on
+          required: false
+          default: "chrome"
         rootDir:
           description: The root directory of the project which contains the checkoutsDir
           required: true
         checkoutsDir:
-          description: The directory inside of root that is where the checkouts occur in the test
+          description: The directory to checkout the WPT tests to
           required: true
+        testResultsDir:
+          description: The directory to store the test results in
+          required: true
+        runsOutfilename:
+          description: The name of the file to store the runs info in
+          required: false
+          default: "runs-baseline.json"
 
   jobs:
     js-diff:
@@ -36,10 +51,19 @@
             node-version: 21
 
         - name: Run WPT-Diff
-          run: ${{ github.event.inputs.wptDiffBaseCommand --proxyURL ${{ github.event.inputs.proxyURL }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}"
+          run: ${{ github.event.inputs.wptDiffBaseCmd --proxyURL ${{ github.event.inputs.proxyURL }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}"
+
+        - name: Gen the runs info
+          run: ${{getRunInfoBaseCmd}} --browser ${{ github.event.inputs.browser }} --runsOutfilename ${{testResultsDir}}/${{ github.event.inputs.runsOutfilename }}
 
         - name: Upload the results as an artifact
           uses: actions/upload-artifact@4
           with:
             name: wpt-diff-results
-            path: $${ github.event.inputs.rootDir }}/${{ github.event.inputs.resultsDir }}/wptDiffResults.csv
+            path: ${github.event.inputs.rootDir }}/${{ github.event.inputs.resultsDir }}/results.json
+
+        - name: Upload the run info as an artifact
+          uses: actions/upload-artifact@4
+          with:
+            name: wpt-diff-results-run-info
+            path:  ${github.event.inputs.rootDir }}/${{ github.event.inputs.resultsDir }}/runs-baseline.json

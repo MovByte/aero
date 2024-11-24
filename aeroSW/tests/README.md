@@ -12,4 +12,4 @@ The tests will be processed in this order
 
 ## CI
 
-All of these will have integrations with Github Actions except for the [wpt-diff](../tests/browser/wpt-diff/README.md) tests
+All of these will have integrations with Github Actions except for the [wpt-diff](../WPT-Diff/README.md) tests

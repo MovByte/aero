@@ -1,9 +1,9 @@
 /**
  * @module
- * This is a test and benchmark that runs the JS Rewriter on all of the tests that are used in the WebKit browser, processed as one large bundle.
- * This module is exposed as a CLI.
- * The CLI here is used for a GitHub Action, which will be published on the GitHub Marketplace.
- * In addition, this module will be published on NPM and JSR.
+ * This is a test and benchmark that runs aero's JS Rewriter on all of the tests that are used in the WebKit browser, processed as one large bundle.
+ * This module also contains a **CLI**
+ * The CLI here is used for a *GitHub Action* in this repo that is meant for the public.
+ * In addition, this module will be published on *NPM* and *JSR*.
  */
 // TODO: Make a GitHub Action that runs this script and logs the results to a CSV file
 
@@ -27,7 +27,7 @@ import validateTestBenchCSV from "../../../tests/shared/validateCSV.js";
 import { checkoutDirSparsely } from "../../../tests/shared/checkoutRepo.js";
 
 /**
- * The context to checkout JSTest
+ * The context to checkout *JSTest*
  * This is exposed if you need it
  */
 export interface JSTestEnvContext {

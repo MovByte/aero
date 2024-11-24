@@ -50,5 +50,5 @@
 		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs",
 		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs"
 	],
-	"exclude": ["rspack.config.ts"]
+	"exclude": ["tests/**/*", "rspack.config.ts"]
 }
