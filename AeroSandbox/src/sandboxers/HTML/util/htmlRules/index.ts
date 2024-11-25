@@ -6,7 +6,7 @@
 import type { htmlRule } from "$aero/types/htmlRules";
 
 import setRulesContentRewriters from "./rewriteContent";
-import setRulesLinks from "./rewriteLinks";
+import setRulesLinks from "./links";
 import setRulesCORS from "./cors";
 import setRulesFrames from "./frame";
 import setRulesForMediaEmulation from "./media";
@@ -14,9 +14,12 @@ import setRulesForMediaEmulation from "./media";
 // biome-ignore lint/suspicious/noExplicitAny: TODO: Make `any`, Element
 const htmlRules = new Map<any, htmlRule>();
 setRulesContentRewriters(htmlRules)
-setRulesLinks(htmlRules);
+if (!HTML_USE_HREF_EMULATION)
+	setRulesLinks(htmlRules);
 if (FEATURE_CORS_EMULATION)
 	setRulesCORS(htmlRules);
-setRulesFrames(htmlRules);
-setRulesForMediaEmulation(htmlRules);
+if (SUPPORT_FRAMES)
+	setRulesFrames(htmlRules);
+if (HTML_INTERCEPT_MEDIA_STREAMS)
+	setRulesForMediaEmulation(htmlRules);
 export default htmlRules;

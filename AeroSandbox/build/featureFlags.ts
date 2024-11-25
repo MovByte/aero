@@ -4,14 +4,20 @@ import type { htmlRewriterMode } from "../types/rewriters/html";
 export type fetchPublicSuffixPriorityType = "compile-time" | "run-time";
 
 export interface FeatureFlags {
-	/** @warning `custom_elements` is currently unsupported */
+	/** @warning `custom_elements` is currently unsupported and untested */
 	supportedHtmlRewriterModes: htmlRewriterMode[];
-	/** @warning currently unsupported */
+	/** @warning currently unsupunsupported and untestedported */
 	htmlUseIsAttr: boolean;
 	/** @warning currently unsupported */
 	htmlUseNavEvents: boolean;
+	/** @warning currently unsupported and untested */
+	htmlUseHrefEmulation: boolean;
+	/** @warning currently unsupported and untested */
+	htmlInterceptMediaStreams: boolean;
+	/** @warning currently unsupported and untested */
+	supportFrames: boolean,
 	featureCorsEmulation: boolean;
-	/** @warning currently unsupported */
+	/** @warning currently unsupported and untested */
 	featureEmuSecureCtx: boolean;
 	/** Integrity emulation is extremely slow, because it blocks the main thread to syncronously run a `Promise`. Very few to no sites will use integrity emulation as a means to detect aero. */
 	supportIntegrityEmu: boolean;

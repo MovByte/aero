@@ -39,5 +39,5 @@ export default function setRulesForMediaEmulation(htmlRules) {
 			}
 		}
 	});
-	// This doesn't need to be done for `.webm` chunks, you are supposed to `fetch` them yourself from the data you recieve from the `sourceopen` event from the `MediaSource` object
+	// Note: This doesn't need to be done for `.webm` chunks, you are supposed to `fetch` them yourself from the data you recieve from the `sourceopen` event from the `MediaSource` object
 }
