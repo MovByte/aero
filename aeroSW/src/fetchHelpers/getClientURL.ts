@@ -9,7 +9,7 @@ import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
 
 // Utility
-import { afterPrefix } from "$shared/getProxyUrl";
+import { afterPrefix } from "$util/getProxyUrl";
 import appendSearchParam from "$shared/escaping/appendSearchParam";
 
 /**

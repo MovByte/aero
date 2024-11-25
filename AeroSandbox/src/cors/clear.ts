@@ -1,5 +1,5 @@
-import { upToProxyOrigin } from "$aero/src/shared/upToProxyLocation";
-import { storageNomenclature, storagePrefix } from "$aero/src/shared/storage";
+import { upToProxyOrigin } from "$shared/upToProxyLocation";
+import { storageNomenclature, storagePrefix } from "$shared/storage";
 
 // @ts-ignore
 declare var openDatabase;

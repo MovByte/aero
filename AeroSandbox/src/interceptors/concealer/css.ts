@@ -5,7 +5,7 @@
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#obtaining_a_stylesheet} - These explain all of the methods of obtaining `CSSStyleSheet`. TODO: Finish intercepting all of those revealers.
  */
 
-import { afterPrefix } from "$aero/src/shared/getProxyURL";
+import { afterPrefix } from "$util/getProxyUrl";
 import {
 	type APIInterceptor,
 	ExposedContextsEnum

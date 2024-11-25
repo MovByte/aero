@@ -2,7 +2,7 @@ import {
 	type APIInterceptor,
 	ExposedContextsEnum
 } from "$types/apiInterceptors.d.ts";
-import { proxyGetString } from "$aero/src/shared/stringProxy";
+import { proxyGetString } from "$util/stringProx";
 
 export default {
 	proxifiedObj: proxyGetString("PushSubscription", ["endpoint"]),

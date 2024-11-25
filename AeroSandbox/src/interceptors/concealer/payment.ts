@@ -1,8 +1,8 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { proxyGetString } from "$aero/src/shared/stringProxy";
+import { proxyGetString } from "$util/stringProx";
 
-import rewriteSrc from "$aero/src/shared/src";
+import rewriteSrc from "$util/src";
 
 // Only supported on Chromium
 export default [

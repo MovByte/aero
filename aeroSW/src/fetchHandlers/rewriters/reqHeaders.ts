@@ -13,7 +13,7 @@ import { fmtNeverthrowErr } from "$aero/AeroSandbox/tests/shared/fmtErrTest";
 import { rewriteAuthClient } from "./auth";
 
 // Utility
-import { afterPrefix } from "$shared/getProxyUrl";
+import { afterPrefix } from "$util/getProxyUrl";
 import getSiteDirective from "$shared/cors/siteTests";
 
 import type BareClient from "@mercuryworkshop/bare-mux";

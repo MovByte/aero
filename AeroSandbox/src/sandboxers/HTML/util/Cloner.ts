@@ -1,9 +1,13 @@
-import { safeText } from "./tt";
+/**
+ * @module
+ */
 
-import Cloner from "./Cloner";
+import { safeText } from "./htmlRules/util/tt";
 
-// In the case of CORS attributes present the original is deleted and a new clone is made because it isn't possible to modify the CORS properties internally
-export default class {
+/**
+ * Made for in the case of CORS attributes present the original is deleted and a new clone is made because it isn't possible to modify the CORS properties internally
+ */
+export default class Cloner {
 	el: HTMLElement;
 	copy: HTMLElement;
 

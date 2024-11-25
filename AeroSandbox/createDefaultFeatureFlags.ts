@@ -10,6 +10,7 @@ export default (ctx: CtxType) =>
 		],
 		htmlUseIsAttr: false,
 		htmlUseNavEvents: false,
+		featureCorsEmulation: false,
 		featureEmuSecureCtx: false,
 		featureHashURL: false,
 		supportIntegrityEmu: false,

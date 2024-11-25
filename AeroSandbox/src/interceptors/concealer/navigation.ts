@@ -1,8 +1,8 @@
 // Not finished
 
-import { afterPrefix } from "$aero/src/shared/getProxyURL";
+import { afterPrefix } from "$util/getProxyUrl";
 
-import { proxyLocation } from "$aero/src/shared/proxyLocation";
+import { proxyLocation } from "$util/proxyLocation";
 
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 

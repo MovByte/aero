@@ -1,11 +1,11 @@
-import rewriteSrc from "$aero/src/shared/src";
+import rewriteSrc from "$util/src";
 import type { onAttrHandler } from "$aero/types/htmlRules";
 // TODO: Use $util
-import htmlSrc from "../shared/htmlSrc";
+import htmlSrc from "../util/htmlSrc";
 
-import proxifyCustomElementName from "../shared/proxifyCustomElementName";
+import proxifyCustomElementName from "../util/proxifyCustomElementName";
 
-import htmlRules from "../shared/htmlRules";
+import htmlRules from "../util/htmlRules";
 
 {
 	for (const [OriginalHTMLElement, htmlRule] of htmlRules.entries()) {

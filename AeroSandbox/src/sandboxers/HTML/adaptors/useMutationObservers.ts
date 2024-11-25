@@ -1,4 +1,4 @@
-import rewriteElement from "$sandbox/HTML/shared/rewriteElement";
+import rewriteElement from "$src/sandboxers/HTML/util/rewriteElement";
 
 new MutationObserver(mutations => {
 	for (const mutation of mutations)

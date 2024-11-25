@@ -1,6 +1,6 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { afterPrefix } from "$aero/src/shared/getProxyURL";
+import { afterPrefix } from "$util/getProxyUrl";
 
 export default {
 	proxifiedObj: Proxy.revocable(launchQueue.setConsumer, {

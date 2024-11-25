@@ -1,6 +1,6 @@
 import { parseDocument } from "htmlparser2";
 // This runs in the SW, so it must not use any custom import paths
-import rewriteElement from "../shared/rewriteElement";
+import rewriteElement from "../util/rewriteElement";
 
 export default function (domText: string) {
 	const dom = parseDocument(domText);

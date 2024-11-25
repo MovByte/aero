@@ -1,6 +1,6 @@
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
 
-import { proxyLocation, upToProxyOrigin } from "$aero/src/shared/proxyLocation";
+import { proxyLocation, upToProxyOrigin } from "$shared/proxyLocation";
 
 // Prevent detection by instanceof or attempting to overwrite it
 const inheritedObject = {};

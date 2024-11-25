@@ -1,4 +1,4 @@
-import { proxyGetString } from "$aero/src/shared/stringProxy";
+import { proxyGetString } from "$util/stringProx";
 
 proxyGetString("File", ["webkitRelativePath"]);
 

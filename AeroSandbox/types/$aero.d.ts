@@ -1,5 +1,5 @@
 import type BareClient from "@mercuryworkshop/bare-mux";
-import type { AeroSandboxLogger } from "$aero/src/shared/Loggers";
+import type { AeroSandboxLogger } from "$shared/Loggers";
 import type { Config } from "./config";
 import type { SearchParamOptionsConfig } from "../../aeroSW/types/config";
 import type JSRewriter from "$aero/src/sandboxers/JS/JSRewriter";

@@ -1,4 +1,4 @@
-import rewriteElement from "$sandbox/HTML/shared/rewriteElement";
+import rewriteElement from "$src/sandboxers/HTML/util/rewriteElement";
 
 export default function (domText: string) {
 	const dom = new DOMParser().parseFromString(domText, "text/html");

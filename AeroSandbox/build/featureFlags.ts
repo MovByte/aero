@@ -10,6 +10,7 @@ export interface FeatureFlags {
 	htmlUseIsAttr: boolean;
 	/** @warning currently unsupported */
 	htmlUseNavEvents: boolean;
+	featureCorsEmulation: boolean;
 	/** @warning currently unsupported */
 	featureEmuSecureCtx: boolean;
 	/** Integrity emulation is extremely slow, because it blocks the main thread to syncronously run a `Promise`. Very few to no sites will use integrity emulation as a means to detect aero. */

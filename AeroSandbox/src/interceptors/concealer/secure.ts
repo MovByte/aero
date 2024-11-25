@@ -3,7 +3,7 @@ import {
     ExposedContextsEnum
 } from "$types/apiInterceptors.d.ts";
 
-import { proxyLocation } from "$aero/src/shared/proxyLocation";
+import { proxyLocation } from "$util/proxyLocation";
 
 export default {
     modifyObjectProperty() {

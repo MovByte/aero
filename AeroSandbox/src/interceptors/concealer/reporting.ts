@@ -1,4 +1,4 @@
-import { afterPrefix } from "$aero/src/shared/getProxyURL";
+import { afterPrefix } from "$util/getProxyUrl";
 
 // TODO: Define the undefined APIs on the Window object. This file is very incomplete.
 

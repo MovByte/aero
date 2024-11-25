@@ -1,10 +1,14 @@
-import { proxyLocation } from "$aero/src/shared/proxyLocation";
+/**
+ * @module
+ */
+
+import { proxyLocation } from "$util/proxyLocation";
 
 // TODO: Use policy.ts
 
 // Gets the sources in the CSP with directive
 function cspSrc(dir: string): string[] {
-	const [sources] = $aero.sec.csp.match(new RegExp(`${dir} ([^;]*)`), "g");
+	const [sources] = $aero.sec.csp.match(new RegExp(`${dir} ([^;]*)`, "g"));
 
 	if (typeof sources === "undefined") return;
 

@@ -3,7 +3,7 @@ import {
 	SpecialInterceptionFeaturesEnum
 } from "$types/apiInterceptors.d.ts";
 
-import { proxyConstructString } from "$aero/src/shared/stringProxy";
+import { proxyConstructString } from "$util/stringProx";
 
 export default {
 	proxifiedObj: ctx => {

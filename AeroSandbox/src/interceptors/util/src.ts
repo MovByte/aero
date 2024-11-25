@@ -1,4 +1,4 @@
-import { getProxyConfig } from "$aero/src/shared/getConfig";
+import { getProxyConfig } from "$shared/getConfig";
 
 import { proxyLocation } from "./proxyLocation";
 

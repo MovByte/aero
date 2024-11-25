@@ -2,7 +2,7 @@ import sharedConfig from "$util/sharedConfig";
 
 import rewriteSrc from "$src/shared/src";
 
-import { proxyLocation } from "$aero/src/shared/proxyLocation";
+import { proxyLocation } from "$util/proxyLocation";
 
 /**
  * Extends src rewriting for processed html urls

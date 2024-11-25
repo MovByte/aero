@@ -1,5 +1,5 @@
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
-import { proxyLocation } from "$aero/src/shared/proxyLocation";
+import { proxyLocation } from "$util/proxyLocation";
 
 /**
  * Checks if a segment is a valid directory name.

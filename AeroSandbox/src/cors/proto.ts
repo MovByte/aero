@@ -1,4 +1,4 @@
-import { proxyLocation } from "$aero/src/shared/proxyLocation";
+import { proxyLocation } from "$util/proxyLocation";
 
 // Custom protocols
 export default {

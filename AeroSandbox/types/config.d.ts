@@ -1,7 +1,7 @@
 import type JSRewriter from "$sandbox/JS/JSRewriter";
 import type { FeatureFlags } from "./featureFlags";
 import type { AeroSandboxFeaturesConfig } from "./aeroSandbox";
-import type { AeroSandboxLogger } from "$aero/src/shared/Loggers";
+import type { AeroSandboxLogger } from "$shared/Loggers";
 
 export type Config = {
 	bundle: string;

@@ -3,7 +3,7 @@ import {
 	ExposedContextsEnum
 } from "$types/apiInterceptors.d.ts";
 
-import rewriteSrc from "$aero/src/shared/src";
+import rewriteSrc from "$util/src";
 
 export default {
 	proxifiedApi: new Proxy(open, {

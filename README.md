@@ -38,18 +38,20 @@ npm --profile=AeroSandbox run build
 ```
 > ⚠️ FIXME: There are currently issues building aero with `pnpm`, so please refrain from using it at the moment
 
-## How to live debug aero (how to run the aero dev server)
+## How to live debug aero
 
-> ⚠️ This dev server isn't meant to be used as a demo, but it certainly can be if you run without the live build scripts. You can pre-build the production builds and run `npm run buildSW`. There will be an actual demo server like described [here](./docs/Plans/Aero%20Live%20Deployment%20Page.md).
-> Be sure to [enable Source Maps](https://developer.chrome.com/docs/devtools/javascript/source-maps#enable_source_maps_in_settings) when debugging
-
-1. Install pm2
-2. Execute these commands
+1. Execute these commands
 
   ```bash
-  ./deps.sh
-  npm start
+  # For live build (so that all of the builds are the latest whenever you edit them because of the watcher)
+  npm --profile=aeroSW i
+  npm --profile=aeroSW start
+  # For the actual demo site
+  npm --profile=aero.sh i
+  npm --profile=aero.sh start
   ```
+
+> This will yield you an instance of the *aero.sh* site locally, and it will auto-update
 
 > Run `git pull` and then run these commands again to update the dev server
 > The port by default is **:2525**

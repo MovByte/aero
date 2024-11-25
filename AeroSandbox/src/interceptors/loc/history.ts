@@ -3,9 +3,9 @@ import {
 	ExposedContextsEnum
 } from "$types/apiInterceptors.d.ts";
 
-import rewriteSrc from "$aero/src/shared/src";
+import rewriteSrc from "$util/src";
 
-import { proxyLocation, upToProxyOrigin } from "$aero/src/shared/proxyLocation";
+import { proxyLocation, upToProxyOrigin } from "$shared/proxyLocation";
 
 const historyState = {
 	apply(target: any, that: ProxyHandler<object>, args: any[]) {

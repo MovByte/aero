@@ -1,7 +1,9 @@
-import htmlRules from "./htmlRules";
+import htmlRules from "./shared/index";
 
-import rewriteSrc from "$aero/src/shared/src";
+// Utility
+import rewriteSrc from "$util/src";
 import rewriteHtmlSrc from "./htmlSrc";
+import Cloner from "./Cloner";
 
 const afterRewritten = new WeakMap<Element, boolean>();
 const elContainer = new WeakMap<Element, Element>();
@@ -49,7 +51,6 @@ export default function rewriteElement(
 			if (elClass === ignoreClass) return el;
 
 	if (isNew && "integrity" in el && el.integrity !== "") {
-		// @ts-ignore
 		const cloner = new Cloner(el);
 
 		cloner.clone();

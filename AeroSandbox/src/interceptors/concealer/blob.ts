@@ -1,5 +1,5 @@
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
-import isHtml from "$aero/src/shared/isHTML";
+import isHtml from "$shared/isHTML";
 
 export default {
 	proxifiedObj: Proxy.revocable(Blob, {

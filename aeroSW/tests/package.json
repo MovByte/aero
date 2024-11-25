@@ -6,7 +6,7 @@
 	"homepage": "https://aero.sh/results",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"wpt-diff": "tsx WPT-Diff/index.ts"
 	},
 	"repository": {
 		"type": "git",
@@ -18,5 +18,9 @@
 		"envsafe": "^2.0.3",
 		"flags": "^0.2.2",
 		"yaml": "^2.6.1"
+	},
+	"devDependencies": {
+		"neverthrow": "^8.1.1",
+		"tsx": "^4.19.2"
 	}
 }
