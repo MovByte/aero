@@ -61,7 +61,7 @@ htmlRules.set(HTMLScriptElement, {
 					el.type === "application/javascript")
 			) {
 				// FIXME: Fix safeText so that it could be used here
-				el.innerHTML = $aero.js.wrapScript(el.innerText, {
+				el.innerHTML = $aero.z	js.rewriteScript(el.innerText, {
 					isModule: el.type === "module"
 				});
 
@@ -126,7 +126,7 @@ for (const autoplayElement of autoplayElements)
 
 	htmlRules.set(HTMLIFrameElement, {
 		onAttrHandlers: {
-			src: (el: HTMLIFrameElement, newVal: string) => {
+			src(el: HTMLIFrameElement, newVal: string) {
 				if (!block("frame-src")) return "";
 				// Embed the origin as an attribute, so that the frame can reference it to do its checks
 				// @ts-ignore
@@ -136,26 +136,25 @@ for (const autoplayElement of autoplayElements)
 				// TODO: Bring back
 			},
 			// Inject aero imports
-			srcdoc: (_el: HTMLIFrameElement, newVal: string) =>
-				$aero.init + newVal,
+			srcdoc: (_el: HTMLIFrameElement, newVal: string) => $aero.init + newVal,
 			// Emulate CSP later
-			csp: (_el: HTMLIFrameElement, newVal: string, oldVal: string) => {
+			csp(_el: HTMLIFrameElement, newVal: string, oldVal: string) {
 				return "";
 			},
-			allow: (_el: HTMLIFrameElement, newVal: string, oldVal: string) => {
+			allow(_el: HTMLIFrameElement, newVal: string, oldVal: string) {
 				sec.perms = oldVal;
 				return "";
 			},
-			allowPaymentRequest: (
+			allowPaymentRequest(
 				_el: HTMLIFrameElement,
 				_newVal: string,
 				oldVal: string
-			) => {
+			) {
 				sec.pr = oldVal;
 				return "";
 			}
 		},
-		onCreateHandler: (el: HTMLIFrameElement) => {
+		onCreateHandler(el: HTMLIFrameElement) {
 			// @ts-ignore
 			el.contentWindow.$aero.frame.sec = JSON.stringify(sec);
 		}
@@ -164,7 +163,7 @@ for (const autoplayElement of autoplayElements)
 
 htmlRules.set(HTMLMetaElement, {
 	onAttrHandlers: {
-		httpEquiv: (el: HTMLMetaElement, newVal: string) => {
+		httpEquiv(el: HTMLMetaElement, newVal: string) {
 			switch (newVal) {
 				case "content-security-policy":
 					return el.content;
@@ -178,6 +177,40 @@ htmlRules.set(HTMLMetaElement, {
 							g4 +
 							rewriteSrc(g5, proxyLocation().href)
 					);
+			}
+		}
+	}
+});
+
+/*
+For **HLS emulation** you could rewrite the `.mpd` manifest file in the SW, but then you would have to rewrite the URL to a proxy that is not a SW-handled-path, because all the major browsers have their own media pipeline, which has native browser code that bypasses the SW
+*/
+htmlRules.set(HTMLMetaElement, {
+	onAttrHandlers: {
+		src(el: HTMLIFrameElement, newVal: string) {
+			if (newVal.endsWith(".m3u8") && (
+				// @ts-ignore: The check `el.canPlayType("application/vnd.apple.mpegurl")` is for Safari only
+				el.canPlayType("application/vnd.apple.mpegurl") ||
+				// This check is for any browser
+				$aero.sandbox.ext.Hls.isSupported())) {
+				const hls = new $aero.sandbox.ext.Hls();
+				hls.loadSource(newVal);
+				hls.attachMedia(el);
+			}
+		}
+	}
+})
+/*
+For **MPEG-DASH emulation**, the situation is similar to **HLS emulation** when it comes to rewriting the `.m3u8` manifest file in the SW. 
+*/
+htmlRules.set(HTMLMetaElement, {
+	onAttrHandlers: {
+		src(el: HTMLIFrameElement, newVal: string) {
+			if (newVal.endsWith(".mpd") ||
+				// Check if the browser supports MPEG-DASH
+				window.MediaSource && MediaSource.isTypeSupported("application/dash+xml")) {
+				const dash = new $aero.sandbox.ext.dashjs.MediaPlayer();
+				dash.initialize(el, newVal, true);
 			}
 		}
 	}

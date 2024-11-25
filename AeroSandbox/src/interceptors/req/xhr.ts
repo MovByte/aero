@@ -11,11 +11,13 @@ import { createEscapePropGetHandler } from "$util/escape.ts";
 
 export default {
 	proxifiedObj: Proxy.revocable(XMLHttpRequest, {
+		isSync: boolean,
+		syncBc: BareMux,
 		construct(target, args) {
-			if (args[2] === true) this.isSync = true;
-			const syncBc: BareMux = $aero.sandbox.ext.awaitSync($aero.bc);
-
-			// TODO: Fetch the request just like I do in the SW (TODO: abstract fetching/request rewriting logic (this will be done in `$aero/util/handlers/request.ts`) (it would also help with porting aero to other runtimes for server-only) from the SW because of this new use case)
+			if (args[2] === true) {
+				this.isSync = true;
+				this.syncBc = $aero.sandbox.ext.awaitSync($aero.bc);
+			}
 
 			return Reflect.construct(target, args);
 		},
@@ -25,3 +27,15 @@ export default {
 	globalProp: "XMLHttpRequest",
 	exposedContexts: anyWorkerExceptServiceWorkerEnumMember
 } as APIInterceptor;
+
+/*
+// TODO: This is an API that was last supported in IE11, so it would also not work in a SW.
+export default {
+	proxifiedObj: Proxy.revocable(XDomainRequest, {
+		construct(target, args) {
+			return Reflect.construct(target, args);
+		}
+	})
+	...
+}
+*/
