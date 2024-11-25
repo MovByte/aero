@@ -13,10 +13,10 @@ import setRulesForMediaEmulation from "./media";
 
 // biome-ignore lint/suspicious/noExplicitAny: TODO: Make `any`, Element
 const htmlRules = new Map<any, htmlRule>();
-
 setRulesContentRewriters(htmlRules)
 setRulesLinks(htmlRules);
 if (FEATURE_CORS_EMULATION)
 	setRulesCORS(htmlRules);
 setRulesFrames(htmlRules);
 setRulesForMediaEmulation(htmlRules);
+export default htmlRules;
