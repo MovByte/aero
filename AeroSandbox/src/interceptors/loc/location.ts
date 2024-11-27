@@ -5,84 +5,88 @@ import { proxyLocation, upToProxyOrigin } from "$shared/proxyLocation";
 // Prevent detection by instanceof or attempting to overwrite it
 const inheritedObject = {};
 Object.defineProperty(this, "inheritedObject", {
-    writable: false,
-    configurable: false
+	writable: false,
+	configurable: false
 });
 Reflect.setPrototypeOf(inheritedObject, Object.getPrototypeOf(location));
 
 const wrap = (url: string) => $aero.config.prefix + url;
 
 const locationProxy = Proxy.revocable(inheritedObject, {
-    get(target, prop) {
-        function internal() {
-            if (typeof target[prop] === "function") {
-                // @ts-ignore
-                // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-                const props: any = {
-                    toString: () => proxyLocation().toString()
-                };
+	get(target, prop) {
+		function internal() {
+			if (typeof target[prop] === "function") {
+				// @ts-ignore
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				const props: any = {
+					toString: () => proxyLocation().toString()
+				};
 
-                // These properties below are not defined in workers
-                if ("assign" in location)
-                    props.assign = (url: string) =>
-                        location.assign(wrap(url));
-                if ("replace" in location)
-                    props.replace = (url: string) =>
-                        location.replace(wrap(url));
 
-                return prop in props && prop in location
-                    ? props[prop]
-                    : target[prop];
-            }
+				if (FEATURE_CORS_EMULATION)
+					// TODO: Respect the `navigate-to` CSP directive from the passthrough CSP headers in `$aero.sec`...
 
-            const fakeUrl = proxyLocation;
+					// These properties below are not defined in workers
+					if ("assign" in location)
+						props.assign = (url: string) =>
+							location.assign(wrap(url));
+				if ("replace" in location)
+					props.replace = (url: string) =>
+						location.replace(wrap(url));
 
-            /**
-             * `ancestorOrigins` is only found in Chrome
-             */
-            const customProps = {
-                // TODO: Rewrite
-                //ancestorOrigins: location.ancestorOrigins,
-            };
+				return prop in props && prop in location
+					? props[prop]
+					: target[prop];
+			}
 
-            if (prop in customProps) return customProps[prop];
+			const fakeUrl = proxyLocation;
 
-            if (prop in fakeUrl) return fakeUrl[prop];
+			/**
+			 * `ancestorOrigins` is only found in Chrome
+			 */
+			const customProps = {
+				// TODO: Rewrite
+				//ancestorOrigins: location.ancestorOrigins,
+			};
 
-            return location[prop];
-        }
+			if (prop in customProps) return customProps[prop];
 
-        const ret = internal();
+			if (prop in fakeUrl) return fakeUrl[prop];
 
-        return ret;
-    },
-    set(target, prop, value) {
-        if (
-            prop === "pathname" ||
-            (prop === "href" && value.startsWith("/"))
-        )
-            target[prop] = upToProxyOrigin + value;
-        else target[prop] = value;
+			return location[prop];
+		}
 
-        return true;
-    }
+		const ret = internal();
+
+		return ret;
+	},
+	set(target, prop, value) {
+		if (
+			prop === "pathname" ||
+			(prop === "href" && value.startsWith("/"))
+		)
+			target[prop] = upToProxyOrigin + value;
+		else target[prop] = value;
+
+		return true;
+	}
 });
 
 export default [{
-    proxifiedObj: locationProxy,
-    globalProp: `["<proxyNamespace>"].sandbox.proxifiedLocation`
+	proxifiedObj: locationProxy,
+	globalProp: `["<proxyNamespace>"].sandbox.proxifiedLocation`
 }, {
-    globalProp: `document.location`,
-    modifyObjectProperty: (ctx) => {
-        Object.defineProperty(document, "domain", {
-            get: (): void => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.hostname
-        });
-    }
+	globalProp: `document.location`,
+	modifyObjectProperty: (ctx) => {
+		Object.defineProperty(document, "domain", {
+			get: (): void => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.hostname
+		});
+	}
 }, {
-    globalProp: `document.location`,
-    modifyObjectProperty: (ctx) => {
-        Object.defineProperty(document, "domain", {
-            get: (): void => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.domain
-        });
-    }
+	globalProp: `document.location`,
+	modifyObjectProperty: (ctx) => {
+		Object.defineProperty(document, "domain", {
+			get: (): void => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.domain
+		});
+	}
 }] as APIInterceptor[];

@@ -7,7 +7,8 @@ import type JSRewriter from "$aero/src/sandboxers/JS/JSRewriter";
 export interface AeroGlobalType {
 	init: string;
 	sec: {
-		csp: string;
+		/** Content Security Policy @see https://content-security-policy.com */
+		csp: string[];
 	};
 	bc: BareClient;
 	logger: AeroSandboxLogger;

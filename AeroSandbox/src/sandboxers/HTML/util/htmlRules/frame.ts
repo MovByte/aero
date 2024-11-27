@@ -26,7 +26,6 @@ export default function setRulesFrames(htmlRules) {
 				el.contentWindow.$aero.frame.parentProxyOrigin =
 					proxyLocation().origin;
 				return newVal;
-				// TODO: Bring back
 			},
 			// Inject aero imports
 			srcdoc: (_el: HTMLIFrameElement, newVal: string) => $aero.init + newVal,

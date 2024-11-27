@@ -14,6 +14,8 @@ import getProxyURL from "$fetchHandlers/util/getProxyURL";
 import getCORSStatus from "$fetchHandlers/util/getCORSStatus";
 import formRequestOpts from "$fetchHandlers/util/formRequestOpts"
 
+import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
 interface Passthrough {
 	logger: eitherLogger
 	req: Request;
@@ -26,6 +28,8 @@ interface Passthrough {
 	sec: Sec;
 	/** This is so that you can include a polyfill for when this is being ran in sync XHR (not in a SW context) */
 	cache: Cache;
+	/** This is mainly intended so that `appendSearchParam()`, whenever it is called, can help the response header rewriter with `No-Vary-Search` header rewriting later */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
 }
 
 export default async function rewriteReq({ logger, req, reqUrl, clientUrl, aeroPathFilter, reqDestination, isNavigate, isiFrame, sec, cache }: Passthrough): Promise<ResultAsync<{

@@ -18,6 +18,8 @@ import rewriteCacheManifest from "$rewriters/cacheManifest";
 import rewriteManifest from "$rewriters/webAppManifest";
 import JSRewriter from "$sandbox/sandboxers/JS/JSRewriter";
 
+import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
 const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
 
 /**
@@ -44,6 +46,8 @@ export default async function rewriteResp({
 	isNavigate: boolean;
 	isMod: boolean;
 	sec: Sec;
+	/** This is for `No-Vary-Search` rewriting */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
 }): Promise<ResultAsync<{
 	rewrittenBody: string | ReadableStream;
 	rewrittenRespHeaders: Headers,
@@ -53,7 +57,8 @@ export default async function rewriteResp({
 	const rewrittenRespHeadersRes = rewriteRespHeaders(originalResp.headers, {
 		proxyUrl,
 		clientUrl,
-		bc: new BareMux.BareClient()
+		bc: new BareMux.BareClient(),
+		rewrittenParamsOriginals
 	});
 	if (rewrittenRespHeadersRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespHeadersRes.error.message);

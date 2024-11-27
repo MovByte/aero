@@ -6,6 +6,8 @@ import { fmtNeverthrowErr } from "$shared/fmtErr";
 import { afterPrefix } from "$util/getProxyUrl";
 import getClientUrlThroughClient, { getClientUrlThroughForcedReferrer } from "$shared/getClientUrl";
 
+import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
 /**
  * Wraps `getClientURL.ts` to be used in aero, with the context of the current aero SW handler being used accordingly with catch-all interception methods.
  * In order to use this function, you must have the feature flag `REQ_INTERCEPTION_CATCH_ALL` set to either `clients` or `referrer`. Prefer `clients` if you can (you must be using a SW).
@@ -35,7 +37,8 @@ export default async function getClientURLAeroWrapper({
 	reqParams,
 	clientId,
 	catchAllClientsValid,
-	isNavigate
+	isNavigate,
+	rewrittenParamsOriginals
 }: {
 	/** The URL from the original request */
 	reqUrl: URL;
@@ -49,6 +52,8 @@ export default async function getClientURLAeroWrapper({
 	catchAllClientsValid: boolean;
 	/** If the request is a navigation request to a document or an iframe (will resolve to a website) */
 	isNavigate: boolean
+	/** This is mainly intended so that `appendSearchParam()` (after `getClientURL()` is called) help the response header rewriter with `No-Vary-Search` header rewriting later */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType
 }): Promise<ResultAsync<string, Error>> {
 	/** The URL from the client's window */
 	let clientUrl: URL;
@@ -74,7 +79,8 @@ export default async function getClientURLAeroWrapper({
 		const clientUrlRes = await getClientUrlThroughForcedReferrer({
 			reqParams,
 			referrerPolicyParamName: aeroConfig.searchParamOptions.referrerPolicy,
-			referrerPolicy: reqHeaders.get("referrer-policy")
+			referrerPolicy: reqHeaders.get("referrer-policy"),
+			rewrittenParamsOriginals
 		})
 		if (clientUrlRes.isErr())
 			return fmtNeverthrowErr(

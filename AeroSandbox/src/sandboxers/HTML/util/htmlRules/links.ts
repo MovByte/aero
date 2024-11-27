@@ -12,6 +12,8 @@ import { proxyLocation } from "$shared/proxyLocation";
 const linkElements = [HTMLAnchorElement, HTMLAreaElement, HTMLBaseElement];
 Object.freeze(linkElements)
 
+const matchMetaRefreshVal = /^([0-9]+)(;)(\s+)?(url=)(.*)/g
+
 /**
  * By "links" in the filename I mean any attribute that may result in a redirect. Because of this definition the meta refresh is also included.
  * @param htmlRules The rules Map to set the rules on
@@ -40,10 +42,12 @@ export default function setRulesLinks(htmlRules) {
 			httpEquiv(el: HTMLMetaElement, newVal: string) {
 				switch (newVal) {
 					case "content-security-policy":
-						return el.content;
+						if (FEATURE_CORS_EMULATIO)
+							for (const dir of el.content.split(";"))
+								$aero.sec.csp.push(dir.trim());
 					case "refresh":
 						return el.content.replace(
-							/^([0-9]+)(;)(\s+)?(url=)(.*)/g,
+							matchMetaRefreshVal,
 							(_match, g1, g2, g3, g4, g5) =>
 								g1 +
 								g2 +

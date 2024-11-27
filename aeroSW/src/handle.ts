@@ -30,6 +30,8 @@ import getPassthroughParam from "$shared/getPassthroughParam";
 /// Cosmetic
 import { AeroLogger } from "$shared/Loggers";
 
+import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
 /** aero's SW logger */
 self.logger = new AeroLogger(Boolean(DEBUG));
 
@@ -100,6 +102,8 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 
 	/** This is an object meant for passthrough, ultimately to the response rewriter, that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
 	const sec: Partial<Sec> = {};
+	/** This is mainly intended so that `appendSearchParam()`, whenever it is called, can help the response header rewriter with `No-Vary-Search` header rewriting later */
+	const rewrittenParamsOriginals: rewrittenParamsOriginalsType = [];
 
 	const rewrittenReqValsRes = await rewriteReq({
 		logger,
@@ -108,10 +112,11 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		clientUrl,
 		aeroPathFilter: aeroConfig.aeroPathFilter,
 		reqDestination: SERVER_ONLY ? self.getReqDest(reqDest,
-			isNavigate: isNavigate
+			isNavigate) : isNavigate
 		isiFrame,
-			sec,
-			clients
+		sec,
+		clients,
+		rewrittenParamsOriginals
 	});
 	if (rewrittenReqValsRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error.message);
@@ -140,7 +145,8 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		clientUrl,
 		isNavigate,
 		isMod,
-		sec
+		sec,
+		rewrittenParamsOriginals
 	});
 	if (rewrittenRespRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespRes.error.message);

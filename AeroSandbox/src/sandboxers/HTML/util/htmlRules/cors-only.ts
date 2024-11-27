@@ -13,17 +13,28 @@ Object.freeze(autoplayElements);
  * @param htmlRules The rules Map to set the rules on
  */
 export default function setRulesCORS(htmlRules) {
-	// Permissions Policy emulation
+	// Permissions Policy and Content Security Policy (CSP) emulation
+	/**
+	 * Permission Policy Directives: @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives'
+	 *
+	 */
+
 	htmlRules.set(HTMLImageElement, {
 		onAttrHandlers: {
-			src: blockHandler("img-src")
+			src: {
+				cspBlock: "img-src",
+				ppBlock: "img-src"
+			}
 		}
 	});
 
 	for (const autoplayElement of autoplayElements)
 		htmlRules.set(autoplayElement, {
 			onAttrHandlers: {
-				autoplay: blockHandler("autoplay")
+				autoplay: {
+					/** @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy/autoplay */
+					ppBlock: "autoplay"
+				}
 			}
 		});
 }

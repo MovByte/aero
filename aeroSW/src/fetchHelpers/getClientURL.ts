@@ -12,6 +12,8 @@ import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { afterPrefix } from "$util/getProxyUrl";
 import appendSearchParam from "$shared/escaping/appendSearchParam";
 
+import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
 /**
  * Gets the URL of the client through the `Client` API in SWs
  * This client URL is used when forming the proxy URL and in various uses for emulation
@@ -34,17 +36,21 @@ export default async function getClientUrlThroughClient(clientId: string): Promi
 export async function getClientUrlThroughForcedReferrer({
 	params,
 	referrerPolicyParamName,
-	referrerPolicy
+	referrerPolicy,
+	rewrittenParamsOriginals
 }: {
 	params: string,
 	referrerPolicyParamName: string,
 	referrerPolicy: string,
+	/** This is mainly intended so that `appendSearchParam()` can help the response header rewriter with `No-Vary-Search` header rewriting later */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType
 }): Promise<ResultAsync<URL, Error>> {
 	// Referrer policy emulation (we will force the referrer later)
 	appendSearchParam(
 		params,
 		referrerPolicyKey,
-		referrerPolicy
+		referrerPolicy,
+		rewrittenParamsOriginals
 	);
 	// TODO: Implement
 	return nErrAsync(new Error("Not implemented yet"));
