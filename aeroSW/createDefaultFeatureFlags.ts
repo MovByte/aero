@@ -4,13 +4,14 @@ import type { FeatureFlagsRspack } from "./types/featureFlags";
 export default (ctx: CtxType) =>
 	// @ts-ignore
 	({
-		featureUrlEnc: false,
-		featureCorsTesting: false,
+		urlEnc: false,
+		corsTesting: false,
 		corsEmulation: false,
 		integrityEmulation: false,
 		encBodyEmulation: false,
 		cachesEmulation: false,
 		clearEmulation: false,
+		supportSpeculation: false,
 		rewriterHtml: true,
 		rewriterXslt: false,
 		rewriterJs: false,

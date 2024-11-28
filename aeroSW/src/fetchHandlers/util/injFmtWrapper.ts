@@ -6,6 +6,7 @@ import { fmtNeverthrowErr } from "$sandbox/util/fmtErr";
 type simpleReplacement = { [search: string]: string };
 
 /**
+ * This is meant to be used for injecting templating into a string that is already pre-made by the `val-plugin`
  * @param valString The string to inject the templating into (usually pre-made by the `val-plugin`)
  * @param htmlTemplating HTML templating goes like - key: `{{REPLACEMENT}}`, value: `replacement`
  * @param jsTemplating JS templating goes like - key: `/**{{REPLACEMENT}}*\/`, value: `replacement`

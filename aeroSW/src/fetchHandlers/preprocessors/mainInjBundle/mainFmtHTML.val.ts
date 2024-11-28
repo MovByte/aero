@@ -26,6 +26,8 @@ export default function fmtHTMLInjBundle({ DEBUG }: FeatureFlagsPassthrough) {
     <!-- If not defined already, manually set the favicon -->
     <link href="/favicon.ico" rel="icon" type="image/x-icon">
 
+	{{FORCE_INLINED_SPECULATION_RULES}}
+	
     <script src="{{BUNDLES_SANDBOX_INIT}}"></script>
     <script>
 		{

@@ -3,8 +3,11 @@
  */
 
 // Utility
-import appendSearchParam from "$util/appendSearchParama";
+import appendSearchParam from "$shared/appendSearchParama";
 import Cloner from "./htmlRules/shared/Cloner";
+
+// Rewriters
+import rewriteSpeculationRules from "$shared/rewriteSpeculationRules";
 
 export default function setRulesContentRewriters(htmlRules) {
 	htmlRules.set(HTMLScriptElement, {
@@ -37,7 +40,11 @@ export default function setRulesContentRewriters(htmlRules) {
 			},
 			// @ts-ignore
 			onCreateHandler: (el: HTMLScriptElement) => {
-				if (
+				if (SUPPORT_SPECULATION && typeof el.innerHTML === "string" &&
+					el.innerHTML !== "" && && el.type === "speculationRules") {
+					el.innerHTML = rewriteSpeculationRules(el.innerHTML);
+				}
+				else if (
 					!el.src &&
 					typeof el.innerHTML === "string" &&
 					el.innerHTML !== "" &&

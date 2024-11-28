@@ -3,11 +3,22 @@
  * Aero's response headers rewriter
  */
 
+// For enhanced type safety
+import { type Maybe } from 'option-t/maybe';
+/// Neverthrow types
+import { ResultAsync } from "neverthrow";
+import { okAsync } from "neverthrow";
+import { fmtNeverthrowErr } from "$shared/fmtErr";
+
+// Separate header rewriters
 import { rewriteSetCookie } from "$sandbox/shared/cookie";
 import { rewriteAuthServer } from "./auth";
 
-import type { BareMux } from "@mercuryworkshop/bare-mux";
+// Utility
+import rewriteSrc from "$util/src";
 
+// Types for passthrough
+import type { BareMux } from "@mercuryworkshop/bare-mux";
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
 /**
@@ -30,25 +41,31 @@ const ignoredHeaders = [
 	"x-frame-options"
 ];
 
-function rewriteLocation(url: string): string {
-	return self.location.origin + aeroConfig.prefix + url;
-}
-
-
 // TODO: Rewrite https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/SourceMap
-export default (
-	headers: Headers,
+/**
+ * 
+ * @param respHeaders The response headers to rewrite
+ * @param proxyUrl The URL of the proxy
+ * @param bc The BareMux client needed for some of the header rewriters
+ * @param rewrittenParamsOriginals The original parameters that were rewritten for reference when correcting the `no-vary-search` header
+ * @returns Possibly the speculation rule if the external path to one had to have been deleted
+ */
+export default async function (
+	respHeaders: Headers,
 	proxyUrl: URL,
 	bc: BareMux.BareClient,
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType
-): void => {
+): Promise<Maybe<string>> {
+	/** Possibly the external speculation rules, but now inlined */
+	let speculationRules: string;
+
 	//const referrerPolicy = headers.get("referrer-policy");
-	for (const [key, value] of Object.entries(headers)) {
+	for (const [key, value] of Object.entries(respHeaders)) {
 		if (ignoredHeaders.includes(key)) continue;
 
 		switch (key) {
 			case "location":
-				headers.set(key, rewriteLocation(value));
+				respHeaders.set(key, rewriteLocation(value));
 				break;
 			/*
 			case "set-cookie":
@@ -60,23 +77,50 @@ export default (
 			case "referrer-policy":
 				// TODO: Emulate the referrer-policy header and force-referrer
 				break;
+			case "speculation-rules":
+				if (SUPPORT_SPECULATION) {
+					/** @see https://developer.chrome.com/docs/web-platform/prerender-pages#speculation-rules-http-header */
+					/** Force-inline the speculation rules later in *AeroSandbox* */
+					/** We don't have to worry about not complying with the mandate for handling CSP for inline speculation rules because this was meant to be external, but it is being inlined now, so the header will be deleted */
+					let extSpeculationRulesResp: Response;
+					try {
+						extSpeculationRulesResp = await bc.fetch(rewriteSrc(value, proxyUrl.origin));
+					} catch (err) {
+						return fmtNeverthrowErr("Failed to fetch the external speculation rules with intent to inline them", err.message);
+					}
+					speculationRules = await extSpeculationRulesResp.text();
+					break;
+				}
 			case "no-vary-search":
 				for (const [originalParam, rewrittenParam] of Object.entries(rewrittenParamsOriginals))
-					headers.set(key, replaceIdInNoVarySearchHeader(value, originalParam, rewrittenParam));
+					respHeaders.set(key, replaceIdInNoVarySearchHeader(value, originalParam, rewrittenParam));
 				break;
 			case "reporting-endpoints":
 				// TODO: Rewrite the URLs in the header value to be under the the proxy site
 				/** @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Reporting-Endpoints */
 				break;
 			default:
-				headers.set(key, value);
+				respHeaders.set(key, value);
 		}
 	}
+
+	// @ts-ignore
+	return typeof speculationRules !== "undefined" ? okAsync(speculationRules) : okAsync(undefined);
 };
 
-/** Match the quoted parameters inside of `params=()` */
+/**
+ * The rewriter for the `location` header
+ * @param url The URL to rewrite (the original location header value)
+ * @returns The rewritten URL (the new location header value) 
+ */
+function rewriteLocation(url: string): string {
+	return self.location.origin + aeroConfig.prefix + url;
+}
+
+/** Match the quoted parameters inside of `params=()` for the rewriting the `no-vary-search` header  */
 const matchIds = /params=\((?:"([^"]+)")(?:\s+"([^"]+)")*(?:\s*\))/;
 /**
+ * The rewriter for the `no-vary-search` header
  * @param value The value of the `no-vary-search` header
  * @param matchId The ID to match
  * @param replacmentId The ID to replace the matched ID with

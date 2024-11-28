@@ -1,4 +1,4 @@
-// Neverthrow
+// For Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
@@ -54,7 +54,8 @@ export default async function rewriteResp({
 	rewrittenStatus: number
 }, Error>> {
 	// Rewrite the response headers
-	const rewrittenRespHeadersRes = rewriteRespHeaders(originalResp.headers, {
+	const rewrittenRespHeaders = { ...originalResp.headers };
+	const rewrittenRespHeadersRes = rewriteRespHeaders(rewrittenRespHeaders, {
 		proxyUrl,
 		clientUrl,
 		bc: new BareMux.BareClient(),
@@ -62,7 +63,7 @@ export default async function rewriteResp({
 	});
 	if (rewrittenRespHeadersRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespHeadersRes.error.message);
-	const rewrittenRespHeaders = rewrittenRespHeadersRes.value;
+	const speculationRules = rewrittenRespHeadersRes.value;
 
 	const type = originalResp.headers.get("content-type");
 
@@ -83,6 +84,10 @@ export default async function rewriteResp({
 			"BUNDLES_SANDBOX_INIT": aeroConfig.bundles.sandboxInitAero,
 			"BUNDLES_SANDBOX_END": aeroConfig.bundles.sandboxEndAero,
 			"BUNDLES_LOGGER_CLIENT": aeroConfig.bundles.loggerClient,
+			"FORCE_INLINED_SPECULATION_RULES": speculationRules.isSome() ? `
+<script type="speculationRules">
+	${speculationRules.value}
+</script>` : ""
 		}, {
 			// $aero (global proxy namespace) passthrough
 			"SEC": sec ? `...${JSON.stringify(sec)}` : "",

@@ -13,6 +13,7 @@ export default (ctx: CtxType) =>
 		htmlUseHrefEmulation: false,
 		htmlInterceptMediaStreams: false,
 		supportFrames: false,
+		supportSpeculation: false,
 		corsEmulation: false,
 		emuSecureCtx: false,
 		hashURL: false,

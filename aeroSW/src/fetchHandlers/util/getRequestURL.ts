@@ -45,6 +45,14 @@ import { ok, err as nErr } from "neverthrow";
  *  rawProxyUrlRes.value()
  * );
  */
+export default class RequestUrlGetter {
+	constructor(
+		origin: string,
+		workerOrigin: string,
+	)
+	getRequestURL(proxyUrl: URL)
+}
+
 export default function getRequestUrl(
 	origin: string,
 	workerOrigin: string,

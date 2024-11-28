@@ -103,7 +103,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	/** This is an object meant for passthrough, ultimately to the response rewriter, that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
 	const sec: Partial<Sec> = {};
 	/** This is mainly intended so that `appendSearchParam()`, whenever it is called, can help the response header rewriter with `No-Vary-Search` header rewriting later */
-	const rewrittenParamsOriginals: rewrittenParamsOriginalsType = [];
+	const rewrittenParamsOriginals: rewrittenParamsOriginalsType = {};
 
 	const rewrittenReqValsRes = await rewriteReq({
 		logger,
