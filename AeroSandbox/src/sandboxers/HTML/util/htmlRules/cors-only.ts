@@ -22,10 +22,10 @@ export default function setRulesCORS(htmlRules) {
 	htmlRules.set(HTMLImageElement, {
 		onAttrHandlers: {
 			src: {
-				cspBlock: "img-src",
 				ppBlock: "img-src"
 			}
-		}
+		},
+		cspSrcBlock: "img-src"
 	});
 
 	for (const autoplayElement of autoplayElements)

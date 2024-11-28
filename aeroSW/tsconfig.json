@@ -21,7 +21,6 @@
 			"$alt_backends/*": ["aeroSW/src/altBackends/*"],
 			"$rewriters/*": ["aeroSW/src/this/rewriters/*"],
 			"$nested_sws/*": ["aeroSW/src/this/nestedSWs/*"],
-			"$cors/*": ["aeroSW/src/this/fetchHandlers/internal/isolation/*"],
 			"$embeds/*": ["aeroSW/src/this/preprocessors/*"],
 			"$handlers/*": ["aeroSW/src/this/handlers/*"],
 			"$types/*": ["aeroSW/types/*"]

@@ -5,7 +5,7 @@
 
 // Utility
 import { proxyLocation } from "$util/proxyLocation";
-import block from "$cors/policy";
+import block from "$src/security/csp/getPolicyRules";
 
 /**
  * @param htmlRules The rules Map to set the rules on
@@ -31,13 +31,13 @@ export default function setRulesFrames(htmlRules) {
 			srcdoc: (_el: HTMLIFrameElement, newVal: string) => $aero.init + newVal,
 			// Emulate CSP later
 			csp(_el: HTMLIFrameElement, _newVal: string, oldVal: string) {
-				if (CORS_EMULATION)
+				if (CSP_EMULATION)
 					// TODO: Implement
 					return "";
 				return "";
 			},
 			allow(_el: HTMLIFrameElement, _newVal: string, oldVal: string) {
-				if (CORS_EMULATION)
+				if (CSP_EMULATION)
 					sec.perms = oldVal;
 				return "";
 			},
@@ -46,13 +46,13 @@ export default function setRulesFrames(htmlRules) {
 				_newVal: string,
 				oldVal: string
 			) {
-				if (CORS_EMULATION)
+				if (CSP_EMULATION)
 					sec.pr = oldVal;
 				return "";
 			}
 		},
 		onCreateHandler(el: HTMLIFrameElement) {
-			if (CORS_EMULATION)
+			if (CSP_EMULATION)
 				// @ts-ignore
 				el.contentWindow.$aero.frame.sec = JSON.stringify(sec);
 		}

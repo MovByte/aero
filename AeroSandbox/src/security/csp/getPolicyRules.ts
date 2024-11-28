@@ -1,12 +1,6 @@
 import { type Maybe } from 'option-t/maybe';
 
-// TODO: Check the policy of the parent's too in case this is an iframe
-export default list => {
-	if (list) {
-	}
-
-	return false;
-};
+// TODO: Get rid of block and allow and instead use `getCSPPolicyRules` and helper methods
 
 /**
  * 

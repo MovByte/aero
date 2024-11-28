@@ -8,6 +8,14 @@ export interface RewriteOptions {
 	isModule: boolean;
 	/** The code to insert */
 	insertCode?: string;
+	// TODO: Implement
+	cspRestrictions: {
+		mustHaveIntegrity: string;
+		unsafeEval: boolean;
+		wasmUnsafeEval: boolean;
+	}
+	/** This should only be used for external scripts like from a SW */
+	integrityCheck: string;
 }
 
 export interface AeroGelConfigFull {

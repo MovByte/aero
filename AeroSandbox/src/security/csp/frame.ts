@@ -18,7 +18,7 @@ if (frameElement) {
 	else if (frameOptions === "SAMEORIGIN") {
 		if (proxyLocation().origin !== parentOrigin) block();
 	} else if (csp.contains("frame-ancestors")) {
-		const sources = $aero.cspSrc("frame-ancestors");
+		const sources = $aero.csp.includes("frame-ancestors");
 
 		if (sources.contains("'none'")) block();
 		else {

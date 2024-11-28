@@ -1,7 +1,9 @@
-//import block from "./policy";
+/**
+ * @module
+ * These methods are for emulating permissions policies in aero
+ */
 
 // Private scope
-/*
 {
 	// Parse a permission policy
 	const parsePerms = perms => {
@@ -9,8 +11,8 @@
 
 		const map = new Map();
 
-		perms.split(",").forEach(v => {
-			let [dir, allowList] = v.split("=");
+		perms.split(",").forEach(perm => {
+			let [dir, allowList] = perm.split("=");
 
 			map[dir] = allowList.split(" ");
 		});
@@ -27,9 +29,9 @@
 const blockPerm = perm => block($aero.perms.get(perm));
 
 const block = (api: keyof Window, type) =>
-	(window[api] = Promise.reject(
-		type ? new DOMException("", type) : new DOMException()
-	));
+(window[api] = Promise.reject(
+	type ? new DOMException("", type) : new DOMException()
+));
 
 if (blockPerm("accelerometer")) delete Accelerometer;
 if (blockPerm("ambient-light-sensor")) delete AmbientLightSensor;
@@ -56,5 +58,4 @@ if (blockPerm("gamepad"))
 	Navigator.getGamepads = () => {
 		throw new DOMException("SecurityError");
 	};
-// ...
-*/
+// TODO...

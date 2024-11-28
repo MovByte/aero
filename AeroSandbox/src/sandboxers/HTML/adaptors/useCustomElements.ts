@@ -6,6 +6,7 @@ import htmlSrc from "../util/htmlSrc";
 import proxifyCustomElementName from "../util/proxifyCustomElementName";
 
 import htmlRules from "../util/htmlRules";
+import getCSPPolicyRules from "$src/security/csp/getPolicyRules";
 
 {
 	for (const [OriginalHTMLElement, htmlRule] of htmlRules.entries()) {
@@ -21,6 +22,14 @@ import htmlRules from "../util/htmlRules";
 					);
 				}
 				attributeChangedCallback(attrName, _oldVal, newVal) {
+					if (htmlRule.cspSrcBlock) {
+
+						if (getCSPPolicyRules(htmlRule.cspSrcBlock)) {
+
+							super.removeAttribute(attrName);
+							return;
+						}
+					}
 					const handler = htmlRule.onAttrHandlers[attrName];
 					if (handler) {
 						const rewriteHandler =

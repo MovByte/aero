@@ -4,7 +4,7 @@ import { proxyLocation } from "$util/proxyLocation";
 export default {
 	get(scheme: string): string {
 		return scheme.replace(
-			new RegExp(`^(web+${$aero.sandbox.proxyLocation().origin}+)`),
+			new RegExp(`^(web+${proxyLocation().origin}+)`),
 			"web+"
 		);
 	},

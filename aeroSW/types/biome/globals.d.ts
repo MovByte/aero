@@ -16,7 +16,7 @@ declare global {
 	var DEBUG: string;
 	var URL_ENC: string;
 	var CORS_TESTING: string;
-	var CORS_EMULATIONN: string;
+	var CORS_EMULATION: string;
 	var INTEGRITY_EMULATION: string;
 	var ENC_BODY_EMULATION: string;
 	var CACHES_EMULATION: string;

@@ -2,7 +2,7 @@
  * @module
  */
 
-import block from "$cors/policy";
+import block from "$src/security/csp/getPolicyRules";
 
 const blockHandler =
 	(allowDir: string) =>

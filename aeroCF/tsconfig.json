@@ -11,7 +11,7 @@
 			"$sw/*": ["aeroSW/*"],
 			"$sandbox/*": ["src/sandboxers/*"],
 			"$apis/*": ["src/apis/*"],
-			"$cors/*": ["src/cors/*"],
+			"$cors/*": ["src/security/cors/*"],
 			"fetchHelpers/*": ["aeroCF/src/fetchHelpers/*"],
 			"swFetchHelpers/*": ["aeroSW/src/fetchHelpers/*"],
 			"$fetchUtil": ["aeroSW/src/fetchHandlers/util/*"],

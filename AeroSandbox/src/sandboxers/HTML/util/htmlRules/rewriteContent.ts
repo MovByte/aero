@@ -8,6 +8,8 @@ import Cloner from "./htmlRules/shared/Cloner";
 
 // Rewriters
 import rewriteSpeculationRules from "$shared/rewriteSpeculationRules";
+import getCSPPolicyRules from "$src/security/csp/getPolicyRules";
+import validateCSPPlain from "$src/security/csp/validateCrossOrigin";
 
 export default function setRulesContentRewriters(htmlRules) {
 	htmlRules.set(HTMLScriptElement, {
@@ -21,18 +23,36 @@ export default function setRulesContentRewriters(htmlRules) {
 
 					const params = url.searchParams;
 
-					appendSearchParam(
-						params,
-						$aero.searchParamOptions.isModule,
-						isMod.toString()
-					);
+					if (CSP_EMULATION && getCSPPolicyRules("script-src").includes("unsafe-inline") && new URL(url).pathname === "javascript:")
+						throw new Error("CSP violation in script-src occured for the rule: unsafe-inline because the script URL is a javascript: URL");
 
-					if (isMod && el.integrity) {
+					if (isMod)
 						appendSearchParam(
 							params,
-							$aero.searchParamOptions.integrity,
+							{
+								searchParam: $aero.searchParamOptions.isModule,
+								escapeKeyword: $aero.searchParamOptions.escapeKeyword
+							},
+							isMod.toString()
+						);
+					if (el.integrity)
+						appendSearchParam(
+							params,
+							{
+								searchParam: $aero.searchParamOptions.isModule,
+								escapeKeyword: $aero.searchParamOptions.escapeKeyword
+							},
 							el.integrity
 						);
+					if (CSP_EMULATION) {
+						appendSearchParam(
+							params,
+							{
+								searchParam: $aero.searchParamOptions.isModule,
+								escapeKeyword: $aero.searchParamOptions.escapeKeyword
+							},
+							JSON.stringify($aero.csp),
+						)
 					}
 
 					return url.href;
@@ -54,9 +74,55 @@ export default function setRulesContentRewriters(htmlRules) {
 						el.type === "text/javascript" ||
 						el.type === "application/javascript")
 				) {
+					// TODO: Support `wasm-unsafe-eval`
+					// TODO: Support `strict-dynamic`
+					if (CSP_EMULATION) {
+						const cspRules = getCSPPolicyRules("script-src");
+						if (!cspRules.includes("'unsafe-inline'")) {
+							for (const cspRule of cspRules) {
+								if (cspRule.startsWith("nonce-")) {
+									const nonce = cspRule.replace("^nonce-", "");
+									if (nonce !== el.nonce)
+										throw new Error("CSP violation in script-src occured for the rule: nonce");
+								}
+								if (cspRule.startsWith("sha256-")) {
+									/** This must be done synchronously because it is inside of a Custom Element */
+									const validateHashSync = $aero.sandbox.ext.awaitSync(validateHash);
+									const hash = cspRule.replace("^sha256-", "");
+									if (cspRules.includes("unsafe-inline") && !validateHashSync(hash, el.innerHTML)) {
+										// Hash validation
+										throw new Error(`CSP violation: hash mismatch in script-src occured for the rule: unsafe-inline`);
+									} else {
+										// SRI validation
+										if (hash !== el.integrity) {
+											throw new Error("CSP violation iin script-src occured for the rule: sha256 (SRI validation failed)");
+										}
+									}
+								}
+								if (cspRule.startsWith("sha384-")) {
+									/** This must be done synchronously because it is inside of a Custom Element */
+									const validateHashSync = $aero.sandbox.ext.awaitSync(validateHash);
+									const hash = cspRule.replace("^sha384-", "");
+									if (cspRules.includes("unsafe-inline") && !validateHashSync(hash, el.innerHTML, "SHA-384")) {
+										// Hash validation
+										throw new Error("hash mismatch in script-src occured for the rule: unsafe-inline");
+									} else {
+										// SRI validation
+										if (hash !== el.integrity) {
+											throw new Error("CSP violation in script-src occured for the rule: sha384 (SRI validation failed)");
+										}
+									}
+								}
+								validateCSPPlain(cspRule, "script-src");
+							}
+						}
+					}
+
 					// FIXME: Fix safeText so that it could be used here
 					el.innerHTML = $aero.js.rewriteScript(el.innerText, {
 						isModule: el.type === "module"
+					}, {
+
 					});
 
 					// The inline code is read-only, so the element must be cloned

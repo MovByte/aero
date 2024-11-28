@@ -3,7 +3,7 @@
  */
 
 // Utility
-import { getCSPPolicy } from "$cors/policy"
+import { getCSPPolicy } from "$src/security/csp/getPolicyRules"
 import rewriteSrc from "$util/src";
 
 /**

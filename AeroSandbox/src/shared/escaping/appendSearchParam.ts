@@ -32,11 +32,10 @@ export default (
 		const paramBehind = escapesStr + searchParamOptions.searchParam;
 		for (let i = 0; i < escapingCharCount; i++)
 			escapesStr += searchParamOptions.escapeKeyword;
-
 		// Try the search param with yet another escapeChar
 		const paramToTry = escapesStr + searchParamOptions.searchParam;
 		if (!searchParams.has(paramToTry)) {
-			if (CORS_EMULATION && rewrittenParamsOriginals)
+			if (rewrittenParamsOriginals)
 				rewrittenParamsOriginals[paramBehind] = paramToTry;
 			searchParams.set(paramToTry, str);
 			return {};
