@@ -36,7 +36,7 @@ export default (
 		// Try the search param with yet another escapeChar
 		const paramToTry = escapesStr + searchParamOptions.searchParam;
 		if (!searchParams.has(paramToTry)) {
-			if (FEATURE_CORS_EMULATION && rewrittenParamsOriginals)
+			if (CORS_EMULATION && rewrittenParamsOriginals)
 				rewrittenParamsOriginals[paramBehind] = paramToTry;
 			searchParams.set(paramToTry, str);
 			return {};

@@ -81,7 +81,7 @@ export default async function getCORSStatus({
 
 	/*
 	FIXME:
-	if (FEATURE_CLEAR_EMULATION && reqHeaders.get("clear-site-data")) {
+	if (CLEAR_EMULATION && reqHeaders.get("clear-site-data")) {
 		sec.clear = JSON.parse(`[${ reqHeaders.get("clear-site-data") }]`);
 		if ("clear" in sec)
 			await clear(sec.clear, await clients.get(event.clientId), proxyUrl);

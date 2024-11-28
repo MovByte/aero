@@ -23,7 +23,7 @@ const locationProxy = Proxy.revocable(inheritedObject, {
 				};
 
 
-				if (FEATURE_CORS_EMULATION)
+				if (CORS_EMULATION)
 					// TODO: Respect the `navigate-to` CSP directive from the passthrough CSP headers in `$aero.sec`...
 
 					// These properties below are not defined in workers

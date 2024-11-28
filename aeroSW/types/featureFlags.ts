@@ -3,13 +3,13 @@ export interface FeatureFlags {
     featureUrlEnc: boolean;
     featureCorsTesting: boolean;
     /** @warning currently unsupported */
-    featureCorsEmulation: boolean;
+    corsEmulation: boolean;
     /** @warning currently broken */
-    FEATURE_INTEGRITY_EMULATION: boolean;
+    INTEGRITY_EMULATION: boolean;
     /** @warning currently unsupported */
-    featureEncBodyEmulation: boolean;
-    featureCachesEmulation: boolean;
-    featureClearEmulation: boolean;
+    encBodyEmulation: boolean;
+    cachesEmulation: boolean;
+    clearEmulation: boolean;
     rewriterHtml: boolean;
     /** @warning currently unsupported */
     rewriterXslt: boolean;

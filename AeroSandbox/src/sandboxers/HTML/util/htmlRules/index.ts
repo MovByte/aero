@@ -16,7 +16,7 @@ const htmlRules = new Map<any, htmlRule>();
 setRulesContentRewriters(htmlRules)
 if (!HTML_USE_HREF_EMULATION)
 	setRulesLinks(htmlRules);
-if (FEATURE_CORS_EMULATION)
+if (CORS_EMULATION)
 	setRulesCORS(htmlRules);
 if (SUPPORT_FRAMES)
 	setRulesFrames(htmlRules);

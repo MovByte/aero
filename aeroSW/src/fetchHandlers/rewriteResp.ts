@@ -114,7 +114,7 @@ export default async function rewriteResp({
 	} else if (REWRITER_JS && isScript) {
 		const script = await originalResp.text();
 
-		if (FEATURE_INTEGRITY_EMULATION) {
+		if (INTEGRITY_EMULATION) {
 			rewrittenBody = jsRewriter.wrapScript(script, {
 				isModule: isMod,
 				insertCode: /* js\ */ `

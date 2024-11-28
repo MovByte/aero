@@ -153,7 +153,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	const { rewrittenBody, rewrittenRespHeaders, rewrittenStatus } = rewrittenRespRes.value;
 
 	// Perform encoded body emulation
-	if (FEATURE_ENC_BODY_EMULATION)
+	if (ENC_BODY_EMULATION)
 		// This will modify the resp headers
 		perfEncBodyEmu(originalResp, rewriteRespHeaders);
 
@@ -164,7 +164,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	});
 
 	// Perform Cache Emulation
-	if (FEATURE_CACHES_EMULATION) {
+	if (CACHES_EMULATION) {
 		const perfCacheSettingRes = perfCacheSetting({
 			reqUrlHref: reqUrl.href,
 			rewrittenResp,

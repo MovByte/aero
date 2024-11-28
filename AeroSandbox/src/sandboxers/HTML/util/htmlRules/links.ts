@@ -42,7 +42,7 @@ export default function setRulesLinks(htmlRules) {
 			httpEquiv(el: HTMLMetaElement, newVal: string) {
 				switch (newVal) {
 					case "content-security-policy":
-						if (FEATURE_CORS_EMULATIO)
+						if (CORS_EMULATION)
 							for (const dir of el.content.split(";"))
 								$aero.sec.csp.push(dir.trim());
 					case "refresh":

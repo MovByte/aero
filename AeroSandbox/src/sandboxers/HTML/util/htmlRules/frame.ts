@@ -31,13 +31,13 @@ export default function setRulesFrames(htmlRules) {
 			srcdoc: (_el: HTMLIFrameElement, newVal: string) => $aero.init + newVal,
 			// Emulate CSP later
 			csp(_el: HTMLIFrameElement, _newVal: string, oldVal: string) {
-				if (FEATURE_CORS_EMULATION)
+				if (CORS_EMULATION)
 					// TODO: Implement
 					return "";
 				return "";
 			},
 			allow(_el: HTMLIFrameElement, _newVal: string, oldVal: string) {
-				if (FEATURE_CORS_EMULATION)
+				if (CORS_EMULATION)
 					sec.perms = oldVal;
 				return "";
 			},
@@ -46,13 +46,13 @@ export default function setRulesFrames(htmlRules) {
 				_newVal: string,
 				oldVal: string
 			) {
-				if (FEATURE_CORS_EMULATION)
+				if (CORS_EMULATION)
 					sec.pr = oldVal;
 				return "";
 			}
 		},
 		onCreateHandler(el: HTMLIFrameElement) {
-			if (FEATURE_CORS_EMULATION)
+			if (CORS_EMULATION)
 				// @ts-ignore
 				el.contentWindow.$aero.frame.sec = JSON.stringify(sec);
 		}

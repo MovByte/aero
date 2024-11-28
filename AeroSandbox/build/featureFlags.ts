@@ -15,10 +15,10 @@ export interface FeatureFlags {
 	/** @warning currently unsupported and untested */
 	htmlInterceptMediaStreams: boolean;
 	/** @warning currently unsupported and untested */
-	supportFrames: boolean,
-	featureCorsEmulation: boolean;
+	supportFrames: boolean;
+	corsEmulation: boolean;
 	/** @warning currently unsupported and untested */
-	featureEmuSecureCtx: boolean;
+	emuSecureCtx: boolean;
 	/** Integrity emulation is extremely slow, because it blocks the main thread to syncronously run a `Promise`. Very few to no sites will use integrity emulation as a means to detect aero. */
 	supportIntegrityEmu: boolean;
 	fetchPublicSuffixPriority: fetchPublicSuffixPriorityType;
@@ -29,7 +29,7 @@ export interface FeatureFlags {
 	/**
 	 * TODO: This will make the URL proceed after the hash, evading all peeping by extension filters.
 	 * @warning currently unsupported */
-	featureHashURL: boolean;
+	hashURL: boolean;
 	errLogAfterColon: string;
 	debug: boolean;
 }
