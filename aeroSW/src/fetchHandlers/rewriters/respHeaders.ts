@@ -54,14 +54,18 @@ const ignoredHeaders = [
  * @param proxyUrl The URL of the proxy
  * @param bc The BareMux client needed for some of the header rewriters
  * @param rewrittenParamsOriginals The original parameters that were rewritten for reference when correcting the `no-vary-search` header
- * @returns Possibly the speculation rule if the external path to one had to have been deleted
+ * @returns Anything needed to be inlined in the response rewriters later
  */
 export default async function (
 	respHeaders: Headers,
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType,
 	accessControlRuleMap: Map<string, string>,
 	passthrough: Passthrough,
-): Promise<Maybe<string>> {
+): Promise<{
+	/** Possibly the speculation rule if the external path to one had to have been deleted */
+	speculationRules: Maybe<string>,
+	sourcemapPath: Maybe<string>,
+}> {
 	const { proxyUrl, bc, clientId } = passthrough;
 
 	/** Possibly the external speculation rules, but now inlined */
@@ -84,6 +88,14 @@ export default async function (
 				break;
 			case "referrer-policy":
 				// TODO: Emulate the referrer-policy header and force-referrer
+				break;
+			// Inline the sourcemap in the external scripts as a comment instead of a header (so it can spawn another request)
+			case "sourcemap":
+				sourcemapPath = rewriteSrc(value);
+				break;
+			case "x-sourcemap":
+				// `x-sourcemap` is deprecated
+				respHeaders.set(key, rewriteSrc(value));
 				break;
 			case "access-control-allow-origin":
 				if (CORS_EMULATION)
@@ -115,6 +127,13 @@ export default async function (
 			default:
 				respHeaders.set(key, value);
 		}
+
+		let ret: {
+			speculationRules?: string
+		} = {};
+		// @ts-ignore
+		if (speculationRules) ret.speculationRules = speculationRules;
+		return okAsync(ret);
 	}
 
 	// @ts-ignore

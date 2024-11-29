@@ -4,7 +4,7 @@
 
 // TODO: Import Neverthrow
 
-import type {
+import {
 	AeroJSParserConfig,
 	RewriteOptions,
 	aerogelParser,

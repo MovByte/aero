@@ -1,4 +1,5 @@
-// For Neverthrow
+// For better type safety
+/// Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
@@ -63,7 +64,7 @@ export default async function rewriteResp({
 	});
 	if (rewrittenRespHeadersRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespHeadersRes.error.message);
-	const speculationRules = rewrittenRespHeadersRes.value;
+	const { speculationRules } = rewrittenRespHeadersRes.value;
 
 	const type = originalResp.headers.get("content-type");
 
@@ -119,6 +120,11 @@ export default async function rewriteResp({
 	} else if (REWRITER_JS && isScript) {
 		const script = await originalResp.text();
 
+		let rewriteOptionsShared = {}
+		if (sourcemapPath.isSome())
+			rewriteOptionsShared = {
+				sourcemapPath: sourcemapPath.value
+			};
 		if (INTEGRITY_EMULATION) {
 			rewrittenBody = jsRewriter.wrapScript(script, {
 				isModule: isMod,
@@ -127,12 +133,14 @@ export default async function rewriteResp({
 	const bak = decodeURIComponent(escape(atob(\`${escapeJS(script)}\`)));
 	${integrityMainCheck(isMod)}
 }
-`
+`,
+				...rewriteOptionsShared
 			});
 			// @ts-ignore
 		} else
 			rewrittenBody = jsRewriter.wrapScript(script, {
-				isModule: isMod
+				isModule: isMod,
+				...rewriteOptionsShared
 			});
 	} else if (REWRITER_CACHE_MANIFEST && reqDestination === "manifest") {
 		const body = await resp.text();
