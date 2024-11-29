@@ -53,6 +53,10 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		// @ts-ignore: This is a neverthrow error, so we are fine
 		return troubleshootRes;
 
+	// Detect feature flag mismatches
+	if (CORS_EMULATION && SERVER_ONLY)
+		return nErrAsync(new Error("CORS Emulation is not supported in server-only mode (I am working on query passthrough as an alternative to client IDs for this)"));
+
 	if (SERVER_ONLY && !("getReqDest" in self))
 		return nErrAsync("You can't run aero's SW in server-only mode without the `getReqDest` function being defined in the global scope. This method is what is used to determine the request destination, since environments like Cloudflare Workers don't have access to `Request.destination`.");
 	if (SERVER_ONLY && !("serverFetch" in self))
@@ -77,6 +81,8 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		const isModParam = getPassthroughParam(reqParams, "isMod");
 		isMod = isModParam && isModParam === "true";
 	}
+
+	const accessControlRuleMap = new Map<string, string>();
 
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
@@ -109,15 +115,16 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		logger,
 		req,
 		reqUrl: URL,
+		clientId: event.clientId,
 		clientUrl,
 		aeroPathFilter: aeroConfig.aeroPathFilter,
 		reqDestination: SERVER_ONLY ? self.getReqDest(reqDest,
-			isNavigate) : isNavigate
+			isNavigate) : isNavigate,
 		isiFrame,
 		sec,
 		clients,
 		rewrittenParamsOriginals
-	});
+	}, accessControlRuleMap);
 	if (rewrittenReqValsRes.isErr())
 		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error.message);
 	const rewrittenReqVals = rewrittenReqValsRes.value;

@@ -3,6 +3,10 @@
  * You must have the proper feature flags from aeroSW and aeroConfig declared in the global scope 
  */
 
+// Neverthrow
+import type { ResultAsync } from "neverthrow";
+import { okAsync, errAsync as nErrAsync } from "neverthrow";
+
 // Passthrough types
 import type { Config } from "$aeroSWTypes/config";
 import type { Sec } from "$aeroSWTypes/cors";
@@ -20,6 +24,7 @@ interface Passthrough {
 	logger: eitherLogger
 	req: Request;
 	reqUrl: URL;
+	clientId: string;
 	clientUrl: string;
 	bundlesPath: string;
 	reqDestination: string;
@@ -32,7 +37,11 @@ interface Passthrough {
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
 }
 
-export default async function rewriteReq({ logger, req, reqUrl, clientUrl, aeroPathFilter, reqDestination, isNavigate, isiFrame, sec, cache }: Passthrough): Promise<ResultAsync<{
+const securityPolicyMaps = {
+	accessControl: new Map<string, string>(),
+}
+
+export default async function rewriteReq({ logger, req, reqUrl, clientId, clientUrl, aeroPathFilter, reqDestination, isNavigate, isiFrame, sec, cache, rewrittenParamsOriginals }: Passthrough): Promise<ResultAsync<{
 	/** You should return the Response in the fetch handler if that is what is returned */
 	finalRespEarly?: Response;
 } | {
@@ -52,6 +61,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientUrl, aeroP
 		logger.debug("aero bundle found! Not rewriting (will proceed normally)");
 		return okAsync(await fetch(reqUrl.href));
 	}
+
 
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
@@ -86,6 +96,24 @@ export default async function rewriteReq({ logger, req, reqUrl, clientUrl, aeroP
 			? `${req.method} ${proxyUrl.href}`
 			: `${req.method} ${proxyUrl.href} (${req.destination})`
 	);
+
+	// Emulate security policies
+	if (securityPolicyMaps.accessControl.has(clientId)) {
+		const policies = securityPolicyMaps.accessControl.get(clientId)?.split(" ");
+		if (policies) {
+			let pass = false;
+			for (const policy of policies) {
+				if (policy === "null") {
+					// TODO: Emulate the value `null` properly (this might require additional AeroSandbox code) https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin#null
+				} else if (new URL(proxyUrl).origin === location.origin)
+					pass = true;
+				else if (policy === "*")
+					pass = true;
+			}
+			if (!pass)
+				return nErrAsync(new Error("The request was blocked by Access-Control-Allow-Origin"));
+		}
+	}
 
 	// This will apply all of the necessary rewriting to the headers for cors emulation, so it will modify the request headers
 	// Performs CORS Emulation and it might return the cached response if one exists in Cache Emulation

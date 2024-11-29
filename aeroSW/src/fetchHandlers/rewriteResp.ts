@@ -29,7 +29,7 @@ const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
  */
 export default async function rewriteResp({
 	originalResp,
-	rewrittenReqHeaders: Header,
+	rewrittenReqHeaders,
 	reqDestination,
 	proxyUrl,
 	clientUrl,
@@ -48,7 +48,7 @@ export default async function rewriteResp({
 	sec: Sec;
 	/** This is for `No-Vary-Search` rewriting */
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
-}): Promise<ResultAsync<{
+}, accessControlRuleMap: Map<string, string>): Promise<ResultAsync<{
 	rewrittenBody: string | ReadableStream;
 	rewrittenRespHeaders: Headers,
 	rewrittenStatus: number

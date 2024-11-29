@@ -21,6 +21,12 @@ import rewriteSrc from "$util/src";
 import type { BareMux } from "@mercuryworkshop/bare-mux";
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
+interface Passthrough {
+	proxyUrl: URL;
+	bc: BareMux.BareClient;
+	clientId: string;
+}
+
 /**
  * Headers that are removed from the proxy
  */
@@ -52,10 +58,12 @@ const ignoredHeaders = [
  */
 export default async function (
 	respHeaders: Headers,
-	proxyUrl: URL,
-	bc: BareMux.BareClient,
-	rewrittenParamsOriginals: rewrittenParamsOriginalsType
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType,
+	accessControlRuleMap: Map<string, string>,
+	passthrough: Passthrough,
 ): Promise<Maybe<string>> {
+	const { proxyUrl, bc, clientId } = passthrough;
+
 	/** Possibly the external speculation rules, but now inlined */
 	let speculationRules: string;
 
@@ -76,6 +84,11 @@ export default async function (
 				break;
 			case "referrer-policy":
 				// TODO: Emulate the referrer-policy header and force-referrer
+				break;
+			case "access-control-allow-origin":
+				if (CORS_EMULATION)
+					// Delete the header and consider it in later requests with hooks in the proxy site
+					accessControlRuleMap.set(clientId, value);
 				break;
 			case "speculation-rules":
 				if (SUPPORT_SPECULATION) {
