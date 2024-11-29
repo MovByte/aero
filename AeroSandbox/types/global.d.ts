@@ -9,12 +9,13 @@ export default interface ToBeDefined {
 	window: {
 		globalProp: string;
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		self: any;
+		browsingContext: any;
 		proxyObject: proxifiedObjType;
 	};
 }
 
-/** Key: name of API Interceptor
- * Value: the error when trying to load the API interceptor */
-
+/**
+ * Key: name of API Interceptor
+ * Value: the error when trying to load the API interceptor
+ */
 export type toBeDefinedErrsType = { [key: keyof APIBitwiseEnum]: Error };

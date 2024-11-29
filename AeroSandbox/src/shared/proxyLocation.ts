@@ -14,7 +14,7 @@ import { AeroLogger, AeroSandboxLogger } from "./Loggers";
  * @param prefix The proxy prefix of the proxy
  * @param logger The logger to use
  */
-export function proxyLocation(prefix = $aero.config.prefix, logger: AeroSandboxLogger | AeroLogger): URL {
+export function proxyLocation(prefix = $aero.config.prefix, logger: AeroSandboxLogger | AeroLogger = $aero.config.logger): URL {
 	return new URL(afterPrefix(location.href, prefix, logger));
 }
 /**
