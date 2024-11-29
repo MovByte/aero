@@ -48,7 +48,7 @@ export async function getClientUrlThroughForcedReferrer({
 	// Referrer policy emulation (we will force the referrer later)
 	appendSearchParam(
 		params,
-		referrerPolicyKey,
+		referrerPolicyParamName,
 		referrerPolicy,
 		rewrittenParamsOriginals
 	);

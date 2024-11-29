@@ -62,7 +62,6 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 		return okAsync(await fetch(reqUrl.href));
 	}
 
-
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
@@ -111,7 +110,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 					pass = true;
 			}
 			if (!pass)
-				return nErrAsync(new Error("The request was blocked by Access-Control-Allow-Origin"));
+				throw new Error("The request was blocked by Access-Control-Allow-Origin");
 		}
 	}
 

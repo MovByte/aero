@@ -59,7 +59,7 @@ export default async function getClientURLAeroWrapper({
 	let clientUrl: URL;
 	if (isNavigate) {
 		clientUrl = new URL(afterPrefix(reqUrl));
-	} else if (REQ_INTERCEPTION_CATCH_ALL === "clients") {
+	} else if (REQ_INTERCEPTION_CATCH_ALL === "clients" && isNavigate) {
 		logger.debug("Attempting catch-all interception through clients");
 		if (!catchAllClientsValid)
 			return nErrAsync(new Error("Missing the client ID required to get the client URL"));

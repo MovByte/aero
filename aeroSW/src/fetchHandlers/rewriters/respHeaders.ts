@@ -86,12 +86,9 @@ export default async function (
 			case "www-authenticate":
 				rewriteAuthServer(value, proxyUrl); // Assumes this handles header setting
 				break;
-			case "referrer-policy":
-				// TODO: Emulate the referrer-policy header and force-referrer
-				break;
 			// Inline the sourcemap in the external scripts as a comment instead of a header (so it can spawn another request)
 			case "sourcemap":
-				sourcemapPath = rewriteSrc(value);
+				respHeaders.set(key, rewriteSrc(value));
 				break;
 			case "x-sourcemap":
 				// `x-sourcemap` is deprecated
@@ -127,6 +124,9 @@ export default async function (
 			default:
 				respHeaders.set(key, value);
 		}
+
+		// Force the referrer policy to always show the full URL
+		respHeaders.set("referrer-policy", "unsafe-url");
 
 		let ret: {
 			speculationRules?: string
