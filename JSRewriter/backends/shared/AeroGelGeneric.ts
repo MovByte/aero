@@ -2,7 +2,7 @@ import type {
 	Result
 } from "neverthrow";
 import {
-	ok,
+	ok as nOk,
 	err as nErr
 } from "neverthrow";
 
@@ -31,7 +31,7 @@ export default class AeroGelGeneric extends RewriterGeneric {
 		});
 		if (rewrittenScriptRes.isErr())
 			return nErr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
-		return ok( /* js */ `
+		return nOk( /* js */ `
 		!(window = ${config.globalsConfig.aeroGel.propTrees.proxified.window || "null"},
 			globalThis = ${config.globalsConfig.aeroGel.propTrees.proxified.window || "null"}
 			location = ${config.globalsConfig.aeroGel.propTrees.proxified.location || "null"}) => {

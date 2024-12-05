@@ -1,5 +1,5 @@
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
-import { proxyLocation } from "$util/proxyLocation";
+import { proxyLocation } from "$shared/proxyLocation";
 
 /**
  * Checks if a segment is a valid directory name.
@@ -47,13 +47,12 @@ function removeOneLevel(path: string): string {
 }
 
 export default {
-	// @ts-ignore
-	proxifiedObj: Proxy.revocable(import.meta.resolve, {
+	proxyObjects: {
 		apply(target, that, args) {
-			const ret = Reflect.apply(target, that, args);
+			const ret = Reflect.apply(target, that, args) as string;
 
 			// Prevent the paths from going behind the proxy origin
-			let curr = ret;
+			let curr: string = ret;
 			while (
 				!new URL(curr, proxyLocation().href).href.startsWith(
 					proxyLocation().href
@@ -63,7 +62,7 @@ export default {
 			}
 			return curr;
 		}
-	}),
+	},
 	// TODO: Define on $aero
-	globalProp: "<proxyNamespace>.moduleScripts.resolve"
+	globalProp: "<proxyNamespace>.moduleScripts.resolve",
 } as APIInterceptor;

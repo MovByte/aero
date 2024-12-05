@@ -30,5 +30,5 @@ export default function injFmtWrapper(valString: string, htmlTemplating: simpleR
 			return fmtNeverthrowErr(`Failed to perform replacement to the JS in the val string ("/**{{${search}}}*\/" -> "${search}")`, err.message);
 		}
 	}
-	return ok(code);
+	return nOk(code);
 }

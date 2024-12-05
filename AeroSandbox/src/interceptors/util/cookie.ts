@@ -4,7 +4,7 @@
  * Neverthrow is used here because it contains potentially dangerous RegExp code
  */
 
-import { Result, ok, err as nErr, Err } from "neverthrow";
+import { Result, ok as nOk, err as nErr, Err } from "neverthrow";
 
 /**
  * Rewrites the `cookie` header
@@ -15,7 +15,7 @@ import { Result, ok, err as nErr, Err } from "neverthrow";
  */
 function rewriteGetCookie(cookieHeader: string, proxyLoc: URL, prefix: string): Result<string, Error> {
 	try {
-		return ok(cookieHeader
+		return nOk(cookieHeader
 			.replace(
 				new RegExp(
 					`(?<=path\=)${prefix}${proxyLoc.origin}.*(?= )`,
@@ -44,7 +44,7 @@ function rewriteGetCookie(cookieHeader: string, proxyLoc: URL, prefix: string): 
 function rewriteSetCookie(cookie: string, proxyLoc: URL, prefix: string): Result<string, Error> {
 	try {
 		// Escape the paths
-		return ok(cookie.replace(
+		return nOk(cookie.replace(
 			/(?<=path\=).*(?= )/g,
 			`${prefix}${proxyLoc.origin}$& _path=$&`
 		));

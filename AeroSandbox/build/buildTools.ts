@@ -4,7 +4,7 @@
  */
 
 import type { Result, AsyncResult } from "neverthrow";
-import { ok, err as nErr, okAsync, errAsync as nErrAsync } from "neverthrow";
+import { ok as nOk, err as nErr, okAsync, errAsync as nErrAsync } from "neverthrow";
 
 import InitDist from "../scripts/InitDist";
 import genWebIDL from "../scripts/initApiTypes";
@@ -64,7 +64,7 @@ export function importFeatureFlagOverrides(): Result<
 		const featureFlagOverrides = importSync(
 			"./createFeatureFlags.ts"
 		).default;
-		return ok(featureFlagOverrides);
+		return nOk(featureFlagOverrides);
 	} catch (err) {
 		return nErr(err);
 	}

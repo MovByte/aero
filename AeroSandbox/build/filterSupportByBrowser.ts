@@ -1,0 +1,1 @@
+// TODO: This will allow you specify a browser and it will use caniuse to disable APIs that the browser doesn't support. It will also force the user agent to be that browser.

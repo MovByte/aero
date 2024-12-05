@@ -14,7 +14,7 @@ import {
 } from "$types/apiInterceptors.d.ts";
 
 import { proxyLocation } from "$util/proxyLocation";
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 import type BareClient from "@mercuryworkshop/bare-mux";
 
 const credentialStore = new WeakMap<PasswordCredential, PasswordCredential>();

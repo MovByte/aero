@@ -2,8 +2,8 @@ import path from "node:path";
 import { access, mkdir } from "node:fs/promises";
 import { writeFileSync } from "node:fs";
 
-import type Result from "neverthrow";
-import { err as nErr, ok } from "neverthrow";
+import type { Result } from "neverthrow";
+import { ok as ok as nOk.err as nErr } from "neverthrow";
 
 /**
  * For WebIDL -> TS conversion
@@ -110,7 +110,7 @@ export default function genWebIDL(
 		});
 	}
 	// @ts-ignore
-	return ok();
+	return nOk();
 }
 
 /**

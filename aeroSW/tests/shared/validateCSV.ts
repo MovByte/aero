@@ -1,5 +1,5 @@
 import type { Result } from "neverthrow";
-import { ok, err as nErr } from "neverthrow";
+import { ok as nOk, err as nErr } from "neverthrow";
 
 export interface Expected {
 	/** The order of this matters */
@@ -35,7 +35,7 @@ export default function validateCSV(csv: string, expected?: Expected): Result<vo
 		if (rows.length > 1 && rows.length > colHeaders.length)
 			return nErr(new Error("The CSV has more rows than defined by the headers. There is no reason for this to happen."));
 	}
-	return ok(undefined);
+	return nOk(undefined);
 }
 
 /**
@@ -56,5 +56,5 @@ export function validateTestBenchCSV(csv: string, type: string, rewriters?: stri
 	const validateCSVRes = validateCSV(csv, expected);
 	if (validateCSVRes.isErr())
 		return nErr(validateCSVRes.error);
-	return ok(undefined);
+	return nOk(undefined);
 }

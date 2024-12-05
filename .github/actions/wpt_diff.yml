@@ -24,6 +24,9 @@
           description: The browser to run the WPT-Diff tests on
           required: false
           default: "chrome"
+        pathToBrowser:
+          description: The path to the browser to run the WPT-Diff tests on
+          required: false
         rootDir:
           description: The root directory of the project which contains the checkoutsDir
           required: true
@@ -33,10 +36,14 @@
         testResultsDir:
           description: The directory to store the test results in
           required: true
-        runsOutfilename:
+        runsFileOut:
           description: The name of the file to store the runs info in
           required: false
-          default: "runs-baseline.json"
+          default: "${{ github.event.inputs.rootDir }}/runs-baseline.json"
+        expectationsFileOut:
+          description: The name of the file to store the expectations (for which tests should pass in your proxy) in. The expectations are correspond to the same pass/fails in the wptreport JSON file, so that it knows what is a problem once it runs the tests through the proxy.
+          required: false
+          default: "${{ github.event.inputs.rootDir }}/expectations.json"
 
   jobs:
     js-diff:
@@ -51,7 +58,7 @@
             node-version: 21
 
         - name: Run WPT-Diff
-          run: ${{ github.event.inputs.wptDiffBaseCmd --proxyURL ${{ github.event.inputs.proxyURL }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} }}"
+          run: ${{ github.event.inputs.wptDiffBaseCmd --proxyURL ${{ github.event.inputs.proxyURL }} --browser ${{ github.event.inputs.browser }} --pathToBrowser ${{ github.event.inputs.pathToBrowser }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} --testResultsDir ${{ github.event.inputs.testResultsDir }} --runsFileOut ${{ github.event.inputs.runsFileOut }} --expectationsFileOut ${{ github.event.inputs.expectationsFileOut }} --log-wptreport={{ github.event.inputs.expectationsFileOut }}"
 
         - name: Gen the runs info
           run: ${{getRunInfoBaseCmd}} --browser ${{ github.event.inputs.browser }} --runsOutfilename ${{testResultsDir}}/${{ github.event.inputs.runsOutfilename }}

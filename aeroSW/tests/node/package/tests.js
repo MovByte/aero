@@ -63,21 +63,21 @@ test("The expected file names were found in node_modules", async t => {
 		const aeroFilenames = await readdir(`${aeroPath}/sw`);
 		for (const expectedAeroImport of expectedAeroSWImports)
 			t.test(expectedAeroImport, t =>
-				t.ok(aeroFilenames.includes(expectedAeroImport))
+				t.nOk(aeroFilenames.includes(expectedAeroImport))
 			);
 	});
 	t.test("aeroExtras", async t => {
 		const aeroExtraFilenames = await readdir(aeroExtrasPath);
 		for (const expectedAeroExtraImport of expectedAeroExtraImports)
 			t.test(expectedAeroExtraImport, t =>
-				t.ok(aeroExtraFilenames.includes(expectedAeroExtraImport))
+				t.nOk(aeroExtraFilenames.includes(expectedAeroExtraImport))
 			);
 	});
 	t.test("aeroSandbox", async t => {
 		const aeroSandboxFilenames = await readdir(aeroSandboxPath);
 		for (const expectedAeroSandboxImport of expectedAeroSandboxImports)
 			t.test(expectedAeroSandboxImport, t =>
-				t.ok(aeroSandboxFilenames.includes(expectedAeroSandboxImport))
+				t.nOk(aeroSandboxFilenames.includes(expectedAeroSandboxImport))
 			);
 	});
 });

@@ -33,7 +33,7 @@ const createErrorFmters = (errLogAfterColon: string) => ({
 	 */
 	// @ts-ignore I want to do this method switching, and it doesn't matter what the first template type is in `Err` from *Neverthrow*, because this method is meant to be generic
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	fmtNeverthrowErr: (explanation: string, originalErrs: string | string[], async = false, customFaultTag?: string): Err<any, Error> => (async ? nErrAsync : nErr)(this.fmtRawErr(explanation, originalErrs, customFaultTag))
+	fmtNeverthrowErr: (explanation: string, originalErrs: string | string[], async = false, customFaultTag?: string): Err<any, Error> => (async ? nErrAsync : nErr)(this.fmtRawErr(explanation, originalErrs, customFaultTag)),
 	fmtRawErr: (explanation: string, originalErrs: string | string[], customFaultTag?: string): string => {
 		if (!Array.isArray(originalErrs))
 			originalErrs = ["", originalErrs];

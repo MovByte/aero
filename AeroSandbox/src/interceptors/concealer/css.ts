@@ -5,7 +5,7 @@
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet#obtaining_a_stylesheet} - These explain all of the methods of obtaining `CSSStyleSheet`. TODO: Finish intercepting all of those revealers.
  */
 
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 import {
 	type APIInterceptor,
 	ExposedContextsEnum
@@ -45,15 +45,21 @@ function getProcessingInstructionSheet(
 }
 
 export default {
-	modifyObjectProperty: () =>
-		Object.defineProperty(document, "styleSheets", {
-			get: () => {
-				// Conceal each `CSSStyleSheet` from the `StyleSheetList`
-				const ret = Array.from(document.styleSheets).map(getSheet);
+	proxifyGetter(_ctx) {
+		/** The concealedProperty */
+		const ret =
+			// Conceal each `CSSStyleSheet` from the `StyleSheetList`
+			Array.from(document.styleSheets).map(getSheet);
 
-				return ret;
-			}
-		}),
+		return ret;
+	},
 	globalProp: "document.styleSheets",
+	conceals: [{
+		what: "CSSStyleSheet.href",
+		revealerType: {
+			type: "url",
+			reveals: "escapedUrl"
+		}
+	}],
 	exposedContexts: ExposedContextsEnum.window
 } as APIInterceptor;

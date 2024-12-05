@@ -1,7 +1,7 @@
 // TODO: This will be the runtime version of AeroSandbox
 
 import type { toBeDefinedErrsType } from "../types/global";
-import type { err, ok, ResultAsync } from "neverthrow";
+import type { err as nErr, ok as nOk, as nOk, ResultAsync } from "neverthrow";
 
 import getPropFromTree from "../src/util/getPropFromTree";
 
@@ -79,7 +79,7 @@ export default (buildConfig: BuildConfig) =>
 				}
 			}
 
-			return toBeDefinedErrs.length > 0 ? err(toBeDefinedErrs) : ok();
+			return toBeDefinedErrs.length > 0 ? nErr(toBeDefinedErrs) : nOk();
 		}
 		fakeOrigin(
 			proxyOrigin?: Assert<string>

@@ -8,7 +8,7 @@ import type {
 	Result,
 } from "neverthrow";
 import {
-	ok,
+	ok as nOk,
 	err as nErr
 } from "neverthrow";
 
@@ -83,7 +83,7 @@ export default class AeroGel extends AeroGelGeneric {
 	 * aeroGel.jailScript(yourScript, isMod);
 	 */
 	jailScript(script: string, isModule: boolean): Result<string, Error> {
-		return ok(super.jailScript(script, isModule, {
+		return nOk(super.jailScript(script, isModule, {
 			globalsConfig: {
 				propTrees: {
 					fakeLet: propTreeAeroGelSpecific + "fakeLet",
@@ -119,7 +119,7 @@ export default class AeroGel extends AeroGelGeneric {
  * const rewrittenScriptRes = this.rewriteScript(script);
  * if (rewrittenScriptRes.isErr())
  *  return nErr(new Error(`Failed to rewrite the script while trying to jail it: ${rewrittenScriptRes.error}`));
- * return ok( /* js *\/ `
+ * return nOk( /* js *\/ `
  *  !(window = ${objPaths.proxy.window},
  *	 globalThis = ${config.objPaths.proxy.window}
  *	 location = ${objPaths.proxy.location}) => {
@@ -209,7 +209,7 @@ export function rewriteScript(script: string, config: AeroConfig): Result<string
 	} catch (err) {
 		return nErr(new Error(`Failed to rewrite the script: ${err}`));
 	}
-	return ok(undefined);
+	return nOk(undefined);
 
-	return ok(res);
+	return nOk(res);
 }

@@ -5,7 +5,7 @@
  */
 
 import type { Result } from "neverthrow";
-import { ok, err as nErr } from "neverthrow";
+import { ok as nOk, err as nErr } from "neverthrow";
 
 /**
  * Gets the url that will actually be fetched
@@ -78,7 +78,7 @@ export default function getRequestUrl(
 				)
 			);
 		}
-		return ok(urlAfterPrefix.href);
+		return nOk(urlAfterPrefix.href);
 	}
 
 	// Not done making this type safe

@@ -74,7 +74,7 @@ export default function initGlobalsTs(
 		return fmtNeverthrowErr("Failed to write the feature flags to the globals TS types file", err);
 	}
 
-	return ok(undefined);
+	return nOk(undefined);
 }
 
 /**

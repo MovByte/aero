@@ -1,5 +1,9 @@
 import type { CtxType, FeatureFlags } from "./build/featureFlags.js";
 
+/**
+ * The default feature flags for AeroSandbox
+ * @param ctx The context to use for creating the feature flags (about the state aero was built in)
+ */
 export default (ctx: CtxType) =>
 	({
 		supportedHtmlRewriterModes: [
@@ -15,6 +19,7 @@ export default (ctx: CtxType) =>
 		supportFrames: false,
 		supportSpeculation: false,
 		corsEmulation: false,
+		cspEmulation: false;
 		emuSecureCtx: false,
 		hashURL: false,
 		supportIntegrityEmu: false,

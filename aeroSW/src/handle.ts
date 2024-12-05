@@ -7,7 +7,7 @@
 import { is } from "ts-runtime-checks";
 /// Neverthrow
 import type { ResultAsync, Result } from "neverthrow";
-import { okAsync, errAsync as nErrAsync, ok, err as nErr } from "neverthrow";
+import { okAsync as nOkAsync, errAsync as nErrAsync, ok as nOk, err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Sanity checkers
@@ -103,7 +103,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	const clientUrl = clientUrlRes.value;
 	if (clientUrl === "skip") {
 		logger.log("Skipping the request");
-		return okAsync(await fetch(req.url));
+		return nOkAsync((await fetch(req.url));
 	}
 
 	/** This is an object meant for passthrough, ultimately to the response rewriter, that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
@@ -129,7 +129,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error.message);
 	const rewrittenReqVals = rewrittenReqValsRes.value;
 	if ("finalRespEarly" in rewrittenReqVals)
-		return okAsync(rewrittenReqVals.finalRespEarly);
+		return nOkAsync((rewrittenReqVals.finalRespEarly);
 	const { rewrittenReqOpts, proxyUrl, cacheMan } = rewrittenReqVals;
 
 	// Make the request to the proxy
@@ -184,7 +184,7 @@ export default async function handleSW(event: FetchEvent): Promise<ResultAsync<R
 	}
 
 	// Return the response
-	return okAsync(rewrittenResp);
+	return nOkAsync((rewrittenResp);
 }
 
 /**
@@ -207,5 +207,5 @@ self.routeAero = (event: Assert<FetchEvent>): Result<boolean, Error> => {
 		// Propogate the error result up the chain (`troubleshootJustConfigs` is already meant to handle errors itself)
 		return troubleshootJustConfigsRes;
 
-	return ok(event.request.url.startsWith(location.origin + aeroConfig.prefix));
+	return nOk(event.request.url.startsWith(location.origin + aeroConfig.prefix));
 }

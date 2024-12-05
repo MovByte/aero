@@ -3,7 +3,7 @@ import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Utility
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 import getClientUrlThroughClient, { getClientUrlThroughForcedReferrer } from "$shared/getClientUrl";
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"

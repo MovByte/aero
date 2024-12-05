@@ -7,13 +7,12 @@ import type {
 	APIInterceptor,
 	proxifiedObjGeneratorCtxType,
 	proxifiedObjType,
-} from "../types/apiInterceptors";
+} from "$types/apiInterceptors";
 
-// TODO: Use ToBeDefined
 import type {
 	default as ToBeDefined,
 	toBeDefinedErrsType,
-} from "../types/global";
+} from "$types/global";
 
 import createApiInterceptorIteratorClient from "./createApiInterceptorIteratorClient";
 
@@ -93,23 +92,33 @@ function handleAI(
 	toBeDefined: ToBeDefined,
 	proxifiedObjGenCtx: proxifiedObjGeneratorCtxType,
 ): toBeDefinedError | "successful" { // @ts-ignore
-	if (aI.proxifiedObj) {
-		const proxyObject = resolveProxifiedObj(
-			// @ts-ignore
-			aI.proxifiedObj,
-			proxifiedObjGenCtx,
-		);
-
-		// TODO: Include more logging in debug mode
-		// FIXME: I forgot what this was before
-		if (aI.proxifiedObj) {
-			toBeDefined.self[aI.globalProp] = proxyObject;
-		} // @ts-ignore
-		else if (aI.proxifiedObjWorkerVersion) {
-			// @ts-ignore
-			toBeDefined.proxifiedObjWorkerVersion[aI.globalProp] =
-				aI.proxifiedObjWorkerVersion;
-		}
+	if (aI.proxifyGetter) {
+		const newGetter = aI.proxifyGetter({
+			this: toBeDefined.browsingContext[aI.globalProp],
+		})
+		Object.defineProperty(toBeDefined.browsingContext, toBeDefined.globalProp, {
+			get: newGetter,
+		});
+		return "successful";
+	}
+	if (aI.proxifySetter) {
+		Object.defineProperty(toBeDefined.browsingContext, toBeDefined.globalProp, {
+			set(newVal) {
+				const newSetter = aI.proxifySetter({
+					this: toBeDefined.browsingContext[aI.globalProp],
+					newVal
+				});
+				newSetter();
+			},
+		});
+		return "successful";
+	}
+	if (aI.proxyHandlers) {
+		toBeDefined.browsingContext[aI.globalProp] = Proxy.revocable(toBeDefined.browsingContext[aI.globalProp], aI.proxyHandlers)
+		return "successful";
+	}
+	if (aI.proxyHandlersWorkersVersion) {
+		toBeDefined.browsingContext[aI.globalProp] = Proxy.revocable(toBeDefined.browsingContext[aI.globalProp], aI.proxyHandlersproxyHandlersWorkersVersion)
 		return "successful";
 	}
 }

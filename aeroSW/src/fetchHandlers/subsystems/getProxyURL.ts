@@ -1,6 +1,6 @@
 // Neverthrow
 import type { Result } from "neverthrow";
-import { ok, err } from "neverthrow";
+import { ok as nOk, err } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Utility
@@ -43,7 +43,7 @@ export default function getProxyUrl({
 	let proxyUrl: URL;
 	try {
 		// Parse the request url to get the url to proxy
-		return okAsync(new URL(rawProxyUrlRes.value));
+		return nOkAsync((new URL(rawProxyUrlRes.value));
 		// biome-ignore lint/suspicious/noExplicitAny: We know the type of the error
 	} catch (err: any) {
 		return fmtNeverthrowErr(`${err instanceof TypeError

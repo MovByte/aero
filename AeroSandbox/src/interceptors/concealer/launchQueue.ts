@@ -1,20 +1,20 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 
 export default {
-	proxifiedObj: Proxy.revocable(launchQueue.setConsumer, {
+	proxifiedHandler: {
 		apply(_target, _that, args) {
 			const [callback] = args;
 
-			// Intercept the manifest
-			return (params: any) => {
-				params.targetUrl = afterPrefix(params.targetUrl);
-
-				callback(params);
+			// Conceal the target URL from the launch params
+			return (launchParams: any) => {
+				launchParams.targetUrl = afterPrefix(launchParams.targetUrl);
+				callback(launchParams);
 			};
 		}
-	}),
+	},
 	globalProp: "launchQueue.setConsumer",
+	conceals: ["LaunchParams.targetURL"],
 	supports: SupportEnum.draft | SupportEnum.shippingChromium
 } as APIInterceptor;

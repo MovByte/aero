@@ -1,6 +1,6 @@
 // Not finished
 
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 
 import { proxyLocation } from "$util/proxyLocation";
 
@@ -10,7 +10,7 @@ export default [
 	// Entries
 	// FIXME:
 	{
-		proxifiedObj: Proxy.revocable(navigation.entries, {
+		proxyHandlers: {
 			apply(target, that, args) {
 				const entries: any[] = Reflect.apply(target, that, args);
 
@@ -38,6 +38,7 @@ export default [
 						continue;
 					}
 
+					// Offset the index to delete the entry change without the site noticing
 					Object.defineProperty(newEntry, "index", {
 						value: i++
 					});
@@ -47,13 +48,27 @@ export default [
 
 				return newEntries;
 			}
-		}),
+		},
 		globalProp: "navigation.entries",
+		conceals: [{
+			what: "NavigationEntry.url",
+			revealerType: {
+				type: "url",
+				reveals: "escapedUrl"
+			}
+		}],
 		supports: SupportEnum.draft | SupportEnum.shippingChromium
 	},
 	{
-		proxifiedObj: () => proxyLocation().href,
+		emuFunc: () => proxyLocation().href,
 		globalProp: "navigation.transition.from",
+		conceals: [{
+			what: "itself",
+			revealerType: {
+				type: "url",
+				reveals: "realUrl"
+			}
+		}],
 		supports: SupportEnum.draft | SupportEnum.shippingChromium
 	},
 	{
@@ -82,6 +97,13 @@ export default [
 			}
 		}),
 		globalProp: "navigation.addEventListener",
+		conceals: [{
+			what: "NavigationCurrentEntryChangeEvent.from.url",
+			revealerType: {
+				type: "url",
+				reveals: "escapedUrl"
+			}
+		}],
 		supports: SupportEnum.draft | SupportEnum.shippingChromium
 	}
 ] as APIInterceptor[];

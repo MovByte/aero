@@ -1,32 +1,13 @@
-import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
+import { type APIInterceptor } from "$types/apiInterceptors.d.ts";
 
-import { proxyGetString } from "$util/stringProx";
-
-import rewriteSrc from "$util/src";
-
-// Only supported on Chromium
+// Delete for now
 export default [
 	{
-		proxifiedObj: Proxy.revocable(PaymentRequest, {
-			construct(target, prop, args) {
-				const [methods] = args;
-
-				args[0] = methods.map(method => rewriteSrc(method));
-
-				return Reflect.construct(target, prop, args);
-			}
-		}),
+		skip: true,
 		globalProp: "PaymentRequest",
-		supports: SupportEnum.draft | SupportEnum.shippingChromium
 	},
 	{
-		proxifiedObj: proxyGetString("MerchantValidationEvent", [
-			"validationURL"
-		]),
+		skip: true,
 		globalProp: "MerchantValidationEvent",
-		supports:
-			SupportEnum.deprecated |
-			SupportEnum.draft |
-			SupportEnum.shippingChromium
 	}
 ] as APIInterceptor[];

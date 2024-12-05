@@ -5,7 +5,7 @@ import {
 //import { handleFetchEvent } from "$aero_browser/util/swlessUtils";
 
 export default {
-	proxifiedObj: Proxy.revocable(fetch, {
+	proxyHandlers: {
 		apply(target, that, args) {
 			let [, opts]: [any?, RequestInit?] = args;
 			opts ??= {};
@@ -20,24 +20,26 @@ export default {
 
 			const headers: Record<string, string> = {};
 
-			if (
-				opts.cache &&
-				// only-if-cached requires the mode to be same origin
-				!(
-					opts.mode !== "same-origin" &&
-					opts.cache === "only-if-cached"
-				)
-			) {
-				// Emulate cache mode
-				if (headers instanceof Headers)
-					headers.append("x-aero-cache", opts.cache);
-				else headers["x-aero-cache"] = opts.cache;
+			if (CACHE_EMULATION) {
+				if (
+					opts.cache &&
+					// only-if-cached requires the mode to be same origin
+					!(
+						opts.mode !== "same-origin" &&
+						opts.cache === "only-if-cached"
+					)
+				) {
+					// Emulate cache mode
+					if (headers instanceof Headers)
+						headers.append("x-aero-cache", opts.cache);
+					else headers["x-aero-cache"] = opts.cache;
+				}
 			}
 
 			// TODO: Apply CORS emulation with the passthrough data from `$aero.sec` with for the directives: `connect-src`, TODO:...
 
 			/*
-			if ($aero.sandbox.swlessEnabled) {
+			if (SWLESS) {
 				const request = createRequest(opts, headers);
 				const nonDefaultResp = handleFetchEvent({ request });
 				if (nonDefaultResp) return nonDefaultResp;
@@ -56,7 +58,7 @@ export default {
 				return resp;
 			});
 		}
-	}),
+	},
 	globalProp: "fetch"
 } as APIInterceptor;
 

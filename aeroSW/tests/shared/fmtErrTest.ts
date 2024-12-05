@@ -7,13 +7,13 @@
  */
 
 // This is where the difference between the two version is
-import createDefaultFeatureFlags from "../../createDefaultFeatureFlags";
+import createDefaultFeatureFlags from "../../createDefaultFeatureFlags.js";
 
 // Remember this file isn't built into a bundle because it is a test file, so this must be done
 const defaultFeatureFlags = createDefaultFeatureFlags({ debugMode: false });
 
 // biome-ignore lint/nursery/useImportRestrictions: This is fundementally how aero works and it keeps the code clean. I will continue to ignore this rule.
-import createErrorFmters from "../../AeroSandbox/src/shared/fmtErrGeneric";
+import createErrorFmters from "../../../AeroSandbox/src/shared/fmtErrGeneric.js";
 
 const errLogAfterColon = defaultFeatureFlags.errLogAfterColon;
 export default errLogAfterColon;

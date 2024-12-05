@@ -24,6 +24,8 @@ import { fileURLToPath } from "node:url";
 import * as flags from "flags";
 import { envsafe, string, url } from "envsafe";
 
+import { access } from "node:fs/promises";
+
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 interface OutputInfo {
@@ -51,11 +53,16 @@ async function runTests({
 	if (setupCLIRes.isErr())
 		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error.message);
 
-	// TODO: Implement
-
-	const { stdout, stderr } = await safeExec(`wpt ${browser} --aero`, { cwd: "../checkouts/WPT" });
+	if (access(""))
+		// Run baseline results
+		const { stdout, stderr } = await safeExec(`wpt ${browser} --headless --aero`, { cwd: "../checkouts/WPT" });
 
 	// TODO: Write the results
+
+
+	const writeNPMVersionsRes = await writeNPMVersions(testResultsDir);
+	if (writeNPMVersionsRes.isErr())
+		return fmtNeverthrowErr("Failed to write the NPM package versions for aero", writeNPMVersionsRes.error.message);
 
 	return okAsync(undefined);
 }
@@ -102,6 +109,8 @@ const isCLI =
 const ignoreInputs = ["wptDiffBaseCmd", "getRunInfoBaseCmd"];
 if (isCLI) {
 	(async () => {
+		const defaultRootDir = resolve(__dirname, "../../../");
+		const defaultTestResultsDir = resolve(defaultRootDir, "testResults");
 		const env = envsafe({
 			PROXY_URL: url({
 				devDefault: "http://localhost:2525/go/"
@@ -112,11 +121,20 @@ if (isCLI) {
 			BROWSER: string({
 				devDefault: "chrome"
 			}),
+			ROOT_DIR: string({
+				devDefault: defaultRootDir
+			}),
 			CHECKOUT_DIR: string({
-				devDefault: resolve(__dirname, "../../../checkouts/WPT")
+				devDefault: resolve(defaultRootDir, "checkouts/WPT")
 			}),
 			TEST_RESULTS_DIR: string({
-				devDefault: resolve(__dirname, "../../../testResults")
+				devDefault: defaultTestResultsDir
+			})
+			RUNS_FILE_OUT: string({
+				devDefault: resolve(defaultTestResultsDir, "runs.json")
+			})
+			EXPECTATIONS_FILE_OUT: string({
+
 			})
 		});
 

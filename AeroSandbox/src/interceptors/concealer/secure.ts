@@ -1,18 +1,20 @@
 import {
-    type APIInterceptor,
-    ExposedContextsEnum
-} from "$types/apiInterceptors.d.ts";
+	type APIInterceptor,
+} from "$types/apiInterceptors";
+import { ExposedContextsEnum } from "$types/apiInterceptors"
 
-import { proxyLocation } from "$util/proxyLocation";
+import { proxyLocation } from "$shared/proxyLocation";
 
-export default {
-    modifyObjectProperty() {
-        Object.defineProperty(window, "isSecureContext", {
-            get: () =>
-                //flags.emulateSecureContext ||
-                proxyLocation($aero.config.prefix, $aero.logger).protocol === "https:"
-        });
-    },
-    globalProp: "isSecureContext",
-    exposedContexts: ExposedContextsEnum.window
-} as APIInterceptor;
+export default [{
+	proxifyGetter: () => proxyLocation().protocol === "https:",
+	globalProp: "isSecureContext",
+	conceals: [{
+		what: "itself",
+		revealerType: {
+			type: "url",
+			// Because of fake protocol emulation!
+			reveals: "realProtocol"
+		}
+	}],
+	exposedContexts: ExposedContextsEnum.window
+}] as APIInterceptor[];

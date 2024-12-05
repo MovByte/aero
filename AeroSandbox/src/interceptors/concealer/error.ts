@@ -1,6 +1,6 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 
 /*
 Error emulation
@@ -8,7 +8,7 @@ These properties are not standard, so functionality is different in browsers
 These interceptors will probably change a lot over time
 */
 export default {
-	proxifiedObj: Proxy.revocable(Error, {
+	proxifiedHandlers: {
 		construct(target, args) {
 			const res = Reflect.construct(target, args);
 
@@ -43,11 +43,11 @@ export default {
 					res.stack = res.stack
 						.split("\n")
 						.map(line =>
-							line.includes(location.origin /*+ config.prefix*/)
-								? ""
-								: line
+							// Basically does the same thing as `afterPrefix`, but with multiple possible matches
+							line.replace(new RegExp(location.origin + $aero.config.prefix), ""),
 						)
 						.join("\n")
+						// TODO: Move these RegExps globally in this file
 						.replace(
 							/^(at )([A-Za-z\.]+ )?.+(?=:\d+:\d+)/g,
 							(_match, g1, g2, g3) => g1 + g2 + afterPrefix(g3)
@@ -60,7 +60,20 @@ export default {
 
 			return res;
 		}
-	}),
+	},
 	globalProp: "Error",
-	supports: SupportEnum.nonstandard
+	conceals: [{
+		what: "Error.stack",
+		revealerType: {
+			type: "url",
+			reveals: "escapedUrl"
+		},
+	}, {
+		what: "Error.fileName",
+		revealerType: {
+			type: "url",
+			reveals: "escapedUrl"
+		}
+	}],
+	supports: SupportEnum.nonStandard
 } as APIInterceptor;

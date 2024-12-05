@@ -21,21 +21,21 @@
  * 	  if (encodedUrlRes.isErr()) {
  *		return nErr(new Error(`Failed to encode the URL, ${url}: ${encodedUrlRes.error}`));
  *    }
- *    return ok(encodedUrlRes.value);
+ *    return nOk(encodedUrlRes.value);
  * 	},
  * 	decodeUrl: (encUrl) => {
  * 	  const decodedUrlRes = precompXOR.decodeUrl(encUrl, yourKey);
  * 	  if (decodedUrlRes.isErr()) {
  * 		return nErr(new Error(`Failed to decode the URL, ${encUrl}: ${decodedUrlRes.error}`));
  * 	  }
- * 	  return ok(decodedUrlRes.value);
+ * 	  return nOk(decodedUrlRes.value);
  *   }
  * }
  */
 
 import type { GenericLogger } from "../Loggers";
 import type { Err, Result } from "neverthrow";
-import { ok, err as nErr } from "neverthrow";
+import { ok as nOk, err as nErr } from "neverthrow";
 
 // The only reason why I am using this version of `fmtError` is because there are test cases that run on this file. That is also why I am resolving this file with `.ts` at the end.
 
@@ -161,7 +161,7 @@ export default class PrecompXOR {
 				);
 		}
 
-		return ok(new TextDecoder().decode(resultArr));
+		return nOk(new TextDecoder().decode(resultArr));
 	}
 	/**
 	 * Decodes a URL using the XOR lookup table that corresponds to the key
@@ -187,7 +187,7 @@ export default class PrecompXOR {
 			resultArr[i] = decodeURLLookupDictionary[char];
 		}
 
-		return ok(new TextDecoder().decode(resultArr));
+		return nOk(new TextDecoder().decode(resultArr));
 	}
 
 	// Helper methods

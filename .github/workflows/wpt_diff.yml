@@ -1,0 +1,27 @@
+name: WPT-diff
+
+on:
+  pull_request:
+    types: [opened, reopened]
+    paths: ["AeroSandbox/**.ts", "aero/**.ts"]
+    
+  push:
+    branches:
+      - main
+      - unstable
+    paths: ["AeroSandbox/**.ts", "aero/**.ts"]
+
+jobs:
+  js-diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run JS-Diff Action
+        uses: ./github/actions/wpt_diff.yml
+        with:
+          proxyURL: "http://localhost:2525/go/"
+          rootDir: AeroSandbox/tests
+          checkoutsDir: checkouts

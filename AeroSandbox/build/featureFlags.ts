@@ -18,7 +18,10 @@ export interface FeatureFlags {
 	supportSpeculation: boolean;
 	/** @warning currently unsupported and untested */
 	supportFrames: boolean;
+	/** @warning currently untested */
 	corsEmulation: boolean;
+	/** @warning currently untested */
+	cspEmulation: boolean;
 	/** @warning currently unsupported and untested */
 	emuSecureCtx: boolean;
 	/** Integrity emulation is extremely slow, because it blocks the main thread to syncronously run a `Promise`. Very few to no sites will use integrity emulation as a means to detect aero. */
@@ -36,8 +39,13 @@ export interface FeatureFlags {
 	debug: boolean;
 }
 
+/**
+ * The context explaining the state of how aero was built IN
+ */
 export interface CtxType {
 	debugMode: boolean;
 }
-
+/**
+ * A type for the function used in aero to create the default feature flags
+ */
 export type createFeatureFlags = (ctx: CtxType) => FeatureFlags;

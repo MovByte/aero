@@ -6,6 +6,8 @@ import {
 import { proxyConstructString } from "$util/stringProx";
 
 export default {
+	/*
+	You know this wouldn't work
 	proxifiedObj: ctx => {
 		if (
 			"requestUrlProxifier" in ctx.specialInterceptionFeatures &&
@@ -17,4 +19,5 @@ export default {
 	globalProp: "EventSource",
 	specialInterceptionFeatures:
 		SpecialInterceptionFeaturesEnum.requestUrlProxifier
+	*/
 } as APIInterceptor;

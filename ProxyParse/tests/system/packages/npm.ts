@@ -27,6 +27,6 @@ test("The expected file names were found in node_modules", async t => {
     const proxyParseFilenames = await readdir(resolve(expectedPath, "dist"));
     for (const expectedAeroImport of proxyParseFilenames)
         t.test(expectedAeroImport, t =>
-            t.ok(proxyParseFilenames.includes(expectedAeroImport))
+            t.nOk(proxyParseFilenames.includes(expectedAeroImport))
         );
 });

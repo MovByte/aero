@@ -4,8 +4,8 @@
  * This module is made for rewriting the `Sec-Fetch-Site`
  */
 
-import { ResultAsync } from "neverthrow";
-import { okAsync } from "neverthrow";
+import type { ResultAsync } from "neverthrow";
+import { okAsync as nOkAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "../fmtErr";
 
 import type BareClient from "@mercuryworkshop/bare-mux";
@@ -36,7 +36,7 @@ export default function getSiteDirective(proxyUrl: URL, clientURL: URL, bc: Bare
  * @return If the two URLs are the same site wrapped in a `ResultAsync` for better error handling from *Neverthrow*
  */
 export async function isSameSite(url1: URL, url2: URL, bc: BareClient = $aero.bc): Promise<ResultAsync<boolean, Error>> {
-	if (url1.protocol === url2.protocol) return okAsync(false);
+	if (url1.protocol === url2.protocol) return nOkAsync((false);
 
 	let publicSuffixes: string[];
 	if (FETCH_PUBLIC_SUFFIX_PRIORITY === "compile-time") {
@@ -63,10 +63,10 @@ export async function isSameSite(url1: URL, url2: URL, bc: BareClient = $aero.bc
 		if (
 			// Check if the public suffix domain are both equal (the first level before the public suffix matters)
 			getSiteDomainFromPublicSuffix(url1, publicSuffix, firstLevelBeforeMatters) === getSiteDomainFromPublicSuffix(url2, publicSuffix, firstLevelBeforeMatters))
-			return okAsync(true);
+			return nOkAsync((true);
 	}
 	// Finally, check if the second-level domains are equal
-	return okAsync(getSecondLevelDomain(url1) === getSecondLevelDomain(url2))
+	return nOkAsync((getSecondLevelDomain(url1) === getSecondLevelDomain(url2))
 }
 
 /**
@@ -108,5 +108,5 @@ export async function getPublicSuffixList(bc: BareClient = $aero.bc): Promise<Re
 	}
 	/** The public suffixes list - @see https://publicsuffix.org/ */
 	const publicSuffixesText = await publicSuffixesRes.text();
-	return okAsync(publicSuffixesText.split("\n").filter(line => !(line.startsWith("//") || line.trim() === "")));
+	return nOkAsync((publicSuffixesText.split("\n").filter(line => !(line.startsWith("//") || line.trim() === "")));
 }

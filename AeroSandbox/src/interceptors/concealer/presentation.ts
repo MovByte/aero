@@ -5,27 +5,30 @@ import { proxyGetString } from "$util/stringProx";
 import rewriteSrc from "$util/src";
 
 export default [
+	/*
+	You know you can't do that
 	{
 		proxifiedObj: Proxy.revocable(PresentationRequest, {
 			construct(that, args) {
-				// Could either be a string or an array
-				let [urls] = args;
+				/** Could either be a string or an array *\/
+			let[urls] = args;
 
-				if (Array.isArray(urls))
-					urls = urls.map(url => rewriteSrc(url));
-				else urls = rewriteSrc(urls);
+						if (Array.isArray(urls))
+			urls = urls.map(url => rewriteSrc(url));
+		else urls = rewriteSrc(urls);
 
-				args[0] = urls;
+		args[0] = urls;
 
-				return Reflect.construct(that, args);
-			}
-		}),
+		return Reflect.construct(that, args);
+					}
+				}),
 		globalProp: "PresentationRequest",
-		supports: SupportEnum.draft | SupportEnum.shippingChromium
-	},
-	{
-		proxifiedObj: proxyGetString("PresentationConnection", ["url"]),
-		globalProp: "PresentationConnection",
-		supports: SupportEnum.draft | SupportEnum.shippingChromium
-	}
+			supports: SupportEnum.draft | SupportEnum.shippingChromium
+			},
+		{
+			proxifiedObj: proxyGetString("PresentationConnection", ["url"]),
+				globalProp: "PresentationConnection",
+					supports: SupportEnum.draft | SupportEnum.shippingChromium
+		}
+	*/
 ] as APIInterceptor[];

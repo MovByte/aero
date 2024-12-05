@@ -25,7 +25,6 @@ import getCSPPolicyRules from "$src/security/csp/getPolicyRules";
 					if (htmlRule.cspSrcBlock) {
 
 						if (getCSPPolicyRules(htmlRule.cspSrcBlock)) {
-
 							super.removeAttribute(attrName);
 							return;
 						}

@@ -4,8 +4,10 @@ import process from "node:process";
 import { access, copyFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 
-// Rust-like error handling
-import { Result, ok, err as err, fromPromise } from 'neverthrow';
+// Neverthrow
+import type { Result } from "neverthrow";
+import { ok as nOk, err as err, fromPromise } from 'neverthrow';
+
 
 /**
  * This interface defines the directories that will be used by the `InitDist` class
@@ -108,7 +110,7 @@ export default class InitDist {
 			return err(copyRes.error);
 
 		console.info("Default config copied successfully");
-		return ok(undefined);
+		return nOk(undefined);
 	}
 }
 

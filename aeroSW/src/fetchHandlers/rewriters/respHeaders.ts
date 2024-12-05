@@ -6,8 +6,8 @@
 // For enhanced type safety
 import { type Maybe } from 'option-t/maybe';
 /// Neverthrow types
-import { ResultAsync } from "neverthrow";
-import { okAsync } from "neverthrow";
+import type { ResultAsync } from "neverthrow";
+import { okAsync as nOkAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Separate header rewriters
@@ -61,11 +61,11 @@ export default async function (
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType,
 	accessControlRuleMap: Map<string, string>,
 	passthrough: Passthrough,
-): Promise<{
+): Promise<ResultAsync<{
 	/** Possibly the speculation rule if the external path to one had to have been deleted */
 	speculationRules: Maybe<string>,
 	sourcemapPath: Maybe<string>,
-}> {
+}, Error>> {
 	const { proxyUrl, bc, clientId } = passthrough;
 
 	/** Possibly the external speculation rules, but now inlined */
@@ -133,11 +133,11 @@ export default async function (
 		} = {};
 		// @ts-ignore
 		if (speculationRules) ret.speculationRules = speculationRules;
-		return okAsync(ret);
+		return nOkAsync((ret);
 	}
 
 	// @ts-ignore
-	return typeof speculationRules !== "undefined" ? okAsync(speculationRules) : okAsync(undefined);
+	return typeof speculationRules !== "undefined" ? nOkAsync((speculationRules) : nOkAsync((undefined);
 };
 
 /**

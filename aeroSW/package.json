@@ -44,7 +44,7 @@
 		"test": "npm run tests/index.js",
 		"testsNode": "npm run tests/node/index.js",
 		"testsBrowser": "echo 'Unsupported at the moment'",
-		"buildSW": "rspack build -c rspack.config.ts",
+		"buildSW": "npm run init-globals:ts && rspack build -c rspack.config.ts",
 		"debugBuildSW": "rspack --stats-error-detail --watch --info-verbosity",
 		"start": "pm2 start ecosystem.config.cjs --only \"aero-dev-server,aero-build-watch,aero-sandbox-build-watch\"",
 		"live-build:sw": "pm2 start ecosystem.config.cjs --only \"aero-build-watch,aero-sandbox-build-watch\"",
@@ -52,8 +52,7 @@
 		"live-build:cfWorkers": "pm2 start ecosystem.config.cjs --only \"aero-build-cf-workers,aero-sandbox-build-watch\", \"",
 		"live-build:aeroSandbox": "pm2 start ecosystem.config.cjs --only \"aero-sandbox-build-watch\"",
 		"syncPackageJson": "node --no-warnings --experimental-strip-types -- ./scripts/syncPackageJson.ts",
-		"init-globals:biome": "node --no-warnings --experimental-strip-types ./scripts/initGlobalsBiome.ts",
-		"init-globals:ts": "node --no-warnings --experimental-strip-types -- ./scripts/initGlobalsTs.ts",
+		"init-globals:ts": "tsx ./scripts/initGlobalsTs.ts",
 		"prepare": "ts-patch install && typia patch"
 	},
 	"repository": {

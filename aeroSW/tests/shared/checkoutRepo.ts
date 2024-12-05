@@ -4,7 +4,7 @@
  */
 
 import type { Result, ResultAsync } from "neverthrow";
-import { ok, err as nErr, okAsync, errAsync as nErrAsync } from "neverthrow";
+import { ok as nOk, err as nErr, okAsync as nOkAsync } from "neverthrow";
 
 import path from "node:path";
 
@@ -46,7 +46,7 @@ export default async function checkoutRepo(repoURL: string, rootDir: string, rep
 		});
 	}
 
-	return okAsync(undefined);
+	return nOkAsync(undefined);
 }
 
 // TODO: Make an exported function that supports sparse checkouts and use it in `jsTest.ts`
@@ -54,10 +54,9 @@ export async function checkoutDirSparsely(repoURL: string, repoDirName: string, 
 	rootDir: string,
 	checkoutsDirName: string,
 }, sparsePaths: string[]): Promise<ResultAsync<void, Error>> {
-	// TODO: Implement
 	let checkoutDirPath: string;
 	try {
-		const checkoutDirPath = path.resolve(dirs.rootDir, dirs.checkoutsDirName);
+		checkoutDirPath = path.resolve(dirs.rootDir, dirs.checkoutsDirName);
 	} catch (err) {
 		return nErrAsync(new Error(`Failed to resolve the checkout directory path: ${err.message}`));
 	}
@@ -104,7 +103,7 @@ export async function checkoutDirSparsely(repoURL: string, repoDirName: string, 
 	}
 	*/
 
-	return ok(undefined)
+	return nOk(undefined)
 }
 
 // Helper functions
@@ -120,9 +119,9 @@ export async function createCheckoutDir(checkoutDir: string): Promise<ResultAsyn
 	} catch (err: any) {
 		if (err.code === "ENOENT")
 			await mkdir(checkoutDir, { recursive: true });
-		else err(new Error(`Error while trying to check if the directory ${checkoutDir} exists: ${err.message}`));
+		else nErr(new Error(`Error while trying to check if the directory ${checkoutDir} exists: ${err.message}`));
 	}
-	return okAsync(undefined);
+	return nOkAsync(undefined);
 }
 
 /**

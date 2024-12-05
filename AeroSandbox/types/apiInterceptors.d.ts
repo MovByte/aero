@@ -18,13 +18,24 @@ export type storageProxifiyObjGenerator = (
 ) => proxifiedObjType;
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 /** This is for trapping `get` */
-export type proxifyGetter = (ctx: proxifiedObjGeneratorCtxType) => any;
+export type proxifiedGetter = (ctx: proxifiedObjGeneratorCtxType) => any;
 /** This is for trapping `get` */
 export type proxifySetter = (ctx: proxifiedObjGeneratorCtxType & {
 	/** The new value from the setter while trying to trap `set` */
 	newVal?: string
 }) => any;
 
+export type concealType = {
+	what: string;
+	revealerType: {
+		type: "url",
+		reveals: "origin" | "escapedUrl" | "hostname" | "domain" | "realProtocol" | "realUrl";
+	}
+}
+/** For origin isolators */
+export type isolatesType = [
+	// TODO: Write this
+]
 
 export type objectPropertyModifier = (
 	ctx: proxifiedObjGeneratorCtxType
@@ -39,6 +50,9 @@ interface APIInterceptorGeneric {
 	 * @warning It will overwrite the entire global scope with your proxified object if you set it to `""`.
 	 */
 	globalProp: string | "";
+	/** You must include this in every concealer in aero */
+	conceals: concealType[];
+	isolates: isolatesType[];
 	/** These toggle code inside of the Proxy handler that provide other things you may want to use AeroSandbox for */
 	specialInterceptionFeatures?: InterceptionFeaturesEnum;
 	/** This is if your API Interceptor covers WebSockets, WebTransports, or WebRTC */
@@ -65,7 +79,7 @@ export type APIInterceptorForProxyObjectsInWorker = APIInterceptorGeneric & {
 	proxifiedObjWorkerVersion?: Object;
 };
 export type APIInterceptorForProxifiyingGettersAndSetters = APIInterceptorGeneric & {
-	proxifyGetter?: proxifyGetter;
+	proxifiedGetter?: proxifiedGetter;
 	proxifySetter?: proxifySetter;
 };
 export type APIInterceptorForModifyingObjectProperties =
@@ -79,7 +93,7 @@ export type APIInterceptor =
 	| APIInterceptorSkip
 	| APIInterceptorForProxyObjects
 	| APIInterceptorForProxyObjectsInWorker
-	| APIInterceptorForProxifiyingGettersAndSetters\
+	| APIInterceptorForProxifiyingGettersAndSetters
 	| APIInterceptorForModifyingObjectProperties;
 
 // TODO: Make something like SupportEnum, but instead you provide a browser string and it only includes API interceptors for the features supported by those browsers
@@ -143,4 +157,12 @@ export enum InterceptionFeaturesEnum {
 	messageIsolation,
 	/** Only use this member if you aren't using it for a regular SW proxy */
 	requestUrlProxifier
+}
+
+// Event stuff
+export type eventListener = (event) => any;
+export interface EventListener {
+	type: "window",
+	eventName: string;
+	listener: eventListener;
 }

@@ -13,12 +13,13 @@ import { fmtNeverthrowErr } from "$aero/AeroSandbox/tests/shared/fmtErrTest";
 import { rewriteAuthClient } from "./auth";
 
 // Utility
-import { afterPrefix } from "$util/getProxyUrl";
+import { afterPrefix } from "$util/getProxyURL";
 import getSiteDirective from "$shared/cors/siteTests";
 
 import type BareClient from "@mercuryworkshop/bare-mux";
+
 /** Things that are required to be passed in to rewrite the headers in the methods that are called from here */
-interface Context {
+interface Passthrough {
 	/** The proxy URL for reference in rewriting the headers */
 	proxyUrl: URL;
 	clientUrl: URL;
@@ -29,7 +30,7 @@ interface Context {
  * A function that rewrites the request headers for aero
  * @param headers The headers to rewrite
  */
-export default async (headers: Headers, ctx: Context): Promise<ResultAsync<void, Error>> => {
+export default async (headers: Headers, ctx: Passthrough): Promise<ResultAsync<void, Error>> => {
 	for (const [key, value] of headers.entries()) {
 		if (key === "host") {
 			headers.set(key, ctx.proxyUrl?.host);

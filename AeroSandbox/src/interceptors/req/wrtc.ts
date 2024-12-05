@@ -4,11 +4,10 @@ import {
 	ExposedContextsEnum
 } from "$types/apiInterceptors.d.ts";
 
-// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
-import escape from "$util/escape";
+import escape from "$shared/escaping/escape";
 
 export default {
-	proxifiedObj: Proxy.revocable(RTCPeerConnection, {
+	proxyHandlers: {
 		construct(target, args) {
 			const [config] = args;
 
@@ -38,8 +37,11 @@ export default {
 			}
 			return Reflect.set(target, prop, value);
 		}
-	}),
+	},
 	globalProp: "RTCPeerConnection",
-	forAltProtocol: AltProtocolEnum.webRTC,
+	escapeFixers: {
+		// TODO: Put iceServers on here
+	}
+	forAltProtocol: AltProtocolEnum.wrtc,
 	exposedContexts: ExposedContextsEnum.window
 } as APIInterceptor;
