@@ -5,7 +5,7 @@
 // Neverthrow
 import type { Result } from "neverthrow";
 import { err as nErr, ok } from "neverthrow";
-import { fmtNeverthrowErr } from "../tests/shared/fmtErrTest.ts";
+import { fmtNeverthrowErr } from "../tests/util/fmtErrTest.js";
 
 import { accessSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";

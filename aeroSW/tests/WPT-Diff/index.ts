@@ -8,13 +8,13 @@
 // Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
-import errLogAfterColon, { fmtNeverthrowErr } from "../shared/fmtErrTest";
+import errLogAfterColon, { fmtNeverthrowErr } from "../util/fmtErrTest.ts";
 
 // Utility
-import checkoutRepo from "../shared/checkoutRepo.ts";
-import { safeExec } from "../shared/safeExec";
-import getNPMVersions from "../shared/getNPMVersions";
-import safeWriteFileToDir from "../shared/safeWriteFileToDir";
+import checkoutRepo from "../util/checkoutRepo.ts";
+import { safeExec } from "../util/safeExec.ts";
+import getNPMVersions from "../util/getNPMVersions.ts";
+import safeWriteFileToDir from "../util/safeWriteFileToDir.ts";
 import unwrapGetActionYAML from "./shared/unwrapGetActionYAML.ts";
 
 // For forming directory paths
@@ -53,10 +53,11 @@ async function runTests({
 	if (setupCLIRes.isErr())
 		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error.message);
 
-	if (access(""))
-		// Run baseline results
+	/*
+	if (access("TODO:..."))
+		// Get results
 		const { stdout, stderr } = await safeExec(`wpt ${browser} --headless --aero`, { cwd: "../checkouts/WPT" });
-
+	*/
 	// TODO: Write the results
 
 
@@ -129,12 +130,12 @@ if (isCLI) {
 			}),
 			TEST_RESULTS_DIR: string({
 				devDefault: defaultTestResultsDir
-			})
+			}),
 			RUNS_FILE_OUT: string({
 				devDefault: resolve(defaultTestResultsDir, "runs.json")
-			})
+			}),
 			EXPECTATIONS_FILE_OUT: string({
-
+				devDefault: resolve(defaultTestResultsDir, "baseline-expectations.json")
 			})
 		});
 
@@ -150,9 +151,12 @@ if (isCLI) {
 			browser: (flags.get("browser") || env.BROWSER) as string,
 			rootDir: (flags.get("rootDir") || env.ROOT_DIR) as string,
 			checkoutDir: (flags.get("checkoutDir") || env.CHECKOUT_DIR) as string,
-			testResultsDir: (flags.get("testResultsDir") || env.TEST_RESULTS_DIR) as string
+			testResultsDir: (flags.get("testResultsDir") || env.TEST_RESULTS_DIR) as string,
+			// @ts-ignore
+			runsFileOut: (flags.get("runsFileOut") || env.RUNS_FILE_OUT) as string,
+			expectationsFileOut: (flags.get("expectationsFileOut") || env.EXPECTATIONS_FILE_OUT) as string
 		});
 		if (runTestsRes.isErr())
-			throw new Error(`Failed to run the${errLogAfterColon}${runTestsRes.error.message}`);
+			throw new Error(`Failed to run the tests${errLogAfterColon}${runTestsRes.error.message}`);
 	});
 }

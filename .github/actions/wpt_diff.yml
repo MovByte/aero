@@ -39,7 +39,7 @@
         runsFileOut:
           description: The name of the file to store the runs info in
           required: false
-          default: "${{ github.event.inputs.rootDir }}/runs-baseline.json"
+          default: "${{ github.event.inputs.rootDir }}/runs.json"
         expectationsFileOut:
           description: The name of the file to store the expectations (for which tests should pass in your proxy) in. The expectations are correspond to the same pass/fails in the wptreport JSON file, so that it knows what is a problem once it runs the tests through the proxy.
           required: false
