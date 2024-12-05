@@ -5,9 +5,9 @@
 
 import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
-import { fmtNeverthrowErr } from "../../util/fmtErrTest";
+import { fmtNeverthrowErr } from "./util/fmtErr";
 
-import type { DiffFilterParam, ResultsSummary, RunDiff, TestDiff, ResultsDiff } from "../../types/WPT-Diff-diff";
+import type { DiffFilterParam, ResultsSummary, RunDiff, TestDiff, ResultsDiff } from "$types/diff.d.ts";
 
 const apiBase = "https://wpt.fyi/api/";
 
@@ -155,9 +155,8 @@ function newTestDiff(
  * Based on @see https://github.com/web-platform-tests/wpt.fyi/blob/a491f1165498e299006d5388bb0e4e8971900cc8/shared/run_diff.go#L539-L549
  */
 function anyPathMatches(testPath: string, paths?: Set<string>): boolean {
-	if (!paths) {
+	if (!paths)
 		return true;
-	}
 	for (const path of paths)
 		if (testPath.startsWith(path))
 			return true;
