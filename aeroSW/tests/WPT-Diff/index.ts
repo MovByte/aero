@@ -15,7 +15,7 @@ import checkoutRepo from "../util/checkoutRepo.ts";
 import { safeExec } from "../util/safeExec.ts";
 import getNPMVersions from "../util/getNPMVersions.ts";
 import safeWriteFileToDir from "../util/safeWriteFileToDir.ts";
-import unwrapGetActionYAML from "./shared/unwrapGetActionYAML.ts";
+import unwrapGetActionYAML from "../../WPTUtil/src/unwrapGetActionYAML.ts";
 
 // For forming directory paths
 import { resolve } from "node:path";
@@ -35,11 +35,19 @@ interface OutputInfo {
 	rootDir: string;
 	checkoutDir: string;
 	testResultsDir: string;
+	runsFileOut: string;
+	expectationsFileOut: string;
+}
+/** Optionally output different types of information */
+interface OutputOptions {
+	diffWithOfficialTestRun?: boolean;
+	expectationsByBaseline?: boolean;
 }
 
 /**
  * Runs the tests and writes the results to the `outdir` directory
  * @param param0 The context required configure how the tests are ran
+ * @param param1 The options for optional files along with the WPT-Diff results
  */
 async function runTests({
 	proxyURL,
@@ -47,8 +55,13 @@ async function runTests({
 	browser,
 	rootDir,
 	checkoutDir,
-	testResultsDir
-}: OutputInfo): Promise<ResultAsync<void, Error>> {
+	testResultsDir,
+	runsFileOut,
+	expectationsFileOut
+}: OutputInfo, {
+	diffWithOfficialTestRun,
+	expectationsByBaseline
+}: OutputOptions): Promise<ResultAsync<void, Error>> {
 	const setupCLIRes = await setupPatchedCLI();
 	if (setupCLIRes.isErr())
 		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error.message);
