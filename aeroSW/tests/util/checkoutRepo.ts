@@ -4,31 +4,32 @@
  */
 
 import type { Result, ResultAsync } from "neverthrow";
-import { ok as nOk, err as nErr, okAsync as nOkAsync } from "neverthrow";
+import { okAsync as nOkAsync, errAsync as nErrAsync } from "neverthrow";
+import { fmtErr } from "../util/fmtErrTest.ts";
 
 import path from "node:path";
 
 import { access, mkdir } from "node:fs/promises";
 
+// Utility
 import safeExec from "./safeExec";
 
 /**
- * Note: this does not support sparse checkouts
+ * Checks out a repository to the specified directory
+ * @param repoURL The URL of the repository to checkout
+ * @param rootDir The root directory to checkout the repository in
+ * @param repoName The name of the folder to checkout the repository in
  */
 export default async function checkoutRepo(repoURL: string, rootDir: string, repoName: string): Promise<ResultAsync<void, Error>> {
-	function fmtnErres(errMsg: string): ResultAsync<void, Error> {
-		return nErrAsync(new Error(`Failed to checkout the repo: ${errMsg}`));
-	}
-
 	const checkoutDirRes = checkoutDirPath(rootDir, "checkouts");
 	if (checkoutDirRes.isErr())
-		return fmtnErres(checkoutDirRes.error.message);
+		return fmtCheckoutErrRes(checkoutDirRes.error.message);
 	const checkoutDir = checkoutDirRes.value;
 	const repoDir = repoDirPath(checkoutDir, repoName);
 
 	const createCheckoutDirRes = await createCheckoutDir(checkoutDir);
 	if (createCheckoutDirRes.isErr())
-		return fmtnErres(createCheckoutDirRes.error.message);
+		return fmtCheckoutErrRes(createCheckoutDirRes.error.message);
 
 	try {
 		await access(repoDir);
@@ -49,90 +50,76 @@ export default async function checkoutRepo(repoURL: string, rootDir: string, rep
 	return nOkAsync(undefined);
 }
 
-// TODO: Make an exported function that supports sparse checkouts and use it in `jsTest.ts`
-export async function checkoutDirSparsely(repoURL: string, repoDirName: string, dirs: {
-	rootDir: string,
-	checkoutsDirName: string,
-}, sparsePaths: string[]): Promise<ResultAsync<void, Error>> {
+export async function checkoutDirSparsely(repoURL: string, repoDirName: string, dirs: { rootDir: string; checkoutsDirName: string }, sparsePaths: string[]): Promise<ResultAsync<void, Error>> {
 	let checkoutDirPath: string;
+
 	try {
 		checkoutDirPath = path.resolve(dirs.rootDir, dirs.checkoutsDirName);
 	} catch (err) {
-		return nErrAsync(new Error(`Failed to resolve the checkout directory path: ${err.message}`));
+		return nErrAsync(new Error(`Failed to resolve the checkout directory path: ${err instanceof Error ? err.message : 'Unknown error'}`));
 	}
 
-	/*
-		// TODO: Remove this code and instead call 
 	try {
-		try {
-			await access(jsTestsDir);
-			await safeExec(
-				`cd ${jsTestsDir} && git pull`,
-				{
-					cwd: rootDir
-				}
-			);
-		} catch {
-			try {
-				await access(webkitCheckoutDir)
-			} catch {
-				setTimeout(async () => {
-					await mkdir(webkitCheckoutDir, { recursive: true });
-					await safeExec(
-						`git clone--filter = blob: none--no - checkout--depth 1 --sparse https://github.com/WebKit/WebKit.git ${webkitCheckoutDir}`, {
-						cwd: rootDir
-					}
-					);
-				}, 5000);
-			}
-			setTimeout(async () => {
-				await safeExec(`git sparse-checkout add JSTests`, {
-					cwd: rootDir
-				});
-			}, 10000);
-			setTimeout(async () => {
-				await safeExec("git checkout", {
-					cwd: rootDir
-				});
-			}, 15000);
-			//console.info("All of the commands have been executed successfully!");
-		}
-		// @ts-ignore
-	} catch (err: any) {
-		throw new Error(`Failed to execute a command for initializing the JSTests dir: ${err.message}`);
+		await access(checkoutDirPath);
+	} catch {
+		await mkdir(checkoutDirPath, { recursive: true });
 	}
-	*/
 
-	return nOk(undefined)
-}
-
-// Helper functions
-/**
- * Creates the checkour dir if it doesn't already exist
- * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
- * ch 
- */
-export async function createCheckoutDir(checkoutDir: string): Promise<ResultAsync<void, Error>> {
 	try {
-		await access(checkoutDir);
-		// biome-ignore lint/suspicious/noExplicitAny: error catching
-	} catch (err: any) {
-		if (err.code === "ENOENT")
-			await mkdir(checkoutDir, { recursive: true });
-		else nErr(new Error(`Error while trying to check if the directory ${checkoutDir} exists: ${err.message}`));
+		await safeExec(`git clone --filter=blob:none --no-checkout --depth 1 --sparse ${repoURL} ${repoDirName}`, { cwd: dirs.rootDir });
+		const repoCwdOption = { cwd: path.resolve(dirs.rootDir, repoDirName) };
+		await safeExec(`git sparse-checkout set ${sparsePaths.join(' ')}`, repoCwdOption);
+		await safeExec(`git sparse-checkout add JSTests`, repoCwdOption);
+		await safeExec("git checkout", repoCwdOption);
+	} catch (err) {
+		return nErrAsync(new Error(`Failed to execute commands for sparse checkout: ${err instanceof Error ? err.message : 'Unknown error'}`));
 	}
+
 	return nOkAsync(undefined);
 }
 
 /**
- * Meant for internal use only
- * @param checkoutPath 
- * @param repoFolderName 
+ * Creates the checkout dir if it doesn't already exist.
+ * This is a helper function meant to be for internal use only, but it is exposed just in case you want to use it for whatever reason.
+ */
+export async function createCheckoutDir(checkoutDir: string): Promise<ResultAsync<void, Error>> {
+	try {
+		await access(checkoutDir);
+	} catch (err) {
+		if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+			try {
+				await mkdir(checkoutDir, { recursive: true });
+			} catch (mkdirErr) {
+				return fmtErr(`Failed to create checkout directory ${checkoutDir}`, mkdirErr instanceof Error ? mkdirErr.message : 'Unknown error');
+			}
+		} else {
+			return fmtErr(`Error while checking if the directory ${checkoutDir} exists`, err instanceof Error ? err.message : 'Unknown error');
+		}
+	}
+	return nOkAsync(undefined);
+}
+
+
+/**
+ * Resolves the path to the repository directory.
+ * @param checkoutPath The root directory to checkout the repository in
+ * @param repoFolderName The name of the folder to checkout the repository in
  * @returns 
  */
-export function repoDirPath(checkoutPath: string, repoFolderName: string): Result<string, Error> {
+export function repoDirPath(checkoutPath: string, repoFolderName: string): string {
 	return path.resolve(checkoutPath, repoFolderName);
 }
+
+/**
+ * Resolves the path to the checkout directory.
+ * @param rootDir The root directory to checkout the repository in
+ * @param checkoutFolderName The name of the folder to checkout the repository in
+ * @returns 
+ */
 export function checkoutDirPath(rootDir: string, checkoutFolderName: string): string {
 	return path.resolve(rootDir, checkoutFolderName);
+}
+
+function fmtCheckoutErrRes(errMsg: string): ResultAsync<void, Error> {
+	return nErrAsync(new Error(`Failed to checkout the repo: ${errMsg}`));
 }

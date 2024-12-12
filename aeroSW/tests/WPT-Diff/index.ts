@@ -10,12 +10,14 @@ import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import errLogAfterColon, { fmtNeverthrowErr } from "../util/fmtErrTest.ts";
 
+import type { ResultsSummary } from "../../../WPTUtils/types/diff.d.ts";
+
 // Utility
-import checkoutRepo from "../util/checkoutRepo.ts";
 import { safeExec } from "../util/safeExec.ts";
-import getNPMVersions from "../util/getNPMVersions.ts";
-import safeWriteFileToDir from "../util/safeWriteFileToDir.ts";
-import unwrapGetActionYAML from "../../WPTUtil/src/unwrapGetActionYAML.ts";
+import { setupPatchedCLI } from "./setupCLI.ts";
+//import convertWptreportToExpectations from "../../../WPTUtils/src/convertWptreportToExpectations.ts";
+/// For CLI
+import unwrapGetActionYAML from "../../../WPTUtils/src/unwrapGetActionYAML.ts";
 
 // For forming directory paths
 import { resolve } from "node:path";
@@ -24,7 +26,7 @@ import { fileURLToPath } from "node:url";
 import * as flags from "flags";
 import { envsafe, string, url } from "envsafe";
 
-import { access } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -36,12 +38,7 @@ interface OutputInfo {
 	checkoutDir: string;
 	testResultsDir: string;
 	runsFileOut: string;
-	expectationsFileOut: string;
-}
-/** Optionally output different types of information */
-interface OutputOptions {
-	diffWithOfficialTestRun?: boolean;
-	expectationsByBaseline?: boolean;
+	expectationsFileOut?: string;
 }
 
 /**
@@ -53,26 +50,35 @@ async function runTests({
 	proxyURL,
 	wptRepo,
 	browser,
-	rootDir,
 	checkoutDir,
 	testResultsDir,
 	runsFileOut,
-	expectationsFileOut
-}: OutputInfo, {
-	diffWithOfficialTestRun,
-	expectationsByBaseline
-}: OutputOptions): Promise<ResultAsync<void, Error>> {
-	const setupCLIRes = await setupPatchedCLI();
+	//expectationsFileOut
+}: OutputInfo): Promise<ResultAsync<void, Error>> {
+	const setupCLIRes = await setupPatchedCLI({ checkoutDir, proxyURL, wptRepo });
 	if (setupCLIRes.isErr())
 		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error.message);
 
-	/*
-	if (access("TODO:..."))
-		// Get results
-		const { stdout, stderr } = await safeExec(`wpt ${browser} --headless --aero`, { cwd: "../checkouts/WPT" });
-	*/
-	// TODO: Write the results
 
+	let runResults: ResultsSummary;
+	try {
+		access(runsFileOut);
+	} catch (err) {
+		await safeExec(`wpt --headless --proxy ${browser} --log-wptreport= ${runsFileOut}`, { cwd: checkoutDir });
+		const runResultsRaw = await readFile(runsFileOut, "utf-8");
+		runResults = JSON.parse(runResultsRaw);
+	}
+
+	// TODO: Unfinished
+	/*
+	if (expectationsFileOut) {
+		try {
+			access(expectationsFileOut);
+		} catch (err) {
+			writeFile(expectationsFileOut, convertWptreportToExpectations(runResults));
+		}
+	}
+	*/
 
 	const writeNPMVersionsRes = await writeNPMVersions(testResultsDir);
 	if (writeNPMVersionsRes.isErr())
@@ -81,33 +87,7 @@ async function runTests({
 	return okAsync(undefined);
 }
 
-/**
- * Gets the WPT CLI and patches it for the *WPT-Diff* tests (to work under proxies)
- * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
- */
-async function setupPatchedCLI(): Promise<ResultAsync<void, Error>> {
-	const checkoutRes = checkoutRepo("https://github.com/web-platform-tests/wpt", "../checkouts", "WPT");
-	if (checkoutRes.isErr())
-		return fmtNeverthrowErr("Failed to checkout the WPT tests", checkoutRes.error.message);
 
-
-	// Patch the WPT CLI (make a flag called `--aero` that will be used to run the WPT tests under aero)
-
-	return okAsync(undefined);
-}
-
-/**
- * The standard output as in `https://wpt.fyi/api/versions?product=...`; this will also be published with the GitHub Actions and shown on `https://aero.sh/stats/api/versions.json`
- * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
- */
-async function writeNPMVersions(outdir = resolve(__dirname, "testResults/api/versions.json")): Promise<ResultAsync<void, Error>> {
-	const npmVersionsRes = await getNPMVersions();
-	if (npmVersionsRes.isErr())
-		return fmtNeverthrowErr("Failed to get the NPM package versions for aero", npmVersionsRes.error.message);
-	const npmVersions = npmVersionsRes.value;
-
-	await safeFileWriteToDir(outfile, JSON.stringify(npmVersions));
-}
 
 /**
  * Detect if the script is being ran as a CLI script and not as a module
