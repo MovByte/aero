@@ -190,10 +190,10 @@ class BrowserClassModifier {
 	 * @param pass The passthrough data needed to patch the browser class
 	 */
 	public async patchBrowserClass(pass: { browser: string, proxyURL: string }): Promise<ResultAsync<string, Error>> {
-		const genericErr = "Failed to patch the browser code";
+		const genericErr = "Failed to patch the browser class name to the target class name (ProxyBrowser)";
 		try {
 			const chromeBrowserNodeMaybeRes = this.findClassDef(`${this.capitalizeFirstLetter(pass.browser)}Browser`);
-			if (chromeBrowserNodeMaybeRes.isErr()) return fmtNeverthrowErr(genericErr, chromeBrowserNodeMaybeRes.error.message);
+			if (chromeBrowserNodeMaybeRes.isErr()) return nErrAsync(chromeBrowserNodeMaybeRes.error);
 			let chromeBrowserNodeMaybe = chromeBrowserNodeMaybeRes.value;
 			let chromeBrowserNode: SyntaxNode;
 			try {
@@ -202,16 +202,13 @@ class BrowserClassModifier {
 				return nErrAsync(new Error("Failed to find the browser class in the source code"));
 			}
 
-			const modifiedCodeMaybe = await this.patchClassName(chromeBrowserNode, pass.proxyURL);
-			let patchedCode: string;
-			try {
-				patchedCode = unwrapMaybe(modifiedCodeMaybe);
-			} catch (err) {
-				return nErrAsync(new Error("Failed to patch the browser class name to the target class name: ProxyBrowser"));
-			}
+			const patchedCodeRes = await this.patchClassName(chromeBrowserNode, pass.proxyURL);
+			if (patchedCodeRes.isErr())
+				return nErrAsync(patchedCodeRes.error);
+			let patchedCode = patchedCodeRes.value;
 			return nOkAsync(patchedCode);
-		} catch (error) {
-			return fmtNeverthrowErr(genericErr, error.message);
+		} catch (err) {
+			return fmtNeverthrowErr(genericErr, err.message);
 		}
 	}
 
@@ -232,7 +229,7 @@ class BrowserClassModifier {
 		} catch (err) {
 			return fmtNeverthrowErr("Failed to get class definition", err.message);
 		}
-		return nOk(classDefNodeMaybe)
+		return nOk(classDefNodeMaybe);
 	}
 	/**
 	 * Change the class name of the browser class to ProxyBrowser and add a URL property getter to the class that uses the proxy URL
@@ -240,18 +237,18 @@ class BrowserClassModifier {
 	 * @param proxyURL 
 	 * @returns 
 	 */
-	private async patchClassName(chromeBrowserNode: SyntaxNode, proxyURL: string): Promise<string> {
+	private async patchClassName(chromeBrowserNode: SyntaxNode, proxyURL: string): Promise<ResultAsync<string, Error>> {
 		try {
-			const nameNode = chromeBrowserNode.childForFieldName('name');
+			const nameNode = chromeBrowserNode.childForFieldName("name");
 			if (!nameNode) throw new Error("Could not find class name node");
-			let patchCode = this.code.slice(0, nameNode.startIndex) + 'ProxyBrowser' + this.code.slice(nameNode.endIndex);
+			let patchCode = this.code.slice(0, nameNode.startIndex) + "ProxyBrowser" + this.code.slice(nameNode.endIndex);
 			// This is used to insert our final url property getter into the class
 			const index = this.getNodeIndex(chromeBrowserNode);
 			const urlProperty = this.createUrlProperty(proxyURL);
 			patchCode = patchCode.slice(0, index) + urlProperty + patchCode.slice(index);
-			return patchCode;
+			return nOkAsync(patchCode);
 		} catch (err) {
-			throw new Error(`Failed to patch class name to ProxyBrowser: ${err.message}`);
+			return fmtNeverthrowErr("Failed to patch class name to ProxyBrowser", err.message);
 		}
 	}
 	/**
@@ -285,7 +282,7 @@ class BrowserClassModifier {
 		@property
 		def url(self) -> str:
 			if self.port is not None:
-				return f"${proxyURL}/go/http://{self.host}:{self.port}{self.base_path}"
+				return f"${proxyURL}http://{self.host}:{self.port}{self.base_path}"
 			raise ValueError("Can't get WebDriver URL before port is assigned")
 		`;
 	}
