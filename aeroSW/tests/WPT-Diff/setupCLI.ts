@@ -4,14 +4,17 @@
  */
 
 // Neverthrow
-import type { ResultAsync } from "neverthrow";
-import { okAsync as nOkAsync, errAsync as nErrAsync } from "neverthrow";
+import type { Result, ResultAsync } from "neverthrow";
+import { ok as nOk, okAsync as nOkAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "../util/fmtErrTest.ts";
+
+import type { Maybe } from "option-t/maybe";
+import { unwrapMaybe } from "option-t/maybe/maybe";
 
 import { resolve } from "node:path";
 import { copyFile, readFile, writeFile } from "node:fs/promises";
 
-import type { SyntaxNode, Tree, Point } from "tree-sitter"
+import type { SyntaxNode, Tree } from "tree-sitter"
 import Parser from "tree-sitter";
 import Python from "tree-sitter-python";
 
@@ -43,43 +46,72 @@ export async function setupCLI({ dirs, proxyURL, wptRepo, browser, proxyName }: 
 	if (typeof browserDir !== "string")
 		return nErrAsync("Failed to resolve the browser directory");
 
-	// Patch the browsers list
-	const browserInitPath = resolve(browserDir, "__init__.py");
-	try {
-		const browserInitCode = await readFile(browserInitPath, "utf-8");
-		const modifier = new BrowsersListModifier(browserInitCode);
-		const modifiedCodeResult = await modifier.addBrowserToProductList(proxyName);
-		if (modifiedCodeResult.isErr())
-			return fmtNeverthrowErr("Failed to modify browsers list", modifiedCodeResult.error.message);
-		await writeFile(browserInitPath, modifiedCodeResult.value, "utf-8");
-	} catch (err) {
-		return fmtNeverthrowErr("Failed to patch browsers list", err.message);
-	}
+	const browsersListRes = await patchBrowsersList(resolve(browserDir, "__init__.py"), proxyName);
+	if (browsersListRes.isErr())
+		return fmtNeverthrowErr("Failed to patch the browsers list", browsersListRes.error.message);
+	const browsersList = browsersListRes.value;
+	const browserClassRes = await patchBrowserClass(resolve(browserDir, "chrome.py"), resolve(browserDir, `${proxyName}-chrome.py`), proxyURL);
+	if (browserClassRes.isErr())
+		return fmtNeverthrowErr("Failed to patch the browser class", browserClassRes.error.message);
+	const browserClass = browserClassRes.value;
 
-	const aeroBrowserPath = resolve(browserDir, `aero-${browser}.py`);
-	const ogBrowserPath = resolve(browserDir, `${browser}.py`);
-
-	try {
-		await copyFile(ogBrowserPath, aeroBrowserPath);
-		const ogBrowserCode = await readFile(aeroBrowserPath, "utf-8");
-		const modifier = new BrowserCodeModifier(ogBrowserCode);
-		const modificationRes = await modifier.modifyBrowserCode({
-			proxyURL
-		});
-		if (modificationRes.isErr())
-			return fmtNeverthrowErr("Failed to modify browser code", modificationRes.error.message);
-		await writeFile(aeroBrowserPath, modificationRes.value, "utf-8");
-	} catch (err) {
-		return fmtNeverthrowErr("Failed to create browser patch", err.message);
-	}
+	writeFile(resolve(browserDir, `${proxyName}-chrome.py`), browserClass, "utf-8");
+	writeFile(resolve(browserDir, "__init__.py"), browsersList, "utf-8");
 
 	return nOkAsync(undefined);
 }
 
-class BrowsersListModifier {
+/**
+ * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason
+ * @param browserInitPath The path to the `__init__.py` file in the browsers directory of the WPT tests
+ * @param proxyName The name of the proxy to add to the browsers list, which is used to specify the browsers you can run the tests under in WPT's CLI	
+ * @returns 
+ */
+async function patchBrowsersList(browserInitPath: string, proxyName: string): Promise<ResultAsync<void, Error>> {
+	try {
+		const browserInitCode = await readFile(browserInitPath, "utf-8");
+		const modifier = new BrowsersListPatch(browserInitCode);
+		const modifiedCodeResult = await modifier.addBrowserToProductList(proxyName);
+		if (modifiedCodeResult.isErr()) return fmtNeverthrowErr("Failed to patch browsers list", modifiedCodeResult.error.message);
+		await writeFile(browserInitPath, modifiedCodeResult.value, "utf-8");
+		return nOkAsync(undefined);
+	} catch (err) {
+		return fmtNeverthrowErr("Failed to patch browsers list", err.message);
+	}
+}
+/**
+ * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason
+ * @param ogBrowserPath The path to the original browser file used in reference to create the patched browser file at `aeroBrowserPath`
+ * @param aeroBrowserPath The path to the patched browser file
+ * @param proxyURL The URL of the proxy to use in the patched browser class
+ * @returns 
+ */
+async function patchBrowserClass(ogBrowserPath: string, aeroBrowserPath: string, proxyURL: string): Promise<ResultAsync<void, Error>> {
+	try {
+		await copyFile(ogBrowserPath, aeroBrowserPath);
+		const ogBrowserCode = await readFile(aeroBrowserPath, "utf-8");
+		const patcher = new BrowserClassModifier(ogBrowserCode);
+		const patchRes = await patcher.patchBrowserClass({ proxyURL });
+		if (patchRes.isErr()) return fmtNeverthrowErr("Failed to patch the browser code", patchRes.error.message);
+		await writeFile(aeroBrowserPath, patchRes.value, "utf-8");
+		return nOkAsync(undefined);
+	} catch (err) {
+		return fmtNeverthrowErr("Failed to create browser patch", err.message);
+	}
+}
+
+
+class BrowsersListPatch {
+	/**
+	 * The parser instance from the `tree-sitter` library
+	 */
 	private parser: Parser;
 	private code: string;
 
+	/**
+	 * 
+	 * @param code The code of the `__init__.py` file in the browsers directory of the WPT tests to patch
+	 */
 	constructor(code: string) {
 		this.parser = new Parser();
 		this.parser.setLanguage(Python);
@@ -88,40 +120,64 @@ class BrowsersListModifier {
 
 	public async addBrowserToProductList(proxyName: string): Promise<ResultAsync<string, Error>> {
 		const tree = this.parser.parse(this.code);
-		let productListNode: SyntaxNode | null = null;
+		const productListNodeMaybe = this.findProductListNode(tree);
+		if (productListNodeMaybe.isErr()) return nErrAsync(new Error("Failed to find the product_list assignment node"));
+		let productListNode: SyntaxNode;
+		try {
+			productListNode = unwrapMaybe(productListNodeMaybe);
+		} catch (err) {
+			return nErrAsync(new Error("Failed to find the product_list assignment node"));
+		}
 
-		tree.rootNode.walk((node) => {
-			if (node.type === "assignment") {
-				const varNode = node.firstChild;
-				if (varNode?.type === "identifier" && varNode.text === "product_list")
-					productListNode = node.namedChildren.find(child => child.type === "list") || null;
-			}
-		});
-
-		if (!productListNode)
-			return nErrAsync(new Error("Unable to find the `product_list` assignment"));
-
-		const listElements = productListNode.namedChildren.map(node => node.text);
+		const listElements = productListNode.namedChildren.map((node) => node.text);
 		const proxyBrowser = `"${proxyName}-chrome"`;
 
-		if (!listElements.includes(proxyBrowser))
-			listElements.push(proxyBrowser);
+		if (!listElements.includes(proxyBrowser)) listElements.push(proxyBrowser);
 
 		const newArrayContent = "[" + listElements.join(", ") + "]";
-		const modifiedCode = this.code.slice(0, productListNode.startIndex) +
-			newArrayContent +
-			this.code.slice(productListNode.endIndex);
+		const modifiedCode = this.code.slice(0, productListNode.startIndex) + newArrayContent + this.code.slice(productListNode.endIndex);
 
 		return nOkAsync(modifiedCode);
 	}
+
+	/**
+	 * Find the product list node in the `__init__.py` file
+	 * @param tree The AST tree of the `__init__.py` file
+	 * @returns The `product_list` node in the AST tree
+	 */
+	private findProductListNode(tree: Tree): Maybe<SyntaxNode> {
+		try {
+			let productListNode: Maybe<SyntaxNode>;
+			// @ts-ignore
+			tree.rootNode.walk((node: SyntaxNode) => {
+				if (node.type === "assignment") {
+					const varNode = node.firstChild;
+					if (varNode?.type === "identifier" && varNode.text === "product_list")
+						// @ts-ignore
+						productListNode = node.namedChildren.find((child) => child.type === "list");
+				}
+			});
+			return productListNode;
+		} catch (err) {
+			return fmtNeverthrowErr("Failed to get product list node", err.message);
+		}
+	}
 }
 
-
-class BrowserCodeModifier {
+class BrowserClassModifier {
+	/**
+	 * The parser instance from the `tree-sitter` library
+	 */
 	private parser: Parser;
+	/**
+	 * TThe node tree after being parsed by `tree-sitter`
+	 */
 	private tree: Tree;
 	private code: string;
 
+	/**
+	 * @param code The code of the browser class to patch
+	 */
 	constructor(code: string) {
 		this.parser = new Parser();
 		this.parser.setLanguage(Python);
@@ -129,74 +185,108 @@ class BrowserCodeModifier {
 		this.tree = this.parser.parse(code);
 	}
 
-	findClassDefinition(className: string): SyntaxNode | null {
-		let classNode: SyntaxNode | null = null;
-		this.tree.rootNode.walk((node) => {
-			if (node.type === "class_definition") {
-				const nameNode = node.childForFieldName("name");
-				if (nameNode && nameNode.text === className) {
-					classNode = node;
-					return false;
-				}
-			}
-			return true;
-		});
-		return classNode;
-	}
-	findLastMethodInClass(classNode: SyntaxNode): { index: number; position: Point } {
-		let lastMethodEnd = 0;
-		let lastPosition: Point = { row: 0, column: 0 };
-
-		classNode.walk((node) => {
-			if (node.type === "function_definition" || node.type === "decorated_definition") {
-				const endIndex = node.endIndex;
-				if (endIndex > lastMethodEnd) {
-					lastMethodEnd = endIndex;
-					lastPosition = node.endPosition;
-				}
-			}
-			return true;
-		});
-
-		return { index: lastMethodEnd, position: lastPosition };
-	}
-	createUrlProperty(proxyURL: string): string {
-		return `
-    @property
-    def url(self) -> str:
-        if self.port is not None:
-            return f"${proxyURL}/go/http://{self.host}:{self.port}{self.base_path}"
-        raise ValueError("Can't get WebDriver URL before port is assigned")
-	`;
-	}
-
-	public async modifyBrowserCode(options: { proxyURL: string }): Promise<ResultAsync<string, Error>> {
+	/**
+	 * Patch the browser class
+	 * @param pass The passthrough data needed to patch the browser class
+	 */
+	public async patchBrowserClass(pass: { browser: string, proxyURL: string }): Promise<ResultAsync<string, Error>> {
+		const genericErr = "Failed to patch the browser code";
 		try {
-			const chromeBrowserNode = this.findClassDefinition("ChromeBrowser");
-			if (!chromeBrowserNode)
-				return nErrAsync(new Error("Could not find ChromeBrowser class in the source code"));
+			const chromeBrowserNodeMaybeRes = this.findClassDef(`${this.capitalizeFirstLetter(pass.browser)}Browser`);
+			if (chromeBrowserNodeMaybeRes.isErr()) return fmtNeverthrowErr(genericErr, chromeBrowserNodeMaybeRes.error.message);
+			let chromeBrowserNodeMaybe = chromeBrowserNodeMaybeRes.value;
+			let chromeBrowserNode: SyntaxNode;
+			try {
+				chromeBrowserNode = unwrapMaybe(chromeBrowserNodeMaybe);
+			} catch (err) {
+				return nErrAsync(new Error("Failed to find the browser class in the source code"));
+			}
 
-			const nameNode = chromeBrowserNode.childForFieldName("name");
-			if (!nameNode)
-				return nErrAsync(new Error("Could not find class name node"));
-
-			// Perform the rename
-			let modifiedCode = this.code.slice(0, nameNode.startIndex) +
-				"ProxyBrowser" +
-				this.code.slice(nameNode.endIndex);
-
-			// Add the url property
-			const { index: lastMethodEnd, position: lastMethodPosition } =
-				this.findLastMethodInClass(chromeBrowserNode);
-			const urlProperty = this.createUrlProperty(options.proxyURL);
-
-			modifiedCode = modifiedCode.slice(0, lastMethodEnd) +
-				urlProperty +
-				modifiedCode.slice(lastMethodEnd);
-
-			return nOkAsync(modifiedCode);
+			const modifiedCodeMaybe = await this.patchClassName(chromeBrowserNode, pass.proxyURL);
+			let patchedCode: string;
+			try {
+				patchedCode = unwrapMaybe(modifiedCodeMaybe);
+			} catch (err) {
+				return nErrAsync(new Error("Failed to patch the browser class name to the target class name: ProxyBrowser"));
+			}
+			return nOkAsync(patchedCode);
 		} catch (error) {
-			return fmtNeverthrowErr("Failed to modify the browser code", error.message);
+			return fmtNeverthrowErr(genericErr, error.message);
 		}
+	}
+
+	private capitalizeFirstLetter(str: string): string {
+		return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+	}
+	private findClassDef(className: string): Result<Maybe<SyntaxNode>, Error> {
+		let classDefNodeMaybe: Maybe<SyntaxNode>;
+		try {
+			// @ts-ignore
+			this.tree.rootNode.walk((node: SyntaxNode) => {
+				if (node.type === "class_definition") {
+					const nameNode = node.childForFieldName("name");
+					if (nameNode && nameNode.text === className)
+						return node;
+				}
+			});
+		} catch (err) {
+			return fmtNeverthrowErr("Failed to get class definition", err.message);
+		}
+		return nOk(classDefNodeMaybe)
+	}
+	/**
+	 * Change the class name of the browser class to ProxyBrowser and add a URL property getter to the class that uses the proxy URL
+	 * @param chromeBrowserNode Get the class node of the 
+	 * @param proxyURL 
+	 * @returns 
+	 */
+	private async patchClassName(chromeBrowserNode: SyntaxNode, proxyURL: string): Promise<string> {
+		try {
+			const nameNode = chromeBrowserNode.childForFieldName('name');
+			if (!nameNode) throw new Error("Could not find class name node");
+			let patchCode = this.code.slice(0, nameNode.startIndex) + 'ProxyBrowser' + this.code.slice(nameNode.endIndex);
+			// This is used to insert our final url property getter into the class
+			const index = this.getNodeIndex(chromeBrowserNode);
+			const urlProperty = this.createUrlProperty(proxyURL);
+			patchCode = patchCode.slice(0, index) + urlProperty + patchCode.slice(index);
+			return patchCode;
+		} catch (err) {
+			throw new Error(`Failed to patch class name to ProxyBrowser: ${err.message}`);
+		}
+	}
+	/**
+	 * Finds the index of the last function definition in the a class
+	 * @param classNode The class to find the last function definition in so that the index of it can be returned
+	 * @returns The index of the last function definition in the class
+	 */
+	private getNodeIndex(classNode: SyntaxNode): Maybe<number> {
+		try {
+			let index: Maybe<number>;
+			// @ts-ignore
+			classNode.walk((node: SyntaxNode) => {
+				if (node.type === "function_definition" || node.type === "decorated_definition") {
+					const index_ = node.endIndex;
+					if (index_ > index)
+						index = index_;
+				}
+			});
+			return index;
+		} catch (err) {
+			return fmtNeverthrowErr("Failed to get class index", err.message);
+		}
+	}
+	/**
+	 * A method that formats the raw property getter code for the ProxyBrowser class that overrides the original URL property getter in the browser class
+	 * @param proxyURL The URL of the proxy to use when forming the URL property
+	 * @returns The raw Python code property getter for the URL property in the ProxyBrowser class
+	 */
+	private createUrlProperty(proxyURL: string): string {
+		return `
+		@property
+		def url(self) -> str:
+			if self.port is not None:
+				return f"${proxyURL}/go/http://{self.host}:{self.port}{self.base_path}"
+			raise ValueError("Can't get WebDriver URL before port is assigned")
+		`;
 	}
 }
