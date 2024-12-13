@@ -50,7 +50,13 @@ export async function setupCLI({ dirs, proxyURL, wptRepo, browser, proxyName }: 
 	if (browsersListRes.isErr())
 		return fmtNeverthrowErr("Failed to patch the browsers list", browsersListRes.error.message);
 	const browsersList = browsersListRes.value;
-	const browserClassRes = await patchBrowserClass(resolve(browserDir, "chrome.py"), resolve(browserDir, `${proxyName}-chrome.py`), proxyURL);
+	const browserClassRes = await patchBrowserClass(
+		{
+			browser,
+			ogBrowserPath: resolve(browserDir, "chrome.py"),
+			aeroBrowserPath: resolve(browserDir, `${proxyName}-chrome.py`),
+			proxyURL
+		});
 	if (browserClassRes.isErr())
 		return fmtNeverthrowErr("Failed to patch the browser class", browserClassRes.error.message);
 	const browserClass = browserClassRes.value;
@@ -63,11 +69,14 @@ export async function setupCLI({ dirs, proxyURL, wptRepo, browser, proxyName }: 
 
 /**
  * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason
- * @param browserInitPath The path to the `__init__.py` file in the browsers directory of the WPT tests
- * @param proxyName The name of the proxy to add to the browsers list, which is used to specify the browsers you can run the tests under in WPT's CLI	
- * @returns 
+ * @param pass The passthrough data needed to patch the browsers list
  */
-async function patchBrowsersList(browserInitPath: string, proxyName: string): Promise<ResultAsync<void, Error>> {
+async function patchBrowsersList(pass: {
+	/** The path to the `__init__.py` file in the browsers directory of the WPT tests */
+	browserInitPath: string,
+	/** The name of the proxy to add to the browsers list, which is used to specify the browsers you can run the tests under in WPT's CLI */
+	proxyName: string
+}): Promise<ResultAsync<void, Error>> {
 	try {
 		const browserInitCode = await readFile(browserInitPath, "utf-8");
 		const modifier = new BrowsersListPatch(browserInitCode);
@@ -81,17 +90,24 @@ async function patchBrowsersList(browserInitPath: string, proxyName: string): Pr
 }
 /**
  * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason
- * @param ogBrowserPath The path to the original browser file used in reference to create the patched browser file at `aeroBrowserPath`
- * @param aeroBrowserPath The path to the patched browser file
- * @param proxyURL The URL of the proxy to use in the patched browser class
+ * @param pass The passthrough data needed to patch the browsers list
  * @returns 
  */
-async function patchBrowserClass(ogBrowserPath: string, aeroBrowserPath: string, proxyURL: string): Promise<ResultAsync<void, Error>> {
+async function patchBrowserClass({
+	/** The browser to patch for */
+	browser,
+	/** The path to the original browser file used in reference to create the patched browser file at `aeroBrowserPath` */
+	ogBrowserPath,
+	/** The path to the patched browser file */
+	aeroBrowserPath,
+	/** The URL of the proxy to use in the patched browser class */
+	proxyURL
+}: { browser: string, ogBrowserPath: string, aeroBrowserPath: string, proxyURL: string }): Promise<ResultAsync<void, Error>> {
 	try {
 		await copyFile(ogBrowserPath, aeroBrowserPath);
 		const ogBrowserCode = await readFile(aeroBrowserPath, "utf-8");
 		const patcher = new BrowserClassModifier(ogBrowserCode);
-		const patchRes = await patcher.patchBrowserClass({ proxyURL });
+		const patchRes = await patcher.patchBrowserClass({ browser, proxyURL });
 		if (patchRes.isErr()) return fmtNeverthrowErr("Failed to patch the browser code", patchRes.error.message);
 		await writeFile(aeroBrowserPath, patchRes.value, "utf-8");
 		return nOkAsync(undefined);
