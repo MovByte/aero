@@ -15,6 +15,7 @@ import type { ResultsSummary } from "../../../WPTUtils/types/diff.d.ts";
 // Utility
 import { safeExec } from "../util/safeExec.ts";
 import { setupPatchedCLI } from "./setupCLI.ts";
+import writeNPMVersions from "../util/getNPMVersions.ts";
 //import convertWptreportToExpectations from "../../../WPTUtils/src/convertWptreportToExpectations.ts";
 /// For CLI
 import unwrapGetActionYAML from "../../../WPTUtils/src/unwrapGetActionYAML.ts";
@@ -31,6 +32,7 @@ import { access, readFile, writeFile } from "node:fs/promises";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 interface OutputInfo {
+	proxyName: string;
 	proxyURL: string;
 	wptRepo: string;
 	browser: string;
@@ -47,6 +49,7 @@ interface OutputInfo {
  * @param param1 The options for optional files along with the WPT-Diff results
  */
 async function runTests({
+	proxyName,
 	proxyURL,
 	wptRepo,
 	browser,
@@ -55,16 +58,17 @@ async function runTests({
 	runsFileOut,
 	//expectationsFileOut
 }: OutputInfo): Promise<ResultAsync<void, Error>> {
-	const setupCLIRes = await setupPatchedCLI({ checkoutDir, proxyURL, wptRepo });
+	const setupCLIRes = await setupPatchedCLI({ checkoutDir, browser, proxyName, proxyURL, wptRepo });
 	if (setupCLIRes.isErr())
 		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error.message);
 
+	const patchedBrowser = `${proxyName}-${browser}`;
 
 	let runResults: ResultsSummary;
 	try {
 		access(runsFileOut);
 	} catch (err) {
-		await safeExec(`wpt --headless --proxy ${browser} --log-wptreport= ${runsFileOut}`, { cwd: checkoutDir });
+		await safeExec(`wpt --headless --proxy ${patchedBrowser} --log-wptreport=${runsFileOut}`, { cwd: checkoutDir })
 		const runResultsRaw = await readFile(runsFileOut, "utf-8");
 		runResults = JSON.parse(runResultsRaw);
 	}
@@ -106,6 +110,9 @@ if (isCLI) {
 		const defaultRootDir = resolve(__dirname, "../../../");
 		const defaultTestResultsDir = resolve(defaultRootDir, "testResults");
 		const env = envsafe({
+			PROXY_NAME: url({
+				devDefault: "aero"
+			}),
 			PROXY_URL: url({
 				devDefault: "http://localhost:2525/go/"
 			}),
@@ -139,6 +146,7 @@ if (isCLI) {
 		flags.parse();
 
 		const runTestsRes = await runTests({
+			proxyName: (flags.get("proxyURL") || env.PROXY_URL) as string,
 			proxyURL: (flags.get("proxyURL") || env.PROXY_URL) as string,
 			wptRepo: (flags.get("wptRepo") || env.WPT_REPO) as string,
 			browser: (flags.get("browser") || env.BROWSER) as string,

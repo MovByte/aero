@@ -22,6 +22,7 @@ jobs:
       - name: Run JS-Diff Action
         uses: ./github/actions/wpt_diff.yml
         with:
+          proxyName: aero
           proxyURL: "http://localhost:2525/go/"
           rootDir: AeroSandbox/tests
           checkoutsDir: checkouts

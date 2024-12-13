@@ -90,21 +90,23 @@
 		"@typhonjs-typedoc/ts-lib-docs": "^2024.9.18",
 		"@typhonjs-typedoc/typedoc-theme-dmt": "^0.2.3",
 		"clean-webpack-plugin": "^4.0.0",
+		"envsafe": "^2.0.3",
+		"flags": "^0.2.2",
 		"import-sync": "^2.2.2",
+		"neverthrow": "^8.1.1",
 		"octokit": "^4.0.2",
+		"option-t": "^50.0.0",
 		"playwright": "^1.48.1",
 		"ts-node": "^10.9.2",
 		"ts-patch": "^3.2.1",
 		"ts-runtime-checks": "^0.6.2",
-		"typescript": "^5.6.3",
-		"envsafe": "^2.0.3",
-		"flags": "^0.2.2",
-		"neverthrow": "^8.1.1",
-		"option-t": "^50.0.0"
+		"typescript": "^5.6.3"
 	},
 	"dependencies": {
 		"@biomejs/wasm-nodejs": "^1.9.4",
 		"@mercuryworkshop/bare-mux": "^2.1.4",
+		"tree-sitter": "^0.22.1",
+		"tree-sitter-python": "^0.23.5",
 		"typia": "^6.12.0"
 	}
 }

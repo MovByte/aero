@@ -13,6 +13,9 @@
           description: The base command to run the command for generating the the runs info
           required: false
           default: npx wpt-diff-runs-info --package=@aero-tests/wpt-diffs
+        proxyName:
+          description: The name of your web proxy
+          required: true
         proxyURL:
           description: The URL to your web proxy
           required: true
@@ -57,8 +60,11 @@
           with:
             node-version: 21
 
+        - name: Patch WPT for proxies
+          run: ${{ github.event.inputs.wptDiffBaseCmd --proxyURL ${{ github.event.inputs.proxyURL }} --browser ${{ github.event.inputs.browser }} --pathToBrowser ${{ github.event.inputs.pathToBrowser }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} --testResultsDir ${{ github.event.inputs.testResultsDir }} --runsFileOut ${{ github.event.inputs.runsFileOut }} --expectationsFileOut ${{ github.event.inputs.expectationsFileOut }}
+
         - name: Run WPT-Diff
-          run: ${{ github.event.inputs.wptDiffBaseCmd --proxyURL ${{ github.event.inputs.proxyURL }} --browser ${{ github.event.inputs.browser }} --pathToBrowser ${{ github.event.inputs.pathToBrowser }} --wptRepo ${{ github.event.inputs.wptRepo }} --webkitDir ${{ github.event.inputs.webkitDir }} --rootDir ${{ github.event.inputs.rootDir }} --checkoutsDir ${{ github.event.inputs.checkoutsDir }} --testResultsDir ${{ github.event.inputs.testResultsDir }} --runsFileOut ${{ github.event.inputs.runsFileOut }} --expectationsFileOut ${{ github.event.inputs.expectationsFileOut }} --log-wptreport={{ github.event.inputs.expectationsFileOut }}"
+          run: python3 ${{ github.event.inputs.proxyName }}-${{ github.event.inputs.browser }} ${{ github.event.inputs.checkoutsDir }}/WPT/wpt --headless --log-wptreport={{ github.event.inputs.expectationsFileOut }}"
 
         - name: Gen the runs info
           run: ${{getRunInfoBaseCmd}} --browser ${{ github.event.inputs.browser }} --runsOutfilename ${{testResultsDir}}/${{ github.event.inputs.runsOutfilename }}
