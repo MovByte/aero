@@ -1,12 +1,12 @@
 // Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
-import { fmtNeverthrowErr } from "../util/fmtErrTest.ts";
+import { fmtNeverthrowErr } from "../../util/fmtErrTest.ts";
 
 import { resolve } from "node:path";
 
 // Utility
-import getNPMVersions from "../util/getNPMVersions.ts";
+import getNPMVersions from "../../util/getNPMVersions.ts";
 import safeWriteFileToDir from "../../../WPTUtils/src/safeWriteFileToDir.ts";
 
 /**

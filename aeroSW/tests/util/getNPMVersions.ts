@@ -9,7 +9,7 @@ import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "./fmtErrTest";
 
-import packageJSON from "../../aeroSW/package.json" with { type: "json" };
+import packageJSON from "../../package.json" with { type: "json" };
 
 type packageVersions = string[];
 

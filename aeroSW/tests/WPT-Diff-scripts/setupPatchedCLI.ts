@@ -10,11 +10,11 @@ import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
 import errLogAfterColon, { fmtNeverthrowErr } from "../util/fmtErrTest.ts";
 
-import type { ResultsSummary } from "../../../WPTUtils/types/diff.d.ts";
+import type { ResultsSummary } from "../../../WPTUtils/types/diff";
 
 // Utility
 import { safeExec } from "../util/safeExec.ts";
-import { setupPatchedCLI } from "./setupCLI.ts";
+import setupPatchedCLI from "./util/patchCLI.ts";
 import writeNPMVersions from "../util/getNPMVersions.ts";
 //import convertWptreportToExpectations from "../../../WPTUtils/src/convertWptreportToExpectations.ts";
 /// For CLI

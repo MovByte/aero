@@ -29,7 +29,7 @@ import { envsafe, string } from "envsafe";
  * 
  * @param browser The browser that the WPT-diff tests were run on
  */
-async function getRunsInfoRes(browser: string, outfile: string): Promise<ResultAsync<any, Error>> {
+export default async function getRunsInfoRes(browser: string, outfile: string): Promise<ResultAsync<any, Error>> {
 	let runsResp: Response;
 	try {
 		runsResp = await fetch("https://wpt.fyi/api/runs?label=experimental&label=master&aligned");
@@ -50,6 +50,10 @@ async function getRunsInfoRes(browser: string, outfile: string): Promise<ResultA
 	} catch (err) {
 		return fmtNeverthrowErr("Failed to parse the WPT Runs JSON, which was expected to contain the WPT runs info we need", err.message);
 	}
+
+	const runsInfoBrowser = runsInfoJSON.runs.find((run: any) => run.browser_name === browser);
+	if (!runsInfoBrowser)
+		return nErrAsync(`The browser you chose, ${browser}, was not found in the default WPT runs info`);
 
 	/** Meant to be an object in the array of the runs in the `runs.json` file. See @https://wpt.fyi/api/runs?label=experimental&label=master&aligned. */
 	return getRunsInfoObjJSON(runsInfoJSON);

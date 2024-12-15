@@ -6,7 +6,7 @@
 // Neverthrow
 import type { Result, ResultAsync } from "neverthrow";
 import { ok as nOk, okAsync as nOkAsync, errAsync as nErrAsync } from "neverthrow";
-import { fmtNeverthrowErr } from "../util/fmtErrTest.ts";
+import { fmtNeverthrowErr } from "../../util/fmtErrTest.ts";
 
 import type { Maybe } from "option-t/maybe";
 import { unwrapMaybe } from "option-t/maybe/maybe";
@@ -19,13 +19,13 @@ import Parser from "tree-sitter";
 import Python from "tree-sitter-python";
 
 // Utility
-import checkoutRepo from "../util/checkoutRepo.ts";
+import checkoutRepo from "../../util/checkoutRepo.ts";
 
 /**
  * Gets the WPT CLI and patches it for the *WPT-Diff* tests (to work under proxies)
  * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
  */
-export async function setupCLI({ dirs, proxyURL, wptRepo, browser, proxyName }: {
+export default async function setupPatchedCLI({ dirs, proxyURL, wptRepo, browser, proxyName }: {
 	dirs: {
 		checkout: string
 	},
