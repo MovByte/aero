@@ -1,6 +1,6 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import config from "$aero/examples/config";
+var config: any = {}
 const { prefix } = config;
 
 const createHandler = (cookieStoreId?) => {

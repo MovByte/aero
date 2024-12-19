@@ -63,11 +63,10 @@ if (testBuild) output.library = ["Mod", "[name]"];
 const defaultBuild = {
 	sandbox: "./build/init.ts",
 	jsRewriter: "./src/sandboxers/JS/JSRewriter.ts",
-	featureFlags: "./src/featureFlags.ts",
 	swAdditions: "./src/swAdditions.ts"
 };
 
-const config: rspack.Configuration = {
+const config = {
 	mode: debugMode ? "development" : "production",
 	optimization: {
 		chunkIds: "named",
@@ -89,7 +88,7 @@ const config: rspack.Configuration = {
 					...defaultBuild,
 					// Extra APIs
 					storageIsolation:
-						"./src/apis/StorageIsolator/storageIsolation.ts",
+						"./src/apis/StorageIsolator/storageIsolator.ts",
 					ControlView: "./src/apis/CustomViews/ControlView.ts",
 					ElectronControlView:
 						"./src/apis/CustomViews/ElectronControlView.ts",
@@ -130,7 +129,6 @@ function genEntryFiles(entryFiles) {
 	return entryFiles;
 }
 
-if (debugMode) config.watch = true;
 
 const distDir = path.resolve(__dirname, "dist");
 initDist();

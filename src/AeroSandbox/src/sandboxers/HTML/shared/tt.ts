@@ -4,7 +4,7 @@ import {
 	TrustedTypesWindow
 } from "trusted-types/lib";
 
-import config from "$aero/examples/config";
+var config: any = {}
 
 const { flags } = config;
 
