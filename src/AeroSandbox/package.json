@@ -42,10 +42,12 @@
 		"@titaniumnetwork-dev/ultraviolet": "^3.2.7",
 		"@types/webappsec-credential-management": "^0.6.8",
 		"babel-loader": "^9.2.1",
+		"glob": "^11.0.0",
 		"navigation-api-types": "^0.5.1",
 		"seafox": "^1.7.1",
-		"typescript": "^5.6.3",
-		"glob": "^11.0.0"
+		"sucrase": "^3.35.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.6.3"
 	},
 	"dependencies": {
 		"@mercuryworkshop/bare-as-module3": "^2.2.4",

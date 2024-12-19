@@ -9,7 +9,6 @@ import type { htmlRewriterMode } from "../types/rewriters/html";
 import { buildConfig } from "./customBuilds/aero";
 //import { buildConfig as buildConfigFrakenUV } from "./customBuilds/frankenUV.inject.ts";
 
-import { config } from "../src/config.ts";
 import { FeatureFlags } from "./featureFlags";
 
 declare const HTML_REWRITER_MODE: htmlRewriterMode;

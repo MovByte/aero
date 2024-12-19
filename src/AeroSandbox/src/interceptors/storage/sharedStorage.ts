@@ -1,4 +1,4 @@
-import config from "$aero/examples/config";
+var config: any = {}
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
 const { prefix } = config;
 

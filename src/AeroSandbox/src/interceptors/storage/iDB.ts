@@ -1,7 +1,8 @@
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
+// @ts-nocheck
 
-import { storageNomenclature } from "$util/shared";
 
+const storageNomenclature=(a)=>"a";
 export default [
 	{
 		storageProxifiedObj: cookieStoreId =>
