@@ -3,13 +3,13 @@
  * Patches the CLI with a wrapped version of the browser you provide from the WPT-Diff tests config to be used to run WPT under a proxy
  */
 
-// Neverthrow
+// For type safety
+/// Neverthrow
 import type { Result, ResultAsync } from "neverthrow";
 import { ok as nOk, okAsync as nOkAsync, errAsync as nErrAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "../../util/fmtErrTest.ts";
-
-import type { Maybe } from "option-t/maybe";
-import { unwrapMaybe } from "option-t/maybe/maybe";
+/// option-t
+import { isNotNullOrUndefined } from "option-t/maybe";
 
 import { resolve } from "node:path";
 import { copyFile, readFile, writeFile } from "node:fs/promises";
@@ -136,22 +136,18 @@ class BrowsersListPatch {
 
 	public async addBrowserToProductList(proxyName: string): Promise<ResultAsync<string, Error>> {
 		const tree = this.parser.parse(this.code);
-		const productListNodeMaybe = this.findProductListNode(tree);
-		if (productListNodeMaybe.isErr()) return nErrAsync(new Error("Failed to find the product_list assignment node"));
-		let productListNode: SyntaxNode;
-		try {
-			productListNode = unwrapMaybe(productListNodeMaybe);
-		} catch (err) {
-			return nErrAsync(new Error("Failed to find the product_list assignment node"));
-		}
+		const maybeProductListNodeRes = this.findProductListNode(tree);
+		if (maybeProductListNodeRes.isErr()) return nErrAsync(new Error("Failed to find the product_list assignment node"));
+		const maybeProductListNode = maybeProductListNodeRes.value;
+		if (!isNotNullOrUndefined(maybeProductListNode)) return nErrAsync(new Error("Failed to find the product_list assignment node"));
 
-		const listElements = productListNode.namedChildren.map((node) => node.text);
+		const listElements = maybeProductListNode.namedChildren.map((node) => node.text);
 		const proxyBrowser = `"${proxyName}-chrome"`;
 
 		if (!listElements.includes(proxyBrowser)) listElements.push(proxyBrowser);
 
 		const newArrayContent = "[" + listElements.join(", ") + "]";
-		const modifiedCode = this.code.slice(0, productListNode.startIndex) + newArrayContent + this.code.slice(productListNode.endIndex);
+		const modifiedCode = this.code.slice(0, maybeProductListNode.startIndex) + newArrayContent + this.code.slice(maybeProductListNode.endIndex);
 
 		return nOkAsync(modifiedCode);
 	}

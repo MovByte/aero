@@ -18,6 +18,7 @@ export default (ctx: CtxType) =>
 		rewriterCacheManifest: false,
 		supportLegacy: false,
 		supportWorker: false,
+		reqInterceptionCatchAll: false,
 		// Branding
 		aeroBrandingInProd: true,
 		// Feel free to change this default if you are making a fork of aero

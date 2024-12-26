@@ -19,7 +19,7 @@ import { writeFile } from "node:fs/promises";
 
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import getGitHubURLSplit from "./shared/getGitHubURLSplit.ts";
+import getGitHubURLSplit from "./util/getGitHubURLSplit.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
