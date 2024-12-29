@@ -4,7 +4,7 @@ import { ok as nOk, err } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 // Utility
-import getRequestUrl from "$shared/getRequestUrl";
+import RequestUrlGetter from "$util/getRequestUrl";
 
 /**
  * Get the proxy URL to be used for fetching the site under the proxy.
@@ -25,10 +25,10 @@ export default function getProxyUrl({
 	isNavigate: boolean,
 	isiFrame: boolean;
 }): Promise<Result<URL, Error>> {
+	const requestUrlGetter = new RequestUrlGetter(reqUrl.origin, location.origin);
+
 	/** The URL to the site that will be proxied in a raw form. This will later be parsed. */
-	const rawProxyUrlRes = getRequestUrl(
-		reqUrl.origin,
-		location.origin,
+	const rawProxyUrlRes = requestUrlGetter.get(
 		clientUrl,
 		reqUrl.pathname + reqUrl.search,
 		isNavigate,

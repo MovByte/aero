@@ -5,6 +5,7 @@ import { createCompilerHost, createProgram, getPreEmitDiagnostics } from "typesc
  * @param code The code to validate
  * @returns An array of the diagnostic errors that occurred when trying to compile the code. The TS is valid if the array is empty.
  */
+/* biome-enable no-param-reassign */
 async function validateTS(code: string): string[] {
 
 }

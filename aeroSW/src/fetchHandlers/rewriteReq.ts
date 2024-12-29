@@ -20,7 +20,7 @@ import formRequestOpts from "$fetchHandlers/util/formRequestOpts"
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
-interface Passthrough {
+type Passthrough = Readonly<{
 	logger: eitherLogger
 	req: Request;
 	reqUrl: URL;
@@ -35,9 +35,11 @@ interface Passthrough {
 	cache: Cache;
 	/** This is mainly intended so that `appendSearchParam()`, whenever it is called, can help the response header rewriter with `No-Vary-Search` header rewriting later */
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
-}
+}>
 
-const securityPolicyMaps = {
+const securityPolicyMaps: {
+	readonly accessControl: Map<string, string>;
+} = {
 	accessControl: new Map<string, string>(),
 }
 
@@ -59,7 +61,9 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 			};
 		}
 		logger.debug("aero bundle found! Not rewriting (will proceed normally)");
-		return okAsync(await fetch(reqUrl.href));
+		return okAsync({
+			finalRespEarly: await fetch(reqUrl.href)
+		});
 	}
 
 	// Get the clientUrl through catch-all interception

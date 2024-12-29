@@ -14,7 +14,7 @@ let apiInterceptors: APIInterceptor = [];
 // Get the types for the cookieStore API and import them in index.d.ts for us here
 if ("cookieStore" in window) {
 	apiInterceptors.push({
-		storageProxifiedObj: cookieStoreId => {
+		createStorageProxyHandlers: cookieStoreId => {
 			return Proxy.revocable(cookieStore.set, {
 				apply(target, that, args) {
 					const [cookie] = args;

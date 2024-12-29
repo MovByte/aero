@@ -36,9 +36,9 @@ export default function getSiteDirective(proxyUrl: URL, clientURL: URL, bc: Bare
  * @return If the two URLs are the same site wrapped in a `ResultAsync` for better error handling from *Neverthrow*
  */
 export async function isSameSite(url1: URL, url2: URL, bc: BareClient = $aero.bc): Promise<ResultAsync<boolean, Error>> {
-	if (url1.protocol === url2.protocol) return nOkAsync((false);
+	if (url1.protocol === url2.protocol) return nOkAsync(false);
 
-	let publicSuffixes: string[];
+	let publicSuffixes: readonly string[];
 	if (FETCH_PUBLIC_SUFFIX_PRIORITY === "compile-time") {
 		const { default: getPublicSuffixListCompileTime } = await import("./getPublicSuffixList.val");
 		publicSuffixes = getPublicSuffixListCompileTime({ errLogAfterColon: ERR_LOG_AFTER_COLON, publicSuffixApi: PUBLIC_SUFFIX_API, failedToFetchSuffixErrMsg: FAILED_TO_FETCH_SUFFIX_ERR_MSG });
@@ -63,7 +63,7 @@ export async function isSameSite(url1: URL, url2: URL, bc: BareClient = $aero.bc
 		if (
 			// Check if the public suffix domain are both equal (the first level before the public suffix matters)
 			getSiteDomainFromPublicSuffix(url1, publicSuffix, firstLevelBeforeMatters) === getSiteDomainFromPublicSuffix(url2, publicSuffix, firstLevelBeforeMatters))
-			return nOkAsync((true);
+			return nOkAsync(true);
 	}
 	// Finally, check if the second-level domains are equal
 	return nOkAsync((getSecondLevelDomain(url1) === getSecondLevelDomain(url2))

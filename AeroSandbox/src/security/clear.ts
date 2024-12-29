@@ -1,5 +1,5 @@
 import { upToProxyOrigin } from "$shared/upToProxyLocation";
-import { storageNomenclature, storagePrefix } from "$shared/storage";
+import { storageNomenclatureHandlers, storagePrefix } from "$shared/storage";
 
 // @ts-ignore
 declare var openDatabase;
@@ -44,7 +44,7 @@ navigator.serviceWorker.addEventListener("message", event => {
 			databases.forEach(database => {
 				if (
 					database?.name &&
-					database.name.startsWith(storageNomenclature)
+					database.name.startsWith(storageNomenclatureHandlers)
 				) {
 					indexedDB.deleteDatabase(database.name);
 				}

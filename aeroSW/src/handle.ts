@@ -41,7 +41,7 @@ self.logger = new AeroLogger(Boolean(DEBUG));
  * @param event The passthrough Fetch event
  * @returns The proxified response
  */
-export default async function handleSW(event: FetchEvent): Promise<ResultAsync<Response, Error>> {
+export default async function handleSW(event: readonly FetchEvent): Promise<ResultAsync<Response, Error>> {
 	// Sanity check: Ensure the handler is being ran in a SW
 	if (!is<FetchEvent>(event))
 		return nErrAsync(troubleshootingStrs.noFetchEvent);

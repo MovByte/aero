@@ -70,10 +70,11 @@ export default class HSTSCacheEmulation extends Cache {
 	 * TODO:...
 	 */
 	async processHSTS(hsts: string): Promise<ResultAsync<void, Error>> {
-		let directives: string[];
+		let directives: readonly string[];
 		try {
 			directives = hsts.toLowerCase().split(";");
 		} catch (err) {
+			// @ts-ignore
 			return nErrAsync(new Error(`${failedToFormVar("directives", "string array")} ${processHSTSAction}${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 
@@ -84,6 +85,7 @@ export default class HSTSCacheEmulation extends Cache {
 			);
 			includeSubdomains = includeSubdomainsDirective !== undefined;
 		} catch (err) {
+			// @ts-ignore
 			return nErrAsync(new Error(`${failedToFormVar("includeSubdomains", "boolean")} ${processHSTSAction}${ERR_LOG_AFTER_COLON}${err.message}`));
 		}
 
@@ -92,9 +94,13 @@ export default class HSTSCacheEmulation extends Cache {
 			const maxAgeDirective = directives.find(dir =>
 				dir.startsWith("max-age")
 			);
-			const maxAge = maxAgeDirective?.split("=")?.[1];
+			if (typeof maxAgeDirective === "undefined")
+				// There is no need to do anything if there is no max-age directive 
+				return okAsync(undefined);
+			maxAge = maxAgeDirective?.split("=")?.[1];
 		}
 		catch (err) {
+			// @ts-ignore
 			return nErrAsync(new Error(`${failedToFormVar("maxAge", "string")} ${processHSTSAction}${ERR_LOG_AFTER_COLON}${err.message} `));
 		}
 
@@ -241,7 +247,7 @@ export default class HSTSCacheEmulation extends Cache {
 	 * Retrieves an HSTS entry from IndexedDB.
 	 *
 	 * @param hostname - The hostname to retrieve the entry for.
-	 * @returns
+	 * @returns The emulated HSTS entry from the store
 	 */
 	async getEntry(hostname: string): Promise<ResultAsync<Nullable<IDBRequest<any>>, Error>> {
 		// FIXME: This error catching and req stuff is wrong
@@ -262,7 +268,7 @@ export default class HSTSCacheEmulation extends Cache {
 	 * A safe and modernized abstraction for opening the IndexedDB database we need for HSTSCacheEmulation.
 	 * This is a helper function meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
 	 *
-	 * @returns
+	 * @returns The IndexedDB database
 	 *
 	 * @example
 	 * const dbRes = await this.safeOpenDatabase();

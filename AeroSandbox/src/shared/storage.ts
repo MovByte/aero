@@ -2,7 +2,11 @@ import { escapeWithOrigin } from "$util/escape";
 
 const storagePrefix = escapeWithOrigin;
 
-const storageNomenclature = cookieStoreId => {
+/**
+ * Generic proxy handlers for methods that create means of storage
+ * @param cookieStoreId The ID to prefix the argument in the call with (where the storage key is)
+ */
+const storageNomenclatureHandlers = cookieStoreId => {
 	apply: (target, that, args) => {
 		const [key] = args;
 
@@ -39,4 +43,4 @@ function storageKeys(keys: string[]) {
 	return proxyKeys;
 }
 
-export { storageNomenclature, storagePrefix, storageKey, storageKeys };
+export { storageNomenclatureHandlers, storagePrefix, storageKey, storageKeys };

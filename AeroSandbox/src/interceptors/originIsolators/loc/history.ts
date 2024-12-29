@@ -7,6 +7,9 @@ import {
 import { proxyLocation } from "$shared/proxyLocation";
 import rewriteSrc from "$intUtil/src";
 
+/** 
+ * Shared proxy handlers for the methods on the history API that modify the state (`history.pushState` and `history.replaceState`)
+ */
 const historySharedProxyHandlers = {
 	apply(target: any, that: ProxyHandler<object>, args: any[]) {
 		let url = "";
@@ -30,7 +33,9 @@ const historySharedProxyHandlers = {
 		return Reflect.apply(target, that, args);
 	}
 };
-// TODO: MAKE A TYPE FOR THIS AS AND DO THIS FOR ALL ESCAPE FIXERS
+/**
+ * The fix types for the history API metthods that modify the state (`history.pushState` and `history.replaceState`)
+ */
 const historySharedEscapeFixTypes = [
 	{
 		targeting: "param",

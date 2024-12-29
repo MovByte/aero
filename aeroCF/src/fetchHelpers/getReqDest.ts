@@ -10,13 +10,13 @@
 
 import getPassthroughParam from "$/AeroSandbox/src/shared/getPassthroughParam";
 
-const pluginTypes: string[] = [
+const pluginTypes: readonly string[] = [
 	"application/x-shockwave-flash",
 	"application/pdf",
 	"application/javascript",
 	"application/octet-stream"
 ];
-const audioTypes: string[] = [
+const audioTypes: readonly string[] = [
 	"audio/mpeg",
 	"audio/wav",
 	"audio/aac",
@@ -24,14 +24,14 @@ const audioTypes: string[] = [
 	"audio/webm",
 	"audio/flac"
 ]
-const videoTypes: string[] = [
+const videoTypes: readonly string[] = [
 	"video/mp4",
 	"video/webm",
 	"video/ogg"
 ]
 /** These support arrays are in order of when they were first supported by major browsers */
 const contentTypesBasedOnReqDests: {
-	[key: string]: string[];
+	[key: string]: readonly string[];
 } = {
 	audio: audioTypes,
 	audioworklet: [

@@ -1,3 +1,3 @@
-import { storageNomenclature } from "./shared";
+import { storageNomenclatureHandlers } from "./shared";
 
 // TODO: Implement

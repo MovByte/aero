@@ -43,7 +43,7 @@ export function createEscapePropGetHandler(): ProxyHandler<any> {
 	 * @param escapedProps The properties to trap and escape
 	 */
 	// @ts-ignore
-	return (escapedProps: string[]) =>
+	return (escapedProps: readonly string[]) =>
 		({
 			// Unescape
 			get(target, prop) {

@@ -1,6 +1,6 @@
 // Neverthrow for improved error handling
 import type { Result } from "neverthrow"
-import { err as nErr } from "neverthrow";
+import { ok as nOk, err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 import { createGenericTroubleshootingStrs } from "$shared/genericTroubleshootingStrs";
 
@@ -48,17 +48,22 @@ export default function troubleshoot(): Result<void, Error> {
 		return troubleshootJustConfigsRes;
 	/// Runtime type validations
 	if (!baremuxValidation.success)
-		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The BareMux bundle you provided is invalid! You may have imported a bare client that doesn't fully support the BareMux 2.0 specification. This could happen if you are using the classic bare client from TompHTTP and not the new one from Mercury Workshop or if you haven't updated the one from Mercury Workshop to 2.0+.", ...baremuxValidation.errors`);
+		// @ts-ignore: the spread is intentional
+		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The BareMux bundle you provided is invalid! You may have imported a bare client that doesn't fully support the BareMux 2.0 specification. This could happen if you are using the classic bare client from TompHTTP and not the new one from Mercury Workshop or if you haven't updated the one from Mercury Workshop to 2.0+.`, ...baremuxValidation.errors);
 	if (!loggerValidation.success)
+		// @ts-ignore: the spread is intentional
 		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The logger bundle ${troubleshootingStrs.validationTarget} provided is invalid!`, ...loggerValidation.errors);
 	if (!configValidation.success)
+		// @ts-ignore: the spread is intentional
 		return fmtNeverthrowErr(`${troubleshootingStrs.devErrTag}The config ${troubleshootingStrs.validationTarget} provided is invalid!`, ...configValidation.errors);
+	return nOk(undefined);
 }
 
 export function troubleshootJustConfigs(): Result<void, Err> {
 	if (!("aeroConfig" in self)) {
 		if ("defaultConfig" in self)
-			return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no default config provided! You need to create one other than the default`));
+			return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no default config provided! You need to create one other than the default `));
 		return nErr(new Error(`${troubleshootingStrs.devErrTag}There is no config provided!${troubleshootingStrs.tryImportingItMsg}`));
 	}
+	return nOk(undefined);
 }

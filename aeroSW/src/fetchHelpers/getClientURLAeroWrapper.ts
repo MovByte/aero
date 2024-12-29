@@ -8,6 +8,23 @@ import getClientUrlThroughClient, { getClientUrlThroughForcedReferrer } from "$s
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
+type Passthrough = Readonly<{
+	/** The URL from the original request */
+	reqUrl: URL;
+	/** The headers from the original request */
+	reqHeaders: Headers;
+	/** The URL Parameters from the original request */
+	reqParams: URLSearchParams;
+	/** The Client ID associated with the client that initiated the fetch event */
+	clientId: string;
+	/** If the the `clients` method is being used and the Client ID is not missing */
+	catchAllClientsValid: boolean;
+	/** If the request is a navigation request to a document or an iframe (will resolve to a website) */
+	isNavigate: boolean
+	/** This is mainly intended so that `appendSearchParam()` (after `getClientURL()` is called) help the response header rewriter with `No-Vary-Search` header rewriting later */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType
+}>
+
 /**
  * Wraps `getClientURL.ts` to be used in aero, with the context of the current aero SW handler being used accordingly with catch-all interception methods.
  * In order to use this function, you must have the feature flag `REQ_INTERCEPTION_CATCH_ALL` set to either `clients` or `referrer`. Prefer `clients` if you can (you must be using a SW).
@@ -31,30 +48,17 @@ import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
  *	return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);
  * }
  */
-export default async function getClientURLAeroWrapper({
-	reqUrl,
-	reqHeaders,
-	reqParams,
-	clientId,
-	catchAllClientsValid,
-	isNavigate,
-	rewrittenParamsOriginals
-}: {
-	/** The URL from the original request */
-	reqUrl: URL;
-	/** The headers from the original request */
-	reqHeaders: Headers;
-	/** The URL Parameters from the original request */
-	reqParams: URLSearchParams;
-	/** The Client ID associated with the client that initiated the fetch event */
-	clientId: string;
-	/** If the the `clients` method is being used and the Client ID is not missing */
-	catchAllClientsValid: boolean;
-	/** If the request is a navigation request to a document or an iframe (will resolve to a website) */
-	isNavigate: boolean
-	/** This is mainly intended so that `appendSearchParam()` (after `getClientURL()` is called) help the response header rewriter with `No-Vary-Search` header rewriting later */
-	rewrittenParamsOriginals: rewrittenParamsOriginalsType
-}): Promise<ResultAsync<string, Error>> {
+export default async function getClientURLAeroWrapper(pass: Passthrough): Promise<ResultAsync<string, Error>> {
+	const {
+		reqUrl,
+		reqHeaders,
+		reqParams,
+		clientId,
+		catchAllClientsValid,
+		isNavigate,
+		rewrittenParamsOriginals
+	} = pass;
+
 	/** The URL from the client's window */
 	let clientUrl: URL;
 	if (isNavigate) {

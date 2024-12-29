@@ -19,7 +19,24 @@ import rewriteCacheManifest from "$rewriters/cacheManifest";
 import rewriteManifest from "$rewriters/webAppManifest";
 import JSRewriter from "$sandbox/sandboxers/JS/JSRewriter";
 
+import type { Sec } from "$aero/aeroSW/types";
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
+type Passthrough = Readonly<{
+	originalResp: Response;
+	rewrittenReqHeaders: Headers,
+	/** If you are making a server-only implementation, you could infer this from the mime type and file type */
+	reqDestination: string;
+	proxyUrl: URL;
+	clientUrl: string;
+	isScript: boolean;
+	isNavigate: boolean;
+	isMod: boolean;
+	sec: Readonly<Sec>;
+	/** This is for `No-Vary-Search` rewriting */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
+}>;
+
 
 const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
 
@@ -28,32 +45,24 @@ const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
  * @param param0 The passthrough object needed for the cache setting
  * @returns 
  */
-export default async function rewriteResp({
-	originalResp,
-	rewrittenReqHeaders,
-	reqDestination,
-	proxyUrl,
-	clientUrl,
-	isNavigate,
-	isMod,
-	sec
-}: {
-	originalResp: Response;
-	rewrittenReqHeaders: Header,
-	/** If you are making a server-only implementation, you could infer this from the mime type and file type */
-	reqDestination: string;
-	proxyUrl: URL;
-	clientUrl: string;
-	isNavigate: boolean;
-	isMod: boolean;
-	sec: Sec;
-	/** This is for `No-Vary-Search` rewriting */
-	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
-}, accessControlRuleMap: Map<string, string>): Promise<ResultAsync<{
+export default async function rewriteResp(pass: Passthrough, accessControlRuleMap: Map<string, string>): Promise<ResultAsync<{
 	rewrittenBody: string | ReadableStream;
 	rewrittenRespHeaders: Headers,
 	rewrittenStatus: number
 }, Error>> {
+	const {
+		originalResp,
+		rewrittenReqHeaders,
+		reqDestination,
+		proxyUrl,
+		clientUrl,
+		isScript,
+		isNavigate,
+		isMod,
+		sec,
+		rewrittenParamsOriginals
+	} = pass;
+
 	// Rewrite the response headers
 	const rewrittenRespHeaders = { ...originalResp.headers };
 	const rewrittenRespHeadersRes = rewriteRespHeaders(rewrittenRespHeaders, {
@@ -109,7 +118,7 @@ export default async function rewriteResp({
 	} else if (
 		REWRITER_XSLT &&
 		isNavigate &&
-		(type.startsWith("text/xml") || type.startsWith("application/xml"))
+		(type?.startsWith("text/xml") || type?.startsWith("application/xml"))
 	) {
 		const body = await originalResp.text();
 		rewrittenBody = body;
@@ -146,9 +155,9 @@ export default async function rewriteResp({
 		const body = await resp.text();
 
 		// Safari exclusive
-		if (SUPPORT_LEGACY && type.includes("text/cache-manifest")) {
+		if (SUPPORT_LEGACY && type?.includes("text/cache-manifest")) {
 			const isFirefox =
-				rewrittenReqHeaders["user-agent"].includes("Firefox");
+				rewrittenReqHeaders.get("user-agent")?.includes("Firefox");
 
 			rewrittenBody = rewriteCacheManifest(body, isFirefox);
 		} else rewrittenBody = rewriteManifest(body, proxyUrl);

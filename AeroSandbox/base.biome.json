@@ -30,6 +30,7 @@
 				"noClassAssign": "error"
 			},
 			"style": {
+        "noParameterAssign": "error",
 				"noNamespace": "error",
 				"noNamespaceImport": "error",
 				"noNegationElse": "error",

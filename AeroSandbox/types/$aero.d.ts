@@ -4,11 +4,11 @@ import type { Config } from "./config";
 import type { SearchParamOptionsConfig } from "../../aeroSW/types/config";
 import type JSRewriter from "$aero/src/sandboxers/JS/JSRewriter";
 
-export interface AeroGlobalType {
+export type AeroGlobalType = Readonly<{
 	init: string;
 	sec: {
-		/** Content Security Policy @see https://content-security-policy.com */
-		csp: string[];
+		/** Content Security Policy from the navigation request that initiated this webpage @see https://content-security-policy.com */
+		csp: readonly string[];
 	};
 	bc: BareClient;
 	logger: AeroSandboxLogger;
@@ -17,7 +17,7 @@ export interface AeroGlobalType {
 	rewriters: {
 		js: JSRewriter;
 	};
-}
+}>;
 
 declare global {
 	// biome-ignore lint/style/noVar: <explanation>

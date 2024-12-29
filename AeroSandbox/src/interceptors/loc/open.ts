@@ -6,7 +6,7 @@ import {
 import rewriteSrc from "$util/src";
 
 export default {
-	proxifiedApi: new Proxy(open, {
+	proxyHandlers: {
 		apply(target, that, args) {
 			const [url] = args;
 
@@ -14,7 +14,7 @@ export default {
 
 			return Reflect.apply(target, that, args);
 		}
-	}),
+	},
 	globalProp: "open",
 	exposedContexts: ExposedContextsEnum.window
 } as APIInterceptor;

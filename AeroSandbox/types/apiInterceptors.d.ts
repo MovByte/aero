@@ -72,7 +72,7 @@ export type APIInterceptorForProxyObjects = APIInterceptorGeneric & {
 	/** This is specifically for objects that use the ES6 Proxy Object or re-implement the API from scratch. proxifiedObjGenFunc is a handler which returns the proxified object depending on the context given, which is determined by how the AeroSandboxBundler class is configured with the config in the constructor.*/
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
 	proxifiedObj?: Object | proxifiyObjGenerator;
-	storageProxifiedObj: storageProxifiyObjGenerator;
+	createStorageProxyHandlers: storageProxifiyObjGenerator;
 };
 export type APIInterceptorForProxyObjectsInWorker = APIInterceptorGeneric & {
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>

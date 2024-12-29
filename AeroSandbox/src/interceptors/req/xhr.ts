@@ -16,7 +16,6 @@ export default {
 			return Reflect.construct(target, args);
 		},
 		...createEscapePropGetHandler(["isSync"])
-		// TODO: Implement all of the things from the fetch interceptor into here
 	}),
 	globalProp: "XMLHttpRequest",
 	exposedContexts: anyWorkerExceptServiceWorkerEnumMember

@@ -14,11 +14,20 @@ import appendSearchParam from "$shared/escaping/appendSearchParam";
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
+type Passthrough = Readonly<{
+	params: URLSearchParams,
+	referrerPolicyParamName: string,
+	referrerPolicy: string,
+	/** This is mainly intended so that `appendSearchParam()` can help the response header rewriter with `No-Vary-Search` header rewriting later */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType
+}>
+
 /**
  * Gets the URL of the client through the `Client` API in SWs
  * This client URL is used when forming the proxy URL and in various uses for emulation
  * @returns The `URL` of the client wrapped in a `ResultAsync` for better error handling from *Neverthrow*
  */
+/* biome-enable no-param-reassign */
 export default async function getClientUrlThroughClient(clientId: string): Promise<ResultAsync<URL, Error>> {
 	/** The client that contains information for the current window */
 	const client = await clients.get(clientId);
@@ -33,18 +42,15 @@ export default async function getClientUrlThroughClient(clientId: string): Promi
  * This client URL is used when forming the proxy URL and in various uses for emulation
  * @returns The `URL` of the client wrapped in a `ResultAsync` for better error handling from *Neverthrow*
  */
-export async function getClientUrlThroughForcedReferrer({
-	params,
-	referrerPolicyParamName,
-	referrerPolicy,
-	rewrittenParamsOriginals
-}: {
-	params: string,
-	referrerPolicyParamName: string,
-	referrerPolicy: string,
-	/** This is mainly intended so that `appendSearchParam()` can help the response header rewriter with `No-Vary-Search` header rewriting later */
-	rewrittenParamsOriginals: rewrittenParamsOriginalsType
-}): Promise<ResultAsync<URL, Error>> {
+/* biome-enable no-param-reassign */
+export async function getClientUrlThroughForcedReferrer(pass: Passthrough): Promise<ResultAsync<URL, Error>> {
+	const {
+		params,
+		referrerPolicyParamName,
+		referrerPolicy,
+		rewrittenParamsOriginals
+	} = pass;
+
 	// Referrer policy emulation (we will force the referrer later)
 	appendSearchParam(
 		params,

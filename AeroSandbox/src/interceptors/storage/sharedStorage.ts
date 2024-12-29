@@ -2,7 +2,7 @@ import config from "$aero/examples/config";
 import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
 const { prefix } = config;
 
-import { storageNomenclature } from "./shared";
+import { storageNomenclatureHandlers } from "./shared";
 
 // TODO: Import types for the Shared Storage API
 // TODO: Proxify it with the new system

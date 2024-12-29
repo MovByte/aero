@@ -31,7 +31,7 @@ export default class GenericLogger {
 	 * @branding The name of the proxy and the text shown inside of the bubble
 	 * @msgs The messages you want to log
 	 */
-	log(branding: string, msgs: string[] | string): void {
+	log(branding: string, msgs: string | string[]): void {
 		if (!Array.isArray(msgs))
 			msgs = [msgs];
 
@@ -44,7 +44,7 @@ export default class GenericLogger {
 	 * @branding The name of the proxy and the text shown inside of the bubble
 	 * @msgs The messages you want to log
 	 */
-	warn(branding: string, msgs: string[] | string): void {
+	warn(branding: string, msgs: string | string[]): void {
 		if (!Array.isArray(msgs))
 			msgs = [msgs];
 
@@ -59,7 +59,7 @@ export default class GenericLogger {
 	 */
 	debug(
 		branding: string,
-		msgs: string[] | string,
+		msgs: string | string[],
 	): void {
 		if (this.debugMode) {
 			if (!Array.isArray(msgs))
@@ -78,7 +78,7 @@ export default class GenericLogger {
 	 */
 	error(
 		branding: string,
-		msgs: string[] | string,
+		msgs: string | string[],
 	): void {
 		if (!Array.isArray(msgs))
 			msgs = [msgs];
@@ -93,7 +93,7 @@ export default class GenericLogger {
 	 * @branding The name of the proxy and the text shown inside of the bubble
 	 * @msgs The messages you want to log
 	 */
-	fatalErr(branding: string, msgs: string[] | string): void {
+	fatalErr(branding: string, msgs: string | string[]): void {
 		if (!Array.isArray(msgs))
 			msgs = [msgs];
 
@@ -128,21 +128,21 @@ export class AeroLogger extends GenericLogger {
 	 * A method that wraps `console.log` with aero branding using bubbles
 	 * @param msgs The messages you want to log
 	 */
-	log(msgs: string[] | string): void {
+	log(msgs: string | string[]): void {
 		super.log("aero SW", msgs);
 	}
 	/**
 	 * A method that wraps `console.warn` with aero branding using bubbles
 	 * @param msgs The messages you want to log
 	 */
-	warn(msgs: string[] | string[] | string): void {
+	warn(msgs: string | string[][] | string): void {
 		super.warn("aero SW", msgs);
 	}
 	/**
 	 * A method that wraps `console.debug` with aero branding using bubbles only if debug mode is enabled
 	 * @param msgs The messages you want to log
 	 */
-	debug(msgs: string[] | string): void {
+	debug(msgs: string | string[]): void {
 		super.warn("aero SW", msgs);
 	}
 	/**
@@ -151,10 +151,10 @@ export class AeroLogger extends GenericLogger {
 	 * @branding The name of the proxy and the text shown inside of the bubble
 	 * @msgs The messages you want to log
 	 */
-	error(msgs: string[] | string): void {
+	error(msgs: string | string[]): void {
 		super.error("aero SW", msgs);
 	}
-	fatalErr(msgs: string[] | string): /* Response */ Error {
+	fatalErr(msgs: string | string[]): /* Response */ Error {
 		super.fatalErr("aero SW", msgs);
 		return new Error(`Caught Fatal Error: ${msgs}`);
 		/*
@@ -190,16 +190,16 @@ export class AeroSandboxLogger extends GenericLogger {
 		this.options = options;
 	}
 
-	log(msgs: string[] | string): void {
+	log(msgs: string | string[]): void {
 		super.log("aero sandbox", msgs);
 	}
-	warn(msgs: string[] | string): void {
+	warn(msgs: string | string[]): void {
 		super.warn("aero sandbox", msgs);
 	}
-	error(msgs: string[] | string): void {
+	error(msgs: string | string[]): void {
 		super.error("aero sandbox", msgs);
 	}
-	fatalErr(msgs: string[] | string): void {
+	fatalErr(msgs: string | string[]): void {
 		// TODO: INSTEAD MAKE THIS A CRASH SCREEN IF THE DEBUG FLAG IS ENABLED
 		super.fatalErr("aero sandbox", msgs);
 
