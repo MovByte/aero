@@ -1,3 +1,7 @@
+/**
+ * @module
+ */
+
 // @ts-nocheck: I haven't yet made types for all of this
 
 /**

@@ -128,7 +128,7 @@ export default [{
 /**
  * Check if a recent request (from the proxy URL) on this page was cached
  * @param proxyUrl 
- * @returns If the request was cached
+ * @returns Whether the request was cached
  */
 function isCached(proxyUrl: string): boolean {
 	let res = $aero.resInfo.get(proxyUrl);

@@ -33,7 +33,8 @@ import getPassthroughParam from "$shared/getPassthroughParam";
 import { AeroLogger } from "$shared/Loggers";
 
 // For initializing listeners
-import initSandboxListeners from "./initSandboxListeners";
+import initSandboxListeners from "./util/initSandboxListeners";
+import allowFeatureFlag from "./util/allowFeatureFlag";
 
 // Init everything
 /** aero's SW logger */
@@ -100,7 +101,7 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 	// Get the clientUrl through catch-all interception
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
-	if (catchAllClientsValid && SERVER_ONLY)
+	if (catchAllClientsValid && && SERVER_ONLY)
 		return nErrAsync(new Error(`${troubleshootingStrs.devErrTag}Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can't be set to "clients" when "SERVER_ONLY" is enabled.`));
 	const clientUrlRes = await getClientURLAeroWrapper({
 		reqUrl,
@@ -225,7 +226,7 @@ self.aeroHandle = handleSW;
 /**
  * Check if the current path should route to aero using the prefix you set in the config
  * @param event 
- * @returns If `aeroHandle` should be called
+ * @returns Whether `aeroHandle` should be called
  */
 self.routeAero = (event: Assert<FetchEvent>): Result<boolean, Error> => {
 	// Sanity check: Ensure the handler is being ran in a SW

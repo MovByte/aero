@@ -36,7 +36,7 @@ export function featureFlagsBuilderRaw(featureFlagsRaw: FeatureFlags): { [key: s
 		const camelCaseToFeatureFlagFmtKey = key
 			.replaceAll(snakeCaseMatch, replacementSnakeCaseToUnderscoreCase)
 			.toUpperCase();
-		featureFlags[camelCaseToFeatureFlagFmtKey] = JSON.stringify(typeof val === "boolean" ? `($aero.config.sandbox.featureFlags.includeEsniff || ${val})` : val);
+		featureFlags[camelCaseToFeatureFlagFmtKey] = JSON.stringify(typeof val === "boolean" ? `($aero.config.featureFlags === "all" || $aero.config.featureFlags["${key}"] && ${val})` : val);
 	}
 	Object.freeze(featureFlags);
 	return featureFlags;

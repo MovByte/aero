@@ -225,7 +225,7 @@ export default class PrecompXOR {
 	 * This is a helper method meant to be for internal-use only, but it is exposed just in case you want to use it for whatever reason.
 	 * @see https://url.spec.whatwg.org/#valid-url-character
 	 * @param char The character to check
-	 * @returns If the character is a valid URL character
+	 * @returns Whether the character is a valid URL character
 	 */
 	checkValidChar(char: number): boolean {
 		return (
