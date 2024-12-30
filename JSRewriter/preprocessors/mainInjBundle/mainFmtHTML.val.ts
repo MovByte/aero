@@ -35,6 +35,7 @@ export default function fmtHTMLInjBundle({ DEBUG }: FeatureFlagsPassthrough) {
 			// The only things defined in here at this time are what is needed to be passed through the SW context to the client context. The rest is defined in the client when the aero bundle for the client is loaded.
 			window.$aero = {
 				...window.$aero,
+				clientId: {{CLIENT_ID}}
 				// Security
 				sec: {{SEC}},
 				// This is used to later copy into an iFrame's srcdoc; this is for an edge case

@@ -170,6 +170,23 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 		status: rewrittenStatus
 	});
 
+	/*/
+	// TODO: Save this for use in Nested SWs later
+	const clientsWithSameProxyOrigin: Client[] = [];
+	for (const client of await clients.matchAll()) {
+		if (isNavigate) {
+			let proxyClientOrigin: string
+			try {
+				proxyClientOrigin = new URL(afterPrefix(client.url, self.config.prefix, self.logger)).origin;
+			} catch (err) {
+				return fmtNeverthrowErr(`Failed to get the proxified version of the client URL (from ${client.url})`, err);
+			}
+			if (proxyClientOrigin === proxyUrl.origin)
+				clientsWithSameProxyOrigin.push(client);
+		}
+	}
+	*/
+
 	// Perform Cache Emulation
 	if (CACHES_EMULATION) {
 		const perfCacheSettingRes = perfCacheSetting({
@@ -177,14 +194,15 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 			rewrittenResp,
 			// @ts-ignore: This is created under an if statement of `FEATURES_CACHE_EMULATION`, so we are fine
 			cacheMan,
-			cache
+			cache,
+			clientsWithSameProxyOrigin
 		})
 		if (perfCacheSettingRes.isErr())
 			return fmtNeverthrowErr("Failed to cache the response", perfCacheSettingRes.error.message);
 	}
 
 	// Return the response
-	return nOkAsync((rewrittenResp);
+	return nOkAsync(rewrittenResp);
 }
 
 /**

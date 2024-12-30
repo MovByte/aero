@@ -45,38 +45,51 @@ export enum URL_IS_ESCAPE {
 	HOSTNAME,
 	DOMAIN,
 	PROTOCOL,
-	FULL_URL,
-	ANY_URL
+	FULL_URL
 }
-type EscapeTypeShared = Array<{
+type TypeShared<MORE_ESCAPE_TYPES> = Array<{
 	what: "URL_STRING"
 	is: URL_IS_ESCAPE
-} | {
+} | ({
 	targeting: "VALUE_PROXIFIED_OBJ",
 	props_that_escape: {
-		[key: string]: EscapeTypeShared
+		[key: string]: TypeShared
 	}
-}>
-type EscapeFixesProxifiedValue = EscapeTypeShared;
-type EscapeFixesProxyHandler = ({
-	targeting: "API_PARAM" | "API_RETURN" | "CONSTRUCTOR_PARAM" | "CONSTRUCTED_CLASS_PROPS",
-	targetingParam: number,
-	apiMethod: string,
-	escapeType: EscapeTypeShared;
 } | {
-	targeting: "CONSTRUCTOR_PARAM",
+	targeting: "VALUE_PROXIFIED_OBJ",
+	props_that_reveal: {
+		[key: string]: TypeShared
+	}
+}) | ({
+	targeting: "REAL_DATA_SIZE",
+} & ({
+	type: "BODY",
+	encoded: boolean
+} | {
+	type: "TRANSFER"
+})) | MORE_ESCAPE_TYPES>
+type GenericProxifiedValue<MORE_ESCAPE_TYPES> = TypeShared<MORE_ESCAPE_TYPES>;
+type GenericProxyHandler<MORE_ESCAPE_TYPES> = ({
+	targeting: "API_PARAM" | "CONSTRUCTOR_PARAM" | "CONSTRUCTED_CLASS_PROPS",
 	/**
-	 * The index of the parameter in the constructor (the index starts from 1)
-	 */
+	  * The index of the parameter in the function (the index starts from 1)
+	  */
 	targetingParam: number,
-	escapeType: EscapeTypeShared;
+	escapeType: TypeShared<MORE_ESCAPE_TYPES>;
 } | {
-	targeting: "CONSTRUCTOR_PARAM" | "CONSTRUCTED_CLASS_PROPS",
-	escapeType: EscapeTypeShared;
+	targeting: "API_RETURN" | "CONSTRUCTOR_RETURN",
+	escapeType: TypeShared<MORE_ESCAPE_TYPES>;
 })[];
 
-type ConcealsProxifiedValue = EscapeFixesProxifiedValue;
-type ConcealsProxyHandler = EscapeFixesProxyHandler;
+type EscapeFixesProxifiedValue = GenericProxifiedValue<{}>;
+type EscapeFixesProxyHandler = GenericProxyHandler<{}>;
+
+type ConcealEscapeTypes = /** For perf emulation */ {
+	what: "REAL_SIZE",
+	propsThatReveal: string[]
+}
+type ConcealsProxifiedValue = GenericProxifiedValue<ConcealEscapeTypes>;
+type ConcealsProxyHandler = GenericProxyHandler<ConcealEscapeTypes>;
 
 /** This is a generic type interface used for intersection in other interfaces below */
 type APIInterceptorGeneric = {
@@ -98,18 +111,23 @@ type APIInterceptorGeneric = {
 	insertLevel?: number;
 	forCors?: boolean;
 	forStorage?: boolean;
-}
+};
 /** You use this when you haven't yet finished your implementation for your API and you want to skip it. If the Feature Flag DELETE_UNSUPPORTED_APIS is enabled, then it would delete the API instead of doing nothing. */
 export type APIInterceptorSkip = APIInterceptorGeneric & {
 	/** Please add a comment above setting this property explaining why you have decided to skip it */
 	skip: true,
+}
+export type APIInterceptorInitForAPI = {
+	init: () => void;
+	/** The prop to the object of the API itself */
+	globalProp: string;
 }
 export type APIInterceptorForProxyObjects = APIInterceptorGeneric & ({
 	proxyHandler: ProxyHandler<any>;
 } | {
 	genProxyHandler: (ctx: GeneratorCtxTypeShared) => ProxyHandler<any>;
 }) & ({
-	escapeFixes: EscapeFixesProxyHandler;
+	escapeFixes: GenericProxyHandler;
 } | {
 	conceals: ConcealsProxifiedValue[];
 } | {
@@ -121,7 +139,7 @@ export type APIInterceptorForProxifiyingGettersAndSetters = APIInterceptorGeneri
 	proxifiedGetter?: ProxifiedGetter;
 	proxifySetter?: ProxifySetter;
 } & ({
-	escapeFixes: EscapeFixesProxifiedValue[];
+	escapeFixes: GenericProxifiedValue[];
 } | {
 	conceals: ConcealsProxifiedValue[];
 } | {
@@ -130,6 +148,7 @@ export type APIInterceptorForProxifiyingGettersAndSetters = APIInterceptorGeneri
 // TODO: Make it possible in AeroSandbox to view the API Interceptor and determine if it should be included in AeroSandbox or not with a handler
 /** This is what is exported in every API Interceptor. Omitting any of the properties with the Enum type will act as if every member of the Enum is present. */
 export type APIInterceptor =
+	| APIInterceptorInitForAPI
 	| APIInterceptorSkip
 	| APIInterceptorForProxyObjects
 	| APIInterceptorForProxifiyingGettersAndSetters

@@ -131,8 +131,8 @@ export default class extends Cache {
 	}
 
 	/**
-	 * @param - Proxy path
-	 * @param - Cache age
+	 * @param path Proxy path
+	 * @param age Cache age
 	 * @returns Cached resp
 	 */
 	async get(path, age): Promise<Response | false> {
@@ -158,11 +158,13 @@ export default class extends Cache {
 	}
 
 	/**
-	 * @param - Proxy path
-	 * @param - Proxy resp
-	 * @param - Vary header
+	 * @param proxyPath Proxy path
+	 * @param resp Proxy resp
+	 * @param vary Vary header
+	 * @param clientId (from the SW)
+	 * @param
 	 */
-	async set(path: string, resp: Response, vary: string): Promise<ResultAsync<void, Error>> {
+	async set(proxyPath: string, resp: Response, vary: string, clientId: string): Promise<ResultAsync<void, Error>> {
 		const cache = await this.#getCache();
 
 		if (
@@ -171,14 +173,25 @@ export default class extends Cache {
 			vary === "*"
 		) {
 			try {
-				await cache.put(path, resp);
+				await cache.put(proxyPath, resp);
 			} catch (err) {
 				const action = "to put the response into the cache";
+				// TODO: Use fmtNeverthrowErr instead
 				return nErrAsync(new Error(err instanceof TypeError ? `The URL for the path ${action} is invalid: ${err.message}` : `Uncaught error while trying ${action}${ERR_LOG_AFTER_COLON}${err.message}`));
 			}
 		} else {
 			// TODO: If in verbose/debug mode, log that nothing was put into the cache
+			self.logger.log(`Nothing was put into the Cache for the request path (${proxyPath})`);
 		}
+
+		for (const client of clientsWithSameProxyOrigin) {
+			const broadcast = new BroadcastChannel("$aero-perf-timing-res-cached");
+			client.postMessage({
+				clientId,
+				msg: 
+			});
+		}
+
 		return nOk(undefined);
 	}
 

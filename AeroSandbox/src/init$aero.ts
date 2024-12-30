@@ -12,5 +12,9 @@ if (!("$aero" in window)) {
 // TODO: Do this in the config
 $aero.bc = new BareClient();
 
+// For API Interceptors
+/// For performance timing
+$aero.resInfo = new Map<string, boolean>();
+
 // Protect from overwriting, in case $aero scoping failed
 Object.freeze($aero);

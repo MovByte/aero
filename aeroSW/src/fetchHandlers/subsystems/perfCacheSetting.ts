@@ -15,15 +15,16 @@ export default async function perfCacheSetting({
 	cacheMan,
 	reqUrlHref,
 	rewrittenResp
+	clientsWithSameProxyOrigin
 }: {
-	cacheMan: CacheManager, reqUrlHref: string, rewrittenResp: Response
+	cacheMan: CacheManager, reqUrlHref: string, rewrittenResp: Response, clientsWithSameEmuControl: Clients
 }): Promise<ResultAsync<void, Error>> {
 	const varyHeader = rewrittenResp.headers.get("vary");
 	if (varyHeader === null)
 		// Skip (we don't need to cache this)
 		return okAsync(undefined);
 	// Cache the response
-	const cacheManSetRes = await cacheMan.set(reqUrlHref, rewrittenResp, varyHeader);
+	const cacheManSetRes = await cacheMan.set(reqUrlHref, rewrittenResp, varyHeader, clientsWithSameProxyOrigin);
 	if (cacheManSetRes.isErr())
 		return fmtNeverthrowErr("Failed to set the new emulated cache", cacheManSetRes.error.message);
 	logger.debug("Cached the response: ", rewrittenResp);

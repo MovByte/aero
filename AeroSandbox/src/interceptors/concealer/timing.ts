@@ -1,125 +1,144 @@
-/*
-import type { APIInterceptor } from "$aero/types/apiInterceptors";
+/**
+ * There are 3 ways to detect proxies using the Performance API
+Using entry.name to expose the url:
+ *   - Using entry.name to expose the url
+ *   - If the site was rewritten or the headers were modified, the size would be different than what is intended. You can think of this as a form of hash checking.
+ *   - If you make a request to two different proxy origins on the site that are both cached and one has the `Clear-Site-Data`, clearing both proxy origins, so the proxy can be detected
+ */
 
-import upToProxyLocation from "sandbox/src/util/upToProxyLocation";
+import { type APIInterceptor, SupportEnum, URL_IS_ESCAPE } from "$types/apiInterceptors";
 
-import { afterPrefix } from "$util/afterPrefix";
-*/
+import getMsgFromSW from "$util/getMsgFromSW";
+import { afterPrefix } from "$shared/afterPrefix";
+import upToProxyLocation from "$shared/upToProxyLocation";
 
-/*
-There are 3 ways to detect proxies using the Performance API
-Using entry.name to expose the url
-If the site was rewritten or the headers were modified, the size would be different than what is intended. You can think of this as a form of hash checking
-If you make a request to two different proxy origins on the site that are both cached and one has the Clear-Site-Data clearing both proxy origins, the proxy can be detected
-*/
+export default [{
+	init: () => {
+		// Get the data from the SW
+		getMsgFromSW("perf-timing-res-cached", event => {
+			const { url, cached } = event.data.payload;
+			$aero.resInfo.set(url, cached);
+		});
+	},
+	globalProp: "performance"
+}, {
+	proxyHandler: {
+		apply(target, that, args) {
+			let realEntries: PerformanceEntryList = Reflect.apply(
+				target,
+				that,
+				args
+			);
+			const proxifiedEntries = realEntries
+				// Hide aero's injection (bundle)
+				.filter(
+					entry =>
+						!entry.name.startsWith(location.origin + $aero.config.bundle)
+				);
+			return proxifiedEntries;
+		},
+	},
+	escapeFixes: [
+		{
+			targeting: "API_RETURN",
+			escapeType: {
+				what: "URL_STRING",
+				is: URL_IS_ESCAPE.FULL_URL
+			}
+		}
+	],
+	globalProp: "performance.getEntries",
+	supports: SupportEnum.widelyAvailable
+}, {
+	proxifyGetter: ctx => {
+		const realUrl = ctx.this;
+		const proxyUrl = afterPrefix(realUrl);
+		return proxyUrl;
+	},
+	conceals: [
+		{
+			targeting: "URL_STRING",
+			is: URL_IS_ESCAPE.FULL_URL
+		}
+	],
+	globalProp: "PerformanceResourceTiming.prototype.name",
+	supports: SupportEnum.widelyAvailable
+}, {
+	proxifyGetter: ctx => {
+		ctx.that.name
+		return afterPrefix(ctx.this)
+	},
+	proxyHandler: {
+		get(target, prop, receiver) {
+			const realUrl = target.name;
+			const proxyUrl = afterPrefix(realUrl);
+			const resCached = isCached(proxyUrl);
+			const resCrossOrigin = !proxyUrl.startsWith(
+				upToProxyLocation()
+			);
+			const isZero =
+				resCached ||
+				resCrossOrigin ||
+				"timing" in $aero.sec;
+			if (target[prop] === "transferSize") {
+				return isZero ? 0 : getAeroHeader(proxyUrl, "size-transfer");
+			}
+			if (target[prop] === "encodedBodySize") {
+				if (isZero) return 0;
+				return await getAeroHeader(
+					proxyUrl,
+					"x-aero-size-encbody"
+				);
+			}
+			if (target[prop] === "decodedBodySize") {
+				if (isZero) return 0;
+				return await getBodySize(proxyUrl);
+			}
+			return Reflect.get(target, prop, receiver);
+		},
+		conceals: {
+			targeting: "VALUE_PROXIFIED_OBJ",
+			props_that_reveal: {
+				"transferSize": [
+					{
+						what: "REAL_DATA_SIZE",
+						type: "TRANSFER"
+					}
+				],
+				"encodedBodySize": [
+					{
+						what: "REAL_DATA_SIZE",
+						type: "BODY",
+						encoded: true
+					}
+				],
+				"decodedBodySize": [
+					{
+						what: "REAL_DATA_SIZE",
+						type: "BODY",
+						encoded: false
+					}
+				]
+			}
+		},
+		globalProp: "PerformanceResourceTiming.prototype",
+		supports: SupportEnum.widelyAvailable
+	}] as APIInterceptor;
 
-// FIXME:
-
-/*
-const resInfo = new Map<string, boolean>();
-
-const broadcast = new BroadcastChannel("resCached");
-
-// Detect if cache is cached
-// TODO: Broadcast this info on the sw
-broadcast.onmessage = event => {
-    const { url, cached } = event.data.payload;
-
-    resInfo.set(url, cached);
-};
 
 function isCached(url: string) {
-    let res = resInfo.get(url);
+	let res = $aero.resInfo.get(url);
 
-    return res ? url in res : false;
+	return res ? url in res : false;
 }
 
-async function getHeader(url: string, headerName: string) {
-    const resp = await fetch(url);
+// FIXME: Instead of doing this in the interceptor, record the data in the SW later to reduce request volume and just use getMsgFromSW with sync-async and a custom promise
+// FIXME: Prefix the size headers with "x-aero-perf-..."
+async function getAeroHeader(url: string, headerName: string) {
+	const resp = await fetch(url);
 
-    return resp.headers[headerName];
+	return resp.headers[`x-aero-${headerName}`];
 }
-
 async function getBodySize(url: string) {
-    return await getHeader(url, "x-aero-size-body");
+	return await getAeroHeader(url, "size-body");
 }
-
-export default {
-    globalProp: "performance.getEntries",
-    proxifiedObj: new Proxy(performance.getEntries, {
-        apply(target, that, args) {
-            let entries: PerformanceEntryList = Reflect.apply(
-                target,
-                that,
-                args
-            );
-
-            return (
-                entries
-                    // Hide aero's injections
-                    .filter(
-                        entry =>
-                            !entry.name.startsWith(location.origin + $aero.config.prefix)
-                    )
-                    .map(async entry => {
-                        if (entry.name) {
-                            Object.defineProperty(entry, "name", {
-                                value: afterPrefix(entry.name),
-                                writable: false,
-                            });
-
-                            // FIXME: Fix this
-                            const size = target[prop];
-
-                            const resCached = isCached(url);
-                            const resCrossOrigin = !url.startsWith(
-                                upToProxyOrigin($aero.prefix, $aero.logger)
-                            );
-                            const isZero =
-                                resCached ||
-                                resCrossOrigin ||
-                                "timing" in $aero.sec.headers;
-
-                            Object.defineProperty(entry, "transferSize", {
-                                value: isZero
-                                    ? 0
-                                    : await getHeader(
-                                        url,
-                                        "x-aero-size-transfer"
-                                    ),
-                                writable: false,
-                            });
-                            Object.defineProperty(entry, "encodedBodySize", {
-                                value: async () => {
-                                    if (isZero) return 0;
-
-                                    const decodeSize = prop.decodedBodySize;
-
-                                    // There is no encoding
-                                    if (size === decodeSize)
-                                        return await getBodySize(url);
-                                    else
-                                        return await getHeader(
-                                            url,
-                                            "x-aero-size-encbody"
-                                        );
-                                },
-                                writable: false,
-                            });
-                            Object.defineProperty(entry, "decodedBodySize", {
-                                value: async () => {
-                                    if (isZero) return 0;
-
-                                    return await getBodySize(url);
-                                },
-                                writable: false,
-                            });
-                        }
-
-                        return entry;
-                    })
-            );
-        },
-    })
-} as APIInterceptor;
-*/

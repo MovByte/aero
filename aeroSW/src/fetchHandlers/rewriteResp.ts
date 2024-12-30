@@ -99,6 +99,7 @@ export default async function rewriteResp(pass: Passthrough, accessControlRuleMa
 	${speculationRules.value}
 </script>` : ""
 		}, {
+			"CLIENT_ID": aeroConfig.clientId,
 			// $aero (global proxy namespace) passthrough
 			"SEC": sec ? `...${JSON.stringify(sec)}` : "",
 			"PREFIX": aeroConfig.prefix,

@@ -37,7 +37,7 @@ export default [
 			// Undo this revealer (conceal and return the fake URL expected by the site)
 			Object.defineProperty(ctx.this, "scriptURL", {
 				get() {
-					return afterPrefix(ctx.this.scriptURL, $aero.config.prefix, $aero.logger);
+					return afterPrefix(ctx.this.scriptURL);
 				},
 			});
 			ctx.this.postMessage = new Proxy(ctx.this.postMessage, {
@@ -96,7 +96,7 @@ export default [
 
 const rewriteReg = reg => {
 	// Don't let the site see the aero sw (unconceal the URL)
-	reg.active.scriptURL = afterPrefix(reg.active, $aero.config.prefix, $aero.logger)
+	reg.active.scriptURL = afterPrefix(reg.active)
 	if (reg.index) {
 		reg.index = new Proxy(reg.index, {
 			get(target, prop) {
