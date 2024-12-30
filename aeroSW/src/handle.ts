@@ -10,6 +10,8 @@ import type { ResultAsync, Result } from "neverthrow";
 import { okAsync as nOkAsync, errAsync as nErrAsync, ok as nOk, err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
+import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+
 // Sanity checkers
 import troubleshoot, { troubleshootJustConfigs, troubleshootingStrs } from "./fetchHelpers/troubleshoot";
 import validateResp from "$aero/aeroSW/src/fetchHandlers/validateResp";
@@ -30,11 +32,12 @@ import getPassthroughParam from "$shared/getPassthroughParam";
 /// Cosmetic
 import { AeroLogger } from "$shared/Loggers";
 
-import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+// For initializing listeners
+import initSandboxListeners from "./initSandboxListeners";
 
+// Init everything
 /** aero's SW logger */
 self.logger = new AeroLogger(Boolean(DEBUG));
-
 self.storedValsForSandbox = {
 	/** proxy url, data */
 	"resp-cached-archive": new Map<string, {
@@ -43,10 +46,7 @@ self.storedValsForSandbox = {
 		bodySize: number;
 	}>()
 }
-new BroadcastChannel(`$aero-get-stored-val`).onmessage((event: MessageEvent) => {
-	if (event.data.for === "get")
-		self.storedValsForSandbox[event.data.name] = event.data.val;
-});
+initSandboxListeners();
 
 /**
  * Handles the requests that are routed to aero

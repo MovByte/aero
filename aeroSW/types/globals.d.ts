@@ -14,4 +14,5 @@ declare global {
 	var handle: unknown; // Replace with actual type
 	var logger: AeroLogger;
 	var nestedSWs: Map<proxyOrigin, NestedSW[]>;
+	var storedValsForSandbox: { [key: string]: any };
 }
