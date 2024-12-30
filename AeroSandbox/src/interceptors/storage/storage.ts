@@ -1,3 +1,3 @@
-import { storageNomenclatureHandlers } from "./shared";
+import genStorageAPIInterceptors from "$util/storageAPIInterceptorsGeneric";
 
-// TODO: Implement
+export default genStorageAPIInterceptors("storage");

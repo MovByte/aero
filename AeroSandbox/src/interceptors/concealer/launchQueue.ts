@@ -3,7 +3,7 @@ import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 import { afterPrefix } from "$util/getProxyURL";
 
 export default {
-	proxifiedHandler: {
+	proxyHandler: {
 		apply(_target, _that, args) {
 			const [callback] = args;
 
@@ -15,6 +15,6 @@ export default {
 		}
 	},
 	globalProp: "launchQueue.setConsumer",
-	conceals: ["LaunchParams.targetURL"],
+	//conceals: ["LaunchParams.targetURL"],
 	supports: SupportEnum.draft | SupportEnum.shippingChromium
 } as APIInterceptor;

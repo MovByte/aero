@@ -8,7 +8,7 @@ These properties are not standard, so functionality is different in browsers
 These interceptors will probably change a lot over time
 */
 export default {
-	proxifiedHandlers: {
+	proxyHandler: {
 		construct(target, args) {
 			const res = Reflect.construct(target, args);
 

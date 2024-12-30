@@ -2,7 +2,7 @@
 
 ![aero logo](./aero.webp)
 
-Aero is a safe, developer-friendly, innovative interception web proxy with many features. Aero provides full site support without delay and has a clean, organized codebase. Aero is made to bypass filter restrictions, web restrictions, and bypasses web browser restrictions.
+Aero is a safe, declarative, developer-friendly, innovative interception web proxy with many features. Aero provides full site support without delay and has a clean, organized codebase. Aero is made to bypass filter restrictions, web restrictions, and bypasses web browser restrictions.
 
 You can refer to the [docs website](https://aero.sh/docs) if you are looking for instructions for how to get aero or how to work on aero
 
@@ -24,7 +24,7 @@ AeroSandbox contains all of the Sandboxing code for aero and is entirely indepen
 
 ### ProxyParse
 
-A collection of parsing libraries that are specifically optimized for anything you would possibly need in a proxy
+A collection of parsing libraries that are specifically optimized for anything you would possibly need in a proxy. It is currently only for JS, but expect a HTML parser soon!
 
 ## Related
 

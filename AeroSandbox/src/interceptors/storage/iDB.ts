@@ -1,18 +1,22 @@
-import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
+import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { storageNomenclatureHandlers } from "$util/shared";
+import { storageNomenclatureHandlers } from "$util/storage";
 
 export default [
 	{
-		createStorageProxyHandlers: cookieStoreId => storageNomenclatureHandlers(cookieStoreId),
-		globalProp: "indexedDB.open"
+		genProxyHandler: ctx => storageNomenclatureHandlers(ctx.cookieStoreId),
+		forStorage: true,
+		globalProp: "indexedDB.open",
+		supports: SupportEnum.widelyAvailable
 	},
 	{
-		createStorageProxyHandlers: cookieStoreId => storageNomenclatureHandlers(cookieStoreId),
-		globalProp: "indexedDB.deleteDatabase"
+		genProxyHandler: ctx => storageNomenclatureHandlers(ctx.cookieStoreId),
+		forStorage: true,
+		globalProp: "indexedDB.deleteDatabase",
+		supports: SupportEnum.widelyAvailable
 	},
 	{
-		createStorageProxyHandlers: cookieStoreId => ({
+		genProxyHandler: ctx => ({
 			async apply(target, that, args) {
 				const dbs = (await Reflect.apply(
 					target,
@@ -23,14 +27,16 @@ export default [
 				dbs.map(db => {
 					if (db instanceof Error) return db;
 
-					let newName = aeroConfig.prefix + db.name;
-					if (newName) newName = `${cookieStoreId}_${newName}`;
-					db.name = newName;
+					let proxifiedName = $aero.config.prefix + db.name;
+					if (proxifiedName) proxifiedName = `${ctx.cookieStoreId}_${proxifiedName}`;
+					db.name = proxifiedName;
 
 					return db;
 				});
 			}
 		}),
-		globalProp: "indexedDB.databases"
+		forStorage: true,
+		globalProp: "indexedDB.databases",
+		supports: SupportEnum.widelyAvailable
 	}
 ] as APIInterceptor[];

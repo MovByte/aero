@@ -15,12 +15,7 @@ export default [
 						urls = urls.map(url => rewriteSrc(url));
 					else urls = rewriteSrc(urls);
 					args[0] = urls;
-					const presReq: PresentationRequest = Reflect.construct(that, args);
-					presReq.start = new Proxy(presReq.start, {
-						async apply(target, that, args) {
-							return rewriteConn(await Reflect.apply(target, that, args));
-						}
-					});
+					return Reflect.construct(that, args);
 				}
 			})
 		},
@@ -31,6 +26,15 @@ export default [
 				supports: SupportEnum.draft | SupportEnum.shippingChromium
 			}
 		},
+		supports: SupportEnum.draft | SupportEnum.shippingChromium
+	},
+	{
+		proxyHandler: {
+			async apply(target, that, args) {
+				return rewriteConn(await Reflect.apply(target, that, args));
+			}
+		},
+		globalProp: "PresentationRequest.prototype.start",
 		supports: SupportEnum.draft | SupportEnum.shippingChromium
 	},
 	{

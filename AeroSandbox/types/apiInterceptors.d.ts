@@ -2,25 +2,23 @@ import type { overwriteRecordsType } from "$types/generic";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type RevokableProxyRet = { proxy: any; revoke: () => void };
-interface ProxifiedObjGeneratorCtxType {
-	specialInterceptionFeatures?: InterceptionFeaturesEnum;
-	// might be removed I will just replace the <proxyContext> in the entire JS file  I am importingproxyGlobalContext: string;
-	overwriteRecords?: overwriteRecordsType;
+type GeneratorCtxTypeShared = {
+	cookieStoreId: string;
 	globalNamespace: string;
+	specialInterceptionFeatures: InterceptionFeaturesEnum;
 	this: any;
 }
+type GeneratorCtxTypeProxyHandler = GeneratorCtxTypeShared;
+type ProxifiedObjGeneratorCtx = GeneratorCtxTypeShared;
 export type ProxifiedObjType = RevokableProxyRet | ProxifiedObjGenerator;
 export type ProxifiedObjGenerator = (
-	ctx: ProxifiedObjGeneratorCtxType
-) => ProxifiedObjType;
-export type StorageProxifiyObjGenerator = (
-	cookieStoreId: string
+	ctx: ProxifiedObjGeneratorCtx
 ) => ProxifiedObjType;
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 /** This is for trapping `get` */
-export type ProxifiedGetter = (ctx: ProxifiedObjGeneratorCtxType) => any;
+export type ProxifiedGetter = (ctx: ProxifiedObjGeneratorCtx) => any;
 /** This is for trapping `get` */
-export type ProxifySetter = (ctx: ProxifiedObjGeneratorCtxType & {
+export type ProxifySetter = (ctx: ProxifiedObjGeneratorCtx & {
 	/** The new value from the setter while trying to trap `set` */
 	newVal?: string
 }) => any;
@@ -38,38 +36,11 @@ export type isolatesType = [
 	// TODO: Write this
 ]
 export type objectPropertyModifier = (
-	ctx: ProxifiedObjGeneratorCtxType
+	ctx: ProxifiedObjGeneratorCtx
 ) => void;
 
 
 export enum URL_IS_ESCAPE {
-	ORIGIN,
-	ESCAPED_URL,
-	HOSTNAME,
-	DOMAIN,
-	REAL_PROTOCOL,
-	REAL_URL,
-	ANY_URL
-}
-type EscapeTypeShared = {
-	what: "URL_STRING"
-	is: URL_IS
-} | {
-	targeting: "VALUE_PROXIFIED_OBJ",
-	props_that_escape: {
-		[key: string]: EscapeTypeShared
-	}
-}
-type EscapeFixesProxifiedValue = EscapeTypeShared;
-type EscapeFixesProxyHandler = {
-	targeting: "API_PARAM",
-	targetingParam: number,
-	apiMethod: "add",
-	escapeType: EscapeTypeShared;
-}[];
-
-
-export enum URL_IS_CONCEAL {
 	ORIGIN,
 	HOSTNAME,
 	DOMAIN,
@@ -77,18 +48,38 @@ export enum URL_IS_CONCEAL {
 	FULL_URL,
 	ANY_URL
 }
-// TODO: Do conceal now
-type ConcealTypeShared = {
+type EscapeTypeShared = Array<{
 	what: "URL_STRING"
-	is: URL_IS
+	is: URL_IS_ESCAPE
 } | {
 	targeting: "VALUE_PROXIFIED_OBJ",
-	props_that_conceal: {
-		[key: string]: ConcealTypeShared
+	props_that_escape: {
+		[key: string]: EscapeTypeShared
 	}
-}
+}>
+type EscapeFixesProxifiedValue = EscapeTypeShared;
+type EscapeFixesProxyHandler = ({
+	targeting: "API_PARAM" | "API_RETURN" | "CONSTRUCTOR_PARAM" | "CONSTRUCTED_CLASS_PROPS",
+	targetingParam: number,
+	apiMethod: string,
+	escapeType: EscapeTypeShared;
+} | {
+	targeting: "CONSTRUCTOR_PARAM",
+	/**
+	 * The index of the parameter in the constructor (the index starts from 1)
+	 */
+	targetingParam: number,
+	escapeType: EscapeTypeShared;
+} | {
+	targeting: "CONSTRUCTOR_PARAM" | "CONSTRUCTED_CLASS_PROPS",
+	escapeType: EscapeTypeShared;
+})[];
 
-type APIInterceptorGenericShared = {
+type ConcealsProxifiedValue = EscapeFixesProxifiedValue;
+type ConcealsProxyHandler = EscapeFixesProxyHandler;
+
+/** This is a generic type interface used for intersection in other interfaces below */
+type APIInterceptorGeneric = {
 	/** This object path that excludes global objects and overwrites the property. *AeroSandbox* will also check if it exists in the global context. This is necessary if `proxifiedObjWorkerVersion` is set.
 	 * This is done so that if the api is only exposed to the window it will overwrite it on the window object specifically or else it would use self since that is also covered by the global context of windows and workers. THe reason why this is done is because I want an error to be thrown if a window API is mistakingly used in a worker's global scope.
 	 * TODO: Throw an error in AeroSandboxBuilder error if globalProp contains "<global context>.<props>"
@@ -96,56 +87,52 @@ type APIInterceptorGenericShared = {
 	 * @warning It will overwrite the entire global scope with your proxified object if you set it to `""`.
 	 */
 	globalProp: string | "";
-	isolates: isolatesType[];
 	/** These toggle code inside of the Proxy handler that provide other things you may want to use AeroSandbox for */
 	specialInterceptionFeatures?: InterceptionFeaturesEnum;
 	/** This is if your API Interceptor covers WebSockets, WebTransports, or WebRTC */
 	forAltProtocol?: AltProtocolEnum;
 	/* Aero uses self.<apiName> to overwrite the proxified object, but if the API is exclusively for the window, it uses window.<apiName>. It assumes the API is supported in all contexts by default. */
 	exposedContexts?: ExposedContextsEnum;
-	supports?: SupportEnum;
+	supports: SupportEnum;
 	/** This number determines how late the API injectors will be injected. It is similar to the index property in CSS. If not set, the default is zero. */
 	insertLevel?: number;
+	forCors?: boolean;
+	forStorage?: boolean;
 }
-/** This is a generic type interface used for intersection in other interfaces below */
-type APIInterceptorGeneric = {
-	/** You must include this in every concealer in aero */
-	conceals: concealType[];
-} & APIInterceptorGenericShared | {
-	escapeFixes: EscapeFixes
-} & APIInterceptorGenericShared;
 /** You use this when you haven't yet finished your implementation for your API and you want to skip it. If the Feature Flag DELETE_UNSUPPORTED_APIS is enabled, then it would delete the API instead of doing nothing. */
 export type APIInterceptorSkip = APIInterceptorGeneric & {
 	/** Please add a comment above setting this property explaining why you have decided to skip it */
 	skip: true,
 }
-export type APIInterceptorForProxyObjects = APIInterceptorGeneric & {
-	/** This is specifically for objects that use the ES6 Proxy Object or re-implement the API from scratch. proxifiedObjGenFunc is a handler which returns the proxified object depending on the context given, which is determined by how the AeroSandboxBundler class is configured with the config in the constructor.*/
-	// biome-ignore lint/complexity/noBannedTypes: <explanation>
-	proxifiedObj?: Object | ProxifiedObjGenerator;
-	createStorageProxyHandlers: StorageProxifiyObjGenerator;
-};
-export type APIInterceptorForProxyObjectsInWorker = APIInterceptorGeneric & {
-	// biome-ignore lint/complexity/noBannedTypes: <explanation>
-	proxifiedObjWorkerVersion?: Object;
-};
+export type APIInterceptorForProxyObjects = APIInterceptorGeneric & ({
+	proxyHandler: ProxyHandler<any>;
+} | {
+	genProxyHandler: (ctx: GeneratorCtxTypeShared) => ProxyHandler<any>;
+}) & ({
+	escapeFixes: EscapeFixesProxyHandler;
+} | {
+	conceals: ConcealsProxifiedValue[];
+} | {
+	forCors: boolean;
+} | {
+	forStorage: boolean;
+})
 export type APIInterceptorForProxifiyingGettersAndSetters = APIInterceptorGeneric & {
 	proxifiedGetter?: ProxifiedGetter;
 	proxifySetter?: ProxifySetter;
-};
-export type APIInterceptorForModifyingObjectProperties =
-	APIInterceptorGeneric & {
-		/** This is for overwriting properties with the `Object` type class  */
-		modifyObjectProperty: objectPropertyModifier;
-	};
+} & ({
+	escapeFixes: EscapeFixesProxifiedValue[];
+} | {
+	conceals: ConcealsProxifiedValue[];
+} | {
+	forCors: boolean;
+});
 // TODO: Make it possible in AeroSandbox to view the API Interceptor and determine if it should be included in AeroSandbox or not with a handler
 /** This is what is exported in every API Interceptor. Omitting any of the properties with the Enum type will act as if every member of the Enum is present. */
 export type APIInterceptor =
 	| APIInterceptorSkip
 	| APIInterceptorForProxyObjects
-	| APIInterceptorForProxyObjectsInWorker
 	| APIInterceptorForProxifiyingGettersAndSetters
-	| APIInterceptorForModifyingObjectProperties;
 
 // TODO: Make something like SupportEnum, but instead you provide a browser string and it only includes API interceptors for the features supported by those browsers
 // Support Enums

@@ -2,7 +2,7 @@ import type { APIInterceptor } from "$types/apiInterceptors.d.ts";
 import isHtml from "$shared/isHTML";
 
 export default {
-	proxifiedHandlers: {
+	proxyHandler: {
 		apply(target, that, args) {
 			const [arr, opts] = args;
 

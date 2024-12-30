@@ -38,7 +38,7 @@ const apiInterceptors = [{
 for (const [eventName] of ["message", "messageerror", "storage", "hashchange"]) {
 	const proxifier = listener => eventInterceptor(eventName, listener);
 	apiInterceptors.push({
-		proxifiedGetter: (_ctx) => proxifier,
+		proxifyGetter: (_ctx) => proxifier,
 		proxifySetter: (_ctx) => proxifier,
 		globalProp: `on${eventName}`,
 		exposedContexts: ExposedContextsEnum.window,
