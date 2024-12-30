@@ -125,7 +125,7 @@ export type APIInterceptorInitForAPI = {
 export type APIInterceptorForProxyObjects = APIInterceptorGeneric & ({
 	proxyHandler: ProxyHandler<any>;
 } | {
-	genProxyHandler: (ctx: GeneratorCtxTypeShared) => ProxyHandler<any>;
+	createProxyHandler: (ctx: GeneratorCtxTypeShared) => ProxyHandler<any>;
 }) & ({
 	escapeFixes: GenericProxyHandler;
 } | {

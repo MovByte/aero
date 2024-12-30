@@ -5,7 +5,7 @@
 
 import { storagePrefix } from "$shared/storage";
 
-function genStorageNomenclatureHandlers(storeId): { [key: string]: ProxyHandler<Storage> } {
+function createStorageNomenclatureHandlers(storeId): { [key: string]: ProxyHandler<Storage> } {
 	return {
 		prefix: {
 			apply: (target, that, args) => {
@@ -41,4 +41,4 @@ function unprefixKey(storeId: string, key: string): string {
 	return keyWithoutStoreIdKey;
 }
 
-export { genStorageNomenclatureHandlers, prefixKey, unprefixKey };
+export { createStorageNomenclatureHandlers, prefixKey, unprefixKey };

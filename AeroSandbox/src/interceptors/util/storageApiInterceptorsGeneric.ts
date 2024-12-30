@@ -1,10 +1,10 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { genStorageNomenclatureHandlers, unprefixKey } from "./storage";
+import { createStorageNomenclatureHandlers, unprefixKey } from "./storage";
 import { storagePrefix } from "$shared/storage";
 
-export default function genStorageApiInterceptors(key: string, storeId: string): APIInterceptor[] {
-	const storageNomenclatureHandlers = genStorageNomenclatureHandlers(storeId);
+export default function createStorageApiInterceptors(key: string, storeId: string): APIInterceptor[] {
+	const storageNomenclatureHandlers = createStorageNomenclatureHandlers(storeId);
 	const storageAPIInterceptorsGeneric = [
 		{
 			proxyHandler: {

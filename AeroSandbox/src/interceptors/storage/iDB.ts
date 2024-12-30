@@ -4,19 +4,19 @@ import { storageNomenclatureHandlers } from "$util/storage";
 
 export default [
 	{
-		genProxyHandler: ctx => storageNomenclatureHandlers(ctx.cookieStoreId),
+		createProxyHandler: ctx => storageNomenclatureHandlers(ctx.cookieStoreId),
 		forStorage: true,
 		globalProp: "indexedDB.open",
 		supports: SupportEnum.widelyAvailable
 	},
 	{
-		genProxyHandler: ctx => storageNomenclatureHandlers(ctx.cookieStoreId),
+		createProxyHandler: ctx => storageNomenclatureHandlers(ctx.cookieStoreId),
 		forStorage: true,
 		globalProp: "indexedDB.deleteDatabase",
 		supports: SupportEnum.widelyAvailable
 	},
 	{
-		genProxyHandler: ctx => ({
+		createProxyHandler: ctx => ({
 			async apply(target, that, args) {
 				const dbs = (await Reflect.apply(
 					target,

@@ -1,12 +1,12 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors";
 
-import genStorageAPIInterceptors from "$util/storageAPIInterceptorsGeneric";
+import createStorageAPIInterceptors from "$util/storageAPIInterceptorsGeneric";
 import { proxyLocation } from "$shared/proxyLocation";
 
 export default [
-	...genStorageAPIInterceptors("sharedStorage", $aero.sandbox.config.sharedStorageId),
-	...genStorageAPIInterceptors("storage", $aero.sandbox.config.storageStoreId),
-	...genStorageAPIInterceptors("sessionStorage", `${$aero.sandbox.config.sessionStoreId}_${$aero.clientId}`),
+	...createStorageAPIInterceptors("sharedStorage", $aero.sandbox.config.sharedStorageId),
+	...createStorageAPIInterceptors("storage", $aero.sandbox.config.storageStoreId),
+	...createStorageAPIInterceptors("sessionStorage", `${$aero.sandbox.config.sessionStoreId}_${$aero.clientId}`),
 	// This is needed for Session Storage only
 	{
 		init: () => {
