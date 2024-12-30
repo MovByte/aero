@@ -4,7 +4,7 @@
  */
 
 /**
- * A broadcast channel wrapper for us to get data from the SW for a certain client for use in aero internally
+ * A broadcast channel wrapper for us to get messages from the SW for a certain client for use in aero internally
  * @param chanName The name of the channel to broadcast to (without the $aero prefixing)
  * @param listener The listener to handle the message (as if there was no other client)
  */

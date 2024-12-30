@@ -5,6 +5,7 @@ import type { SearchParamOptionsConfig } from "../../aeroSW/types/config";
 import type JSRewriter from "$aero/src/sandboxers/JS/JSRewriter";
 
 export type AeroGlobalType = Readonly<{
+	clientId: string;
 	init: string;
 	sec: {
 		/** Content Security Policy from the navigation request that initiated this webpage @see https://content-security-policy.com */
@@ -17,6 +18,7 @@ export type AeroGlobalType = Readonly<{
 	rewriters: {
 		js: JSRewriter;
 	};
+	extLib: { [key: string]: any };
 }>;
 
 declare global {

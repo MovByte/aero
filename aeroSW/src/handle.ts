@@ -35,6 +35,19 @@ import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 /** aero's SW logger */
 self.logger = new AeroLogger(Boolean(DEBUG));
 
+self.storedValsForSandbox = {
+	/** proxy url, data */
+	"resp-cached-archive": new Map<string, {
+		transferSize: number;
+		encBody: boolean;
+		bodySize: number;
+	}>()
+}
+new BroadcastChannel(`$aero-get-stored-val`).onmessage((event: MessageEvent) => {
+	if (event.data.for === "get")
+		self.storedValsForSandbox[event.data.name] = event.data.val;
+});
+
 /**
  * Handles the requests that are routed to aero
  * This is only exported so that *aeroCF* can make use of it

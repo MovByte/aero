@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { createWorker } from "await-sync";
 
 import BareClient from "@mercuryworkshop/bare-mux";
 
@@ -11,6 +11,9 @@ if (!("$aero" in window)) {
 
 // TODO: Do this in the config
 $aero.bc = new BareClient();
+
+// Init external libs used in AeroSandbox
+$aero.extLib.syncify = createWorker();
 
 // For API Interceptors
 /// For performance timing

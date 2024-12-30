@@ -1,21 +1,23 @@
+// @ts-nocheck
 /**
- * There are 3 ways to detect proxies using the Performance API
-Using entry.name to expose the url:
- *   - Using entry.name to expose the url
- *   - If the site was rewritten or the headers were modified, the size would be different than what is intended. You can think of this as a form of hash checking.
- *   - If you make a request to two different proxy origins on the site that are both cached and one has the `Clear-Site-Data`, clearing both proxy origins, so the proxy can be detected
+ * There are **3** ways to detect proxies using the Performance APIs
+Using `entry.name` to expose the url:
+ *   - Using `entry.name` to expose the url
+ *   - If the site was rewritten or the headers were modified, the size would be different than what is intended. You can think of this as a form of hash checking
+ *   - If you make a request to two different proxy origins on the site that are both cached and one has the `Clear-Site-Data`, clearing both proxy origins, so *the proxy can be detected*
  */
 
 import { type APIInterceptor, SupportEnum, URL_IS_ESCAPE } from "$types/apiInterceptors";
 
 import getMsgFromSW from "$util/getMsgFromSW";
+import getValFromSW from "$util/getValFromSW";
 import { afterPrefix } from "$shared/afterPrefix";
 import upToProxyLocation from "$shared/upToProxyLocation";
 
 export default [{
 	init: () => {
-		// Get the data from the SW
-		getMsgFromSW("perf-timing-res-cached", event => {
+		// Get the timing data whenever a new request comes in
+		getMsgFromSW("perf-timing-resp-cached", event => {
 			const { url, cached } = event.data.payload;
 			$aero.resInfo.set(url, cached);
 		});
@@ -38,7 +40,7 @@ export default [{
 			return proxifiedEntries;
 		},
 	},
-	escapeFixes: [
+	conceals: [
 		{
 			targeting: "API_RETURN",
 			escapeType: {
@@ -64,10 +66,6 @@ export default [{
 	globalProp: "PerformanceResourceTiming.prototype.name",
 	supports: SupportEnum.widelyAvailable
 }, {
-	proxifyGetter: ctx => {
-		ctx.that.name
-		return afterPrefix(ctx.this)
-	},
 	proxyHandler: {
 		get(target, prop, receiver) {
 			const realUrl = target.name;
@@ -80,65 +78,88 @@ export default [{
 				resCached ||
 				resCrossOrigin ||
 				"timing" in $aero.sec;
-			if (target[prop] === "transferSize") {
-				return isZero ? 0 : getAeroHeader(proxyUrl, "size-transfer");
-			}
-			if (target[prop] === "encodedBodySize") {
-				if (isZero) return 0;
-				return await getAeroHeader(
-					proxyUrl,
-					"x-aero-size-encbody"
-				);
-			}
-			if (target[prop] === "decodedBodySize") {
-				if (isZero) return 0;
-				return await getBodySize(proxyUrl);
-			}
-			return Reflect.get(target, prop, receiver);
-		},
-		conceals: {
-			targeting: "VALUE_PROXIFIED_OBJ",
-			props_that_reveal: {
-				"transferSize": [
-					{
-						what: "REAL_DATA_SIZE",
-						type: "TRANSFER"
-					}
-				],
-				"encodedBodySize": [
-					{
-						what: "REAL_DATA_SIZE",
-						type: "BODY",
-						encoded: true
-					}
-				],
-				"decodedBodySize": [
-					{
-						what: "REAL_DATA_SIZE",
-						type: "BODY",
-						encoded: false
-					}
-				]
+			const respCachedArchive = getRespCachedArchive();
+			const respCachedData = respCachedArchive.get(proxyUrl);
+			switch (prop) {
+				case "transferSize":
+					return isZero ? 0 : respCachedData.transferSize;
+				case "encodedBodySize":
+					return !respCachedData.encBody ? isZero ? 0 : respCachedData.bodySize :
+						// Let it error-out
+						Reflect.get(target, prop, receiver);
+				case "decodedBodySize":
+					return respCachedData.encBody ?
+						// Let it error-out
+						Reflect.get(target, prop, receiver) : isZero ? 0 : respCachedData.bodySize;
+				default:
+					return Reflect.get(target, prop, receiver);
 			}
 		},
-		globalProp: "PerformanceResourceTiming.prototype",
-		supports: SupportEnum.widelyAvailable
-	}] as APIInterceptor;
+	},
+	conceals: {
+		targeting: "VALUE_PROXIFIED_OBJ",
+		props_that_reveal: {
+			"transferSize": [
+				{
+					what: "REAL_DATA_SIZE",
+					type: "TRANSFER"
+				}
+			],
+			"encodedBodySize": [
+				{
+					what: "REAL_DATA_SIZE",
+					type: "BODY",
+					encoded: true
+				}
+			],
+			"decodedBodySize": [
+				{
+					what: "REAL_DATA_SIZE",
+					type: "BODY",
+					encoded: false
+				}
+			]
+		}
+	},
+	globalProp: "PerformanceResourceTiming.prototype",
+	supports: SupportEnum.widelyAvailable
+}] as APIInterceptor;
 
-
-function isCached(url: string) {
-	let res = $aero.resInfo.get(url);
-
-	return res ? url in res : false;
+/**
+ * Check if a recent request (from the proxy URL) on this page was cached
+ * @param proxyUrl 
+ * @returns If the request was cached
+ */
+function isCached(proxyUrl: string): boolean {
+	let res = $aero.resInfo.get(proxyUrl);
+	return res ? proxyUrl in res : false;
 }
 
-// FIXME: Instead of doing this in the interceptor, record the data in the SW later to reduce request volume and just use getMsgFromSW with sync-async and a custom promise
-// FIXME: Prefix the size headers with "x-aero-perf-..."
-async function getAeroHeader(url: string, headerName: string) {
-	const resp = await fetch(url);
-
-	return resp.headers[`x-aero-${headerName}`];
+/**
+ * Gets the context of the timing of a cached response
+ * @returns The context of the timing of a cached response
+ * @throws {Error} An error and the aero crash page if some part of the the expected context is missing
+ */
+function getRespCachedArchive(): {
+	timing: number;
+	encBody: boolean;
+	bodySize: number;
+} {
+	const respCachedArchive = getValFromSW({
+		name: "resp-cached-archive",
+	});
+	if (!("timing" in respCachedArchive))
+		$aero.logger.fatalErr(fmtIsMissingProp("timing"));
+	if (!("encBody" in respCachedArchive))
+		$aero.logger.fatalErr(fmtIsMissingProp("encBody"));
+	if (!("bodySize" in respCachedArchive))
+		$aero.logger.fatalErr(fmtIsMissingProp("bodySize"));
+	return respCachedArchive;
 }
-async function getBodySize(url: string) {
-	return await getAeroHeader(url, "size-body");
+/**
+ * This is a helper method used by `getRespCachedArchive` to format the error message for when a property is missing
+ * @param prop The property that is missing
+ */
+function fmtIsMissingProp(prop: string): string {
+	return `The response cache archive is missing the  (expected of the aero SW handler) \`${prop}\` property!`;
 }
