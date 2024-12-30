@@ -1,38 +1,44 @@
-import { type GeneratorCtxTypeProxyHandler } from "$types/apiInterceptors";
+/**
+ * Note: The cookie store ID is so that we can store data from other storage types when the storage is exhausted from them. We need to know what is actually a cookie.
+ * @module
+ */
 
 import { storagePrefix } from "$shared/storage";
 
-const storageNomenclatureHandlers: { [key: string]: GeneratorCtxTypeProxyHandler } = {
-	prefix: (ctx) => ({
-		apply: (target, that, args) => {
-			const [key] = args;
-			args[0] = prefixKey(ctx.cookieStoreId, key);
-			return Reflect.apply(target, that, args);
+function genStorageNomenclatureHandlers(storeId): { [key: string]: ProxyHandler<Storage> } {
+	return {
+		prefix: {
+			apply: (target, that, args) => {
+				const [key] = args;
+				args[0] = prefixKey(storeId, key);
+				return Reflect.apply(target, that, args);
+			}
+		},
+		unprefix: {
+			apply: (target, that, args) => {
+				const [key] = args;
+				args[0] = unprefixKey(storeId, key);
+				return Reflect.apply(target, that, args);
+			}
 		}
-	} as ProxyHandler<Storage>),
-	unprefix: (ctx) => ({
-		apply: (target, that, args) => {
-			const [key] = args;
-			args[0] = unprefixKey(ctx.cookieStoreId, key);
-			return Reflect.apply(target, that, args);
-		}
-	} as ProxyHandler<Storage>),
-};
+	}
+}
 
-function prefixKey(cookieStoreId, key: string): string {
+
+function prefixKey(prefix, key: string): string {
 	let proxifiedKey = storagePrefix(key);
-	if (cookieStoreId) {
-		proxifiedKey = `${cookieStoreId}_${proxifiedKey}`;
+	if (prefix) {
+		proxifiedKey = `${prefix}_${proxifiedKey}`;
 	}
 	return proxifiedKey;
 }
-function unprefixKey(cookieStoreId, key: string): string {
-	if (!key.startsWith(cookieStoreId))
-		$aero.logger.fatalErr("Failed to unprefix the key (the key does not belong to the current cookie store)");
-	const keyWithoutCookieStoreId = key.replace(new RegExp(`^${cookieStoreId}`), "");
-	if (!keyWithoutCookieStoreId.startsWith(storagePrefix("")))
-		$aero.logger.fatalErr("Failed to unprefix the key (the key does not have the storage prefix)");
-	return keyWithoutCookieStoreId.replace(storagePrefix(""), "");
+/** Works for everything except Session Storage */
+function unprefixKey(storeId: string, key: string): string {
+	const storeIdKey = storagePrefix(storeId);
+	if (!key.startsWith(storeIdKey))
+		$aero.logger.fatalErr(`Failed to unprefix the key (the key does not have the expected cookie store key prefix, "${storeIdKey}")!`);
+	const keyWithoutStoreIdKey = key.replace(new RegExp(`^${storeIdKey}`), "");
+	return keyWithoutStoreIdKey;
 }
 
-export { storageNomenclatureHandlers };
+export { genStorageNomenclatureHandlers, prefixKey, unprefixKey };

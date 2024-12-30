@@ -1,18 +1,13 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
+import { proxyLocation } from "$shared/proxyLocation";
 
 /**
- * The id to use for escaping the SQL storage key
- * @param cookieStoreId 
- * @returns 
  */
-const createHandler = (cookieStoreId?) => {
+const createHandler = () => {
 	return (target, that, args) => {
 		const [key]: [string] = args;
 
-		let newKey = $aero.config.sandbox.storageKey + key;
-		if (cookieStoreId) {
-			newKey = `${cookieStoreId}_${newKey}`;
-		}
+		const newKey = `${proxyLocation().origin}_sql_${key}`;
 
 		args[0] = newKey;
 
@@ -30,6 +25,7 @@ const createHandler = (cookieStoreId?) => {
 	};
 };
 
+// FIXME: This is all deprecated way of doing thiigs
 export default [
 	{
 		createStorageProxyHandlers: cookieStoreId =>
