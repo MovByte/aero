@@ -5,7 +5,7 @@ import { afterPrefix } from "$util/getProxyURL";
 import { proxyLocation } from "$util/proxyLocation";
 
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
-
+/*
 export default [
 	// Entries
 	// FIXME:
@@ -107,3 +107,4 @@ export default [
 		supports: SupportEnum.draft | SupportEnum.shippingChromium
 	}
 ] as APIInterceptor[];
+*/

@@ -39,9 +39,6 @@ export default {
 		}
 	},
 	globalProp: "RTCPeerConnection",
-	escapeFixers: {
-		// TODO: Put iceServers on here
-	}
 	forAltProtocol: AltProtocolEnum.wrtc,
 	exposedContexts: ExposedContextsEnum.window
 } as APIInterceptor;

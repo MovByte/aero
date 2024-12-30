@@ -6,7 +6,7 @@ import { ExposedContextsEnum } from "$types/apiInterceptors"
 import { proxyLocation } from "$shared/proxyLocation";
 
 export default [{
-	proxifyGetter: () => proxyLocation().protocol === "https:",
+	proxifyGetter: (_ctx) => proxyLocation($aero.config.prefix, $aero.logger).protocol === "https:",
 	globalProp: "isSecureContext",
 	conceals: [{
 		what: "itself",

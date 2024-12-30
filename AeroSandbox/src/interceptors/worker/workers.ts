@@ -1,65 +1,117 @@
+import { type APIInterceptor, ExposedContextsEnum } from "$types/apiInterceptors";
+import { URL_IS } from "$types/apiInterceptors";
+
+import { afterPrefix } from "$util/getProxyURL";
+import rewriteSrc from "$shared/src";
+
+import { proxyLocation } from "$shared/proxyLocation";
+
 /*
-import config from "$src/config"; 
-const { flags } = config;
+export default {
+	skip: true,
+	globalProp: "navigator.serviceWorker"
+} as APIInterceptor;
+*/
 
-import rewriteSrc from "$util/hared/src";
-
-import { proxyLocation } from "$util/proxyLocation";
-
-
-if (flags.nestedWorkers)
-	if ("serviceWorker" in navigator) {
-		// FIXME: Somehow unregisters all service workers, and then reloads on https://radon.games
-		// Patch
-		Object.defineProperty(navigator, "serviceWorker", {
-			get() {
-				return undefined;
-			},
-		});
-
-		/*
-		// This api is only exposed in secure contexts
-		navigator.serviceWorker.register = new Proxy(
-			navigator.serviceWorker.register,
-			{
-				apply(target, that, args) {
-					const [path, opts] = args;
-
-					args[0] = `${rewriteSrc(path, proxyLocation().href)}?mod=${
-						opts.type === "module"
+export default [
+	{
+		// @ts-ignore
+		proxyHandler: {
+			apply(target, that, args) {
+				const [path, opts] = args;
+				// Rewrite this here so that the SW can handle it and nest the scripts accordingly
+				args[0] = `${rewriteSrc(path, proxyLocation($aero.config.prefix, $aero.logger).href)}?mod=${opts.type === "module"
 					}`;
+				$aero.logger.log(
+					`Registering a nested service worker\n${path} ➜ ${args[0]}`
+				);
 
-					$aero.error(
-						`Registering a nested service worker\n${path} ➜ ${args[0]}`
-					);
-
+				return Reflect.apply(target, that, args);
+			},
+		},
+		globalProp: "navigator.serviceWorker.register",
+		exposedContexts: ExposedContextsEnum.window
+	},
+	{
+		proxifyGetter(ctx) {
+			// Undo this revealer (conceal and return the fake URL expected by the site)
+			Object.defineProperty(ctx.this, "scriptURL", {
+				get() {
+					return afterPrefix(ctx.this.scriptURL, $aero.config.prefix, $aero.logger);
+				},
+			});
+			ctx.this.postMessage = new Proxy(ctx.this.postMessage, {
+				apply(target, that, args) {
+					args[0] = {
+						from: ctx.this.scriptURL,
+						realMsg: args[0]
+					};
 					return Reflect.apply(target, that, args);
 				},
-			}
-		);
-
-		const rewriteReg = reg =>
-			// Don't let the site see the aero sw
-			(reg.active.scriptURL = reg.active.scriptURL.match(
-				new RegExp(
-					`(?<=${location.origin}${prefix}${proxyLocation().origin}).*`,
-					"g"
-				)
-			)[0]);
-
-		navigator.serviceWorker.getRegistration = new Proxy(
-			navigator.serviceWorker.getRegistration,
+			});
+		},
+		globalProp: "ServiceWorkerContainer.prototype.controller",
+		exposedContexts: ExposedContextsEnum.window
+	},
+	{
+		proxifyGetter(ctx) {
+			return new Promise((resolve, reject) => {
+				ctx.this.then(reg => {
+					resolve(rewriteReg(reg));
+				}).catch(reject);
+			});
+		},
+		escapeFixes: [
 			{
-				apply: async target =>
-					(await target()).map(reg => rewriteReg(reg)),
+				targeting: "VALUE_PROXIFIED_OBJ",
+				props_that_escape: {
+					"index.add": [{
+						targeting: "API_PARAM",
+						targetingParam: 1,
+						apiMethod: "add",
+						escapeType: {
+							what: "URL_STRING",
+							is: URL_IS.ANY_URL
+						},
+					}]
+				}
 			}
-		);
-		navigator.serviceWorker.getRegistrations = new Proxy(
-			navigator.serviceWorker.getRegistrations,
-			{
-				apply: async target => rewriteReg(await target()),
-			}
-		);
-		*\/
+		],
+		globalProp: "ServiceWorkerContainer.prototype.ready",
+		exposedContexts: ExposedContextsEnum.window
+	}, {
+		proxyHandler: {
+			apply: async target => rewriteReg(await target())
+		},
+		globalProp: "navigator.serviceWorker.getRegistration",
+		exposedContexts: ExposedContextsEnum.window
+	}, {
+		proxyHandler: {
+			apply: async target => (await target()).map(reg => rewriteReg(reg))
+		},
+		globalProp: "navigator.serviceWorker.getRegistrations",
+		exposedContexts: ExposedContextsEnum.window
 	}
-*/
+] as APIInterceptor[];
+
+const rewriteReg = reg => {
+	// Don't let the site see the aero sw (unconceal the URL)
+	reg.active.scriptURL = afterPrefix(reg.active, $aero.config.prefix, $aero.logger)
+	if (reg.index) {
+		reg.index = new Proxy(reg.index, {
+			get(target, prop) {
+				if (prop === "add") {
+					return new Proxy(target.add, {
+						apply(target, that, args) {
+							const [url] = args;
+							args[0] = rewriteSrc(url);
+							return Reflect.apply(target, that, args);
+						},
+					});
+				}
+				return target[prop];
+			},
+		})
+	}
+	return;
+}

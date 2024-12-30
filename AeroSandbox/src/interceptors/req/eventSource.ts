@@ -6,6 +6,8 @@ import {
 import { proxyConstructString } from "$util/stringProx";
 
 export default {
+	skip: true,
+	globalProp: "EventSource"
 	/*
 	You know this wouldn't work
 	proxifiedObj: ctx => {

@@ -1,34 +1,51 @@
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
-import { proxyGetString } from "$util/stringProx";
-
+import { proxyGetString } from "$util/stringProxy";
 import rewriteSrc from "$util/src";
 
 export default [
-	/*
-	You know you can't do that
 	{
-		proxifiedObj: Proxy.revocable(PresentationRequest, {
-			construct(that, args) {
-				/** Could either be a string or an array *\/
-			let[urls] = args;
-
-						if (Array.isArray(urls))
-			urls = urls.map(url => rewriteSrc(url));
-		else urls = rewriteSrc(urls);
-
-		args[0] = urls;
-
-		return Reflect.construct(that, args);
-					}
-				}),
-		globalProp: "PresentationRequest",
-			supports: SupportEnum.draft | SupportEnum.shippingChromium
-			},
-		{
-			proxifiedObj: proxyGetString("PresentationConnection", ["url"]),
-				globalProp: "PresentationConnection",
-					supports: SupportEnum.draft | SupportEnum.shippingChromium
-		}
-	*/
+		proxifyGetter(ctx) {
+			// ctx.this would be an instance of PresentationRequest
+			ctx.this = new Proxy(ctx.this, {
+				construct(that, args) {
+					/** Could either be a string or an array */
+					let [urls] = args;
+					if (Array.isArray(urls))
+						urls = urls.map(url => rewriteSrc(url));
+					else urls = rewriteSrc(urls);
+					args[0] = urls;
+					const presReq: PresentationRequest = Reflect.construct(that, args);
+					presReq.start = new Proxy(presReq.start, {
+						async apply(target, that, args) {
+							return rewriteConn(await Reflect.apply(target, that, args));
+						}
+					});
+				}
+			})
+		},
+		globalProp: "navigator.presentation.receiver.defaultRequest",
+		subAPIs: {
+			"start": {
+				globalProp: "PresentationRequest.start",
+				supports: SupportEnum.draft | SupportEnum.shippingChromium
+			}
+		},
+		supports: SupportEnum.draft | SupportEnum.shippingChromium
+	},
+	{
+		proxifyGetter(ctx) {
+			return new Promise((resolve, reject) => {
+				ctx.this.then(conns => {
+					resolve(conns.map(rewriteConn));
+				}).catch(reject);
+			});
+		},
+		globalProp: "navigator.presentation.receiver.connectionList",
+		supports: SupportEnum.draft | SupportEnum.shippingChromium
+	}
 ] as APIInterceptor[];
+
+function rewriteConn(conn) {
+	conn.url = new Proxy(conn.url, proxyGetString("PresentationConnection", ["url"]));
+}

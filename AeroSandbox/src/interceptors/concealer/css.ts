@@ -53,7 +53,6 @@ export default {
 
 		return ret;
 	},
-	globalProp: "document.styleSheets",
 	conceals: [{
 		what: "CSSStyleSheet.href",
 		revealerType: {
@@ -61,5 +60,6 @@ export default {
 			reveals: "escapedUrl"
 		}
 	}],
+	globalProp: "document.styleSheets",
 	exposedContexts: ExposedContextsEnum.window
 } as APIInterceptor;

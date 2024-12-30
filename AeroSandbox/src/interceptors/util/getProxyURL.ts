@@ -8,7 +8,7 @@
 import { eitherLogger } from "./Loggers";
 
 /**
- * Separates the prefix from the url to get the proxy url isolated
+ * Separates the prefix from the url to get the proxy url isolated (undoes the URL rewriting for us to disect and handle accordingly)
  * This is primarily used for concealers
  * @param realURL Likely `location.href`
  * @param prefix Likely `aeroConfig.prefix`

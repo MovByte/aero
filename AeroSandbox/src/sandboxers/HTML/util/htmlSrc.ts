@@ -1,8 +1,8 @@
 import sharedConfig from "$util/sharedConfig";
 
 import rewriteSrc from "$src/shared/src";
-
 import { proxyLocation } from "$util/proxyLocation";
+import proto from "$util/proto";
 
 /**
  * Extends src rewriting for processed html urls
@@ -13,7 +13,7 @@ export default (src: string, isIFrame?: boolean): string => {
 	// TODO: rewrite
 	if (src instanceof Blob) return src;
 
-	const url = $aero.proto.get(
+	const url = proto.get(
 		src.replace(new RegExp(`^(${location.origin})`, "g"), "")
 	);
 

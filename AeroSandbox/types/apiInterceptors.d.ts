@@ -1,48 +1,94 @@
 import type { overwriteRecordsType } from "$types/generic";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export type revokableProxyRet = { proxy: any; revoke: () => void };
-interface proxifiedObjGeneratorCtxType {
+export type RevokableProxyRet = { proxy: any; revoke: () => void };
+interface ProxifiedObjGeneratorCtxType {
 	specialInterceptionFeatures?: InterceptionFeaturesEnum;
 	// might be removed I will just replace the <proxyContext> in the entire JS file  I am importingproxyGlobalContext: string;
 	overwriteRecords?: overwriteRecordsType;
 	globalNamespace: string;
 	this: any;
 }
-export type proxifiedObjType = revokableProxyRet | proxifiyObjGenerator;
-export type proxifiyObjGenerator = (
-	ctx: proxifiedObjGeneratorCtxType
-) => proxifiedObjType;
-export type storageProxifiyObjGenerator = (
+export type ProxifiedObjType = RevokableProxyRet | ProxifiedObjGenerator;
+export type ProxifiedObjGenerator = (
+	ctx: ProxifiedObjGeneratorCtxType
+) => ProxifiedObjType;
+export type StorageProxifiyObjGenerator = (
 	cookieStoreId: string
-) => proxifiedObjType;
+) => ProxifiedObjType;
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 /** This is for trapping `get` */
-export type proxifiedGetter = (ctx: proxifiedObjGeneratorCtxType) => any;
+export type ProxifiedGetter = (ctx: ProxifiedObjGeneratorCtxType) => any;
 /** This is for trapping `get` */
-export type proxifySetter = (ctx: proxifiedObjGeneratorCtxType & {
+export type ProxifySetter = (ctx: ProxifiedObjGeneratorCtxType & {
 	/** The new value from the setter while trying to trap `set` */
 	newVal?: string
 }) => any;
 
-export type concealType = {
+type revealerType = {
+	type: "URL",
+	reveals: "ORIGIN" | "ESCAPED_URL" | "HOSTNAME" | "DOMAIN" | "REAL_PROTOCOL" | "REAL_URL"
+};
+type concealType = {
 	what: string;
-	revealerType: {
-		type: "url",
-		reveals: "origin" | "escapedUrl" | "hostname" | "domain" | "realProtocol" | "realUrl";
-	}
-}
+	revealerType
+};
 /** For origin isolators */
 export type isolatesType = [
 	// TODO: Write this
 ]
-
 export type objectPropertyModifier = (
-	ctx: proxifiedObjGeneratorCtxType
+	ctx: ProxifiedObjGeneratorCtxType
 ) => void;
 
-/** This is a generic type interface used for intersection in other interfaces below */
-interface APIInterceptorGeneric {
+
+export enum URL_IS_ESCAPE {
+	ORIGIN,
+	ESCAPED_URL,
+	HOSTNAME,
+	DOMAIN,
+	REAL_PROTOCOL,
+	REAL_URL,
+	ANY_URL
+}
+type EscapeTypeShared = {
+	what: "URL_STRING"
+	is: URL_IS
+} | {
+	targeting: "VALUE_PROXIFIED_OBJ",
+	props_that_escape: {
+		[key: string]: EscapeTypeShared
+	}
+}
+type EscapeFixesProxifiedValue = EscapeTypeShared;
+type EscapeFixesProxyHandler = {
+	targeting: "API_PARAM",
+	targetingParam: number,
+	apiMethod: "add",
+	escapeType: EscapeTypeShared;
+}[];
+
+
+export enum URL_IS_CONCEAL {
+	ORIGIN,
+	HOSTNAME,
+	DOMAIN,
+	PROTOCOL,
+	FULL_URL,
+	ANY_URL
+}
+// TODO: Do conceal now
+type ConcealTypeShared = {
+	what: "URL_STRING"
+	is: URL_IS
+} | {
+	targeting: "VALUE_PROXIFIED_OBJ",
+	props_that_conceal: {
+		[key: string]: ConcealTypeShared
+	}
+}
+
+type APIInterceptorGenericShared = {
 	/** This object path that excludes global objects and overwrites the property. *AeroSandbox* will also check if it exists in the global context. This is necessary if `proxifiedObjWorkerVersion` is set.
 	 * This is done so that if the api is only exposed to the window it will overwrite it on the window object specifically or else it would use self since that is also covered by the global context of windows and workers. THe reason why this is done is because I want an error to be thrown if a window API is mistakingly used in a worker's global scope.
 	 * TODO: Throw an error in AeroSandboxBuilder error if globalProp contains "<global context>.<props>"
@@ -50,8 +96,6 @@ interface APIInterceptorGeneric {
 	 * @warning It will overwrite the entire global scope with your proxified object if you set it to `""`.
 	 */
 	globalProp: string | "";
-	/** You must include this in every concealer in aero */
-	conceals: concealType[];
 	isolates: isolatesType[];
 	/** These toggle code inside of the Proxy handler that provide other things you may want to use AeroSandbox for */
 	specialInterceptionFeatures?: InterceptionFeaturesEnum;
@@ -63,6 +107,13 @@ interface APIInterceptorGeneric {
 	/** This number determines how late the API injectors will be injected. It is similar to the index property in CSS. If not set, the default is zero. */
 	insertLevel?: number;
 }
+/** This is a generic type interface used for intersection in other interfaces below */
+type APIInterceptorGeneric = {
+	/** You must include this in every concealer in aero */
+	conceals: concealType[];
+} & APIInterceptorGenericShared | {
+	escapeFixes: EscapeFixes
+} & APIInterceptorGenericShared;
 /** You use this when you haven't yet finished your implementation for your API and you want to skip it. If the Feature Flag DELETE_UNSUPPORTED_APIS is enabled, then it would delete the API instead of doing nothing. */
 export type APIInterceptorSkip = APIInterceptorGeneric & {
 	/** Please add a comment above setting this property explaining why you have decided to skip it */
@@ -71,16 +122,16 @@ export type APIInterceptorSkip = APIInterceptorGeneric & {
 export type APIInterceptorForProxyObjects = APIInterceptorGeneric & {
 	/** This is specifically for objects that use the ES6 Proxy Object or re-implement the API from scratch. proxifiedObjGenFunc is a handler which returns the proxified object depending on the context given, which is determined by how the AeroSandboxBundler class is configured with the config in the constructor.*/
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
-	proxifiedObj?: Object | proxifiyObjGenerator;
-	createStorageProxyHandlers: storageProxifiyObjGenerator;
+	proxifiedObj?: Object | ProxifiedObjGenerator;
+	createStorageProxyHandlers: StorageProxifiyObjGenerator;
 };
 export type APIInterceptorForProxyObjectsInWorker = APIInterceptorGeneric & {
 	// biome-ignore lint/complexity/noBannedTypes: <explanation>
 	proxifiedObjWorkerVersion?: Object;
 };
 export type APIInterceptorForProxifiyingGettersAndSetters = APIInterceptorGeneric & {
-	proxifiedGetter?: proxifiedGetter;
-	proxifySetter?: proxifySetter;
+	proxifiedGetter?: ProxifiedGetter;
+	proxifySetter?: ProxifySetter;
 };
 export type APIInterceptorForModifyingObjectProperties =
 	APIInterceptorGeneric & {

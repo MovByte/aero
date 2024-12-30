@@ -8,6 +8,8 @@ mutable_node_modules
 # Deno
 /**/deno.lock
 
+.VSCodeCounter/
+
 # Swap
 ## VIM
 /**/*.swp
