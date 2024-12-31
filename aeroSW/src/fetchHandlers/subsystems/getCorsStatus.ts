@@ -10,7 +10,7 @@ import { Sec } from "$aero/types";
 // CORS Emulation
 import block from "../isolation/corsTesting";
 // Cache Emulation
-import HSTSCacheEmulation from "../isolation/HSTSCacheEmulation";
+import HSTSCacheEmulation from "../isolation/HstsCacheEmulation";
 // TODO: Fix import - import clear from "./isolation/execClearEmulationOnWindowClients";
 import CacheManager from "$aero/src/this/util/internal/isolation/CacheManager";
 

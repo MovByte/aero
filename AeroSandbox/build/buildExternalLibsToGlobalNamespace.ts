@@ -8,11 +8,12 @@ import { Hls } from "hls.js";
 import { dashjs } from "dashjs";
 
 // ext as in external
+// Init external libs used in AeroSandbox
 {
-	// Setup *awaitAsync* on the global proxy namespace
-	const awaitAsync = createWorker();
+	// Setup *await-async* on the global proxy namespace
+	window[PROXY_NAMESPACE_OBJ][AERO_SANDBOX_NAMESPACE_OBJ].extLib.syncify = await createWorker();
 	// Setup *hls.js* on the global proxy namespace
-	window[PROXY_NAMESPACE_OBJ][AERO_SANDBOX_NAMESPACE_OBJ].ext.Hls = Hls;
+	window[PROXY_NAMESPACE_OBJ][AERO_SANDBOX_NAMESPACE_OBJ].extLib.Hls = Hls;
 	// Setup *dashjs*
-	window[PROXY_NAMESPACE_OBJ][AERO_SANDBOX_NAMESPACE_OBJ].ext.dashjs = dashjs;
+	window[PROXY_NAMESPACE_OBJ][AERO_SANDBOX_NAMESPACE_OBJ].extLib.dashjs = dashjs;
 }

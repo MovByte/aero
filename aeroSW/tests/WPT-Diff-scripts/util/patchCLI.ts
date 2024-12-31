@@ -1,6 +1,6 @@
 /**
  * @module
- * Patches the CLI with a wrapped version of the browser you provide from the WPT-Diff tests config to be used to run WPT under a proxy
+ * Patches the official WPT CLI with a wrapped version of the browser you provide from the WPT-Diff tests config to be used to run WPT under a proxy
  */
 
 // For type safety

@@ -1,6 +1,7 @@
 import {
 	type APIInterceptor,
-	ExposedContextsEnum
+	ExposedContextsEnum,
+	URL_IS_ESCAPE
 } from "$types/apiInterceptors.d.ts";
 
 // Utility
@@ -32,29 +33,37 @@ const historySharedProxyHandlers = {
 
 		return Reflect.apply(target, that, args);
 	}
-};
+} as ProxyHandler<History>;
 /**
  * The fix types for the history API metthods that modify the state (`history.pushState` and `history.replaceState`)
  */
 const historySharedEscapeFixTypes = [
 	{
 		targeting: "param",
+		targetingParam: 2,
+		type: {
+			what: "URL_STRING",
+			is: URL_IS_ESCAPE.FULL_URL
+		}
+	}
+	{
+		targeting: "param",
 		targetingParam: 3,
-		escapeType: {
-			what: "url",
-			escapeType: "full"
+		type: {
+			what: "URL_STRING",
+			is: URL_IS_ESCAPE.FULL_URL
 		}
 	}
 ]
 export default [
 	{
-		proxyHandlers: historySharedProxyHandlers,
+		proxyHandler: historySharedProxyHandlers,
 		globalProp: "history.pushState",
 		escapeFixes: historySharedEscapeFixTypes,
 		exposedContexts: ExposedContextsEnum.window
 	},
 	{
-		proxyHandlers: historySharedProxyHandlers,
+		proxyHandler: historySharedProxyHandlers,
 		globalProp: "history.replaceState",
 		escapeFixes: historySharedEscapeFixTypes,
 		exposedContexts: ExposedContextsEnum.window

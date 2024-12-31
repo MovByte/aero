@@ -2,41 +2,32 @@ import type { overwriteRecordsType } from "$types/generic";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type RevokableProxyRet = { proxy: any; revoke: () => void };
-type GeneratorCtxTypeShared = {
+type CtxTypeShared = {
 	cookieStoreId: string;
-	globalNamespace: string;
+	// TODO: Remove this
+	proxyNamespace: string;
+	// TODO: Remove this
+	sandboxNamespace: string;
 	specialInterceptionFeatures: InterceptionFeaturesEnum;
 	this: any;
 }
-type GeneratorCtxTypeProxyHandler = GeneratorCtxTypeShared;
-type ProxifiedObjGeneratorCtx = GeneratorCtxTypeShared;
-export type ProxifiedObjType = RevokableProxyRet | ProxifiedObjGenerator;
-export type ProxifiedObjGenerator = (
-	ctx: ProxifiedObjGeneratorCtx
+type GeneratorCtxTypeProxyHandler = CtxTypeShared;
+type CreateProxifiedObjCtx = CtxTypeShared;
+export type ProxifiedObjType = RevokableProxyRet | CreateProxifiedObj;
+export type CreateProxifiedObj = (
+	ctx: CreateProxifiedObjCtx
 ) => ProxifiedObjType;
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 /** This is for trapping `get` */
-export type ProxifiedGetter = (ctx: ProxifiedObjGeneratorCtx) => any;
+export type ProxifiedGetter = (ctx: CreateProxifiedObjCtx) => any;
 /** This is for trapping `get` */
-export type ProxifySetter = (ctx: ProxifiedObjGeneratorCtx & {
+export type ProxifySetter = (ctx: CreateProxifiedObjCtx & {
 	/** The new value from the setter while trying to trap `set` */
 	newVal?: string
 }) => any;
 
-type revealerType = {
-	type: "URL",
-	reveals: "ORIGIN" | "ESCAPED_URL" | "HOSTNAME" | "DOMAIN" | "REAL_PROTOCOL" | "REAL_URL"
-};
-type concealType = {
-	what: string;
-	revealerType
-};
-/** For origin isolators */
-export type isolatesType = [
-	// TODO: Write this
-]
 export type objectPropertyModifier = (
-	ctx: ProxifiedObjGeneratorCtx
+	ctx: CreateProxifiedObjCtx
 ) => void;
 
 
@@ -52,13 +43,13 @@ type TypeShared<MORE_ESCAPE_TYPES> = Array<{
 	is: URL_IS_ESCAPE
 } | ({
 	targeting: "VALUE_PROXIFIED_OBJ",
-	props_that_escape: {
-		[key: string]: TypeShared
+	propsThatEscape: {
+		[key: string]: TypeShared<MORE_ESCAPE_TYPES>
 	}
 } | {
 	targeting: "VALUE_PROXIFIED_OBJ",
 	props_that_reveal: {
-		[key: string]: TypeShared
+		[key: string]: TypeShared<MORE_ESCAPE_TYPES>
 	}
 }) | ({
 	targeting: "REAL_DATA_SIZE",
@@ -75,10 +66,10 @@ type GenericProxyHandler<MORE_ESCAPE_TYPES> = ({
 	  * The index of the parameter in the function (the index starts from 1)
 	  */
 	targetingParam: number,
-	escapeType: TypeShared<MORE_ESCAPE_TYPES>;
+	type: TypeShared<MORE_ESCAPE_TYPES>;
 } | {
 	targeting: "API_RETURN" | "CONSTRUCTOR_RETURN",
-	escapeType: TypeShared<MORE_ESCAPE_TYPES>;
+	type: TypeShared<MORE_ESCAPE_TYPES>;
 })[];
 
 type EscapeFixesProxifiedValue = GenericProxifiedValue<{}>;
@@ -105,12 +96,12 @@ type APIInterceptorGeneric = {
 	/** This is if your API Interceptor covers WebSockets, WebTransports, or WebRTC */
 	forAltProtocol?: AltProtocolEnum;
 	/* Aero uses self.<apiName> to overwrite the proxified object, but if the API is exclusively for the window, it uses window.<apiName>. It assumes the API is supported in all contexts by default. */
-	exposedContexts?: ExposedContextsEnum;
+	exposedContexts: ExposedContextsEnum | "ALL" | "ALL_EXCEPT_SERVICE_WORKER" | "ALL_WEB_WORKERS";
 	supports: SupportEnum;
 	/** This number determines how late the API injectors will be injected. It is similar to the index property in CSS. If not set, the default is zero. */
 	insertLevel?: number;
 	forCors?: boolean;
-	forStorage?: boolean;
+	for: "CORS" | "STORAGE_ISOLATION" | "ORIGIN_ISOLATION" | "AERO_INTERNAL_ESCAPING";
 };
 /** You use this when you haven't yet finished your implementation for your API and you want to skip it. If the Feature Flag DELETE_UNSUPPORTED_APIS is enabled, then it would delete the API instead of doing nothing. */
 export type APIInterceptorSkip = APIInterceptorGeneric & {
@@ -125,7 +116,7 @@ export type APIInterceptorInitForAPI = {
 export type APIInterceptorForProxyObjects = APIInterceptorGeneric & ({
 	proxyHandler: ProxyHandler<any>;
 } | {
-	createProxyHandler: (ctx: GeneratorCtxTypeShared) => ProxyHandler<any>;
+	createProxyHandler: (ctx: CtxTypeShared) => ProxyHandler<any>;
 }) & ({
 	escapeFixes: GenericProxyHandler;
 } | {
@@ -178,7 +169,7 @@ export enum ExposedContextsEnum {
 	serviceWorker,
 	window
 }
-export type anyWorkerExceptServiceWorkerEnumMember =
+export type AnyWorkerExceptServiceWorkerEnumMember =
 	| ExposedContextsEnum.animationWorklet
 	| ExposedContextsEnum.audioWorklet
 	| ExposedContextsEnum.dedicatedWorker
@@ -186,8 +177,8 @@ export type anyWorkerExceptServiceWorkerEnumMember =
 	| ExposedContextsEnum.paintWorklet
 	| ExposedContextsEnum.sharedStorageWorklet
 	| ExposedContextsEnum.sharedWorker;
-export type anyWorkerEnumMember =
-	| anyWorkerExceptServiceWorkerEnumMember
+export type AnyWorkerEnumMember =
+	| AnyWorkerExceptServiceWorkerEnumMember
 	| ExposedContextsEnum.serviceWorker;
 // biome-ignore lint/style/useEnumInitializers: <explanation>
 export enum AltProtocolEnum {

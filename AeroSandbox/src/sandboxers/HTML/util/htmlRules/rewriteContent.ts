@@ -24,7 +24,7 @@ export default function setRulesContentRewriters(htmlRules) {
 					const params = url.searchParams;
 
 					if (CSP_EMULATION && getCSPPolicyRules("script-src").includes("unsafe-inline") && new URL(url).pathname === "javascript:")
-						throw new Error("CSP violation in script-src occured for the rule: unsafe-inline because the script URL is a javascript: URL");
+						throw new Error("A CSP violation in script-src occured for the rule, unsafe-inline, because the script URL is a `javascript:` URL!");
 
 					if (isMod)
 						appendSearchParam(
@@ -61,7 +61,7 @@ export default function setRulesContentRewriters(htmlRules) {
 			// @ts-ignore
 			onCreateHandler: (el: HTMLScriptElement) => {
 				if (SUPPORT_SPECULATION && typeof el.innerHTML === "string" &&
-					el.innerHTML !== "" && && el.type === "speculationRules") {
+					el.innerHTML !== "" && el.type === "speculationRules") {
 					el.innerHTML = rewriteSpeculationRules(el.innerHTML);
 				}
 				else if (
@@ -83,55 +83,52 @@ export default function setRulesContentRewriters(htmlRules) {
 								if (cspRule.startsWith("nonce-")) {
 									const nonce = cspRule.replace("^nonce-", "");
 									if (nonce !== el.nonce)
-										throw new Error("CSP violation in script-src occured for the rule: nonce");
+										$aero.logger.fatalErr("CSP violation in script-src occured for the rule, nonce!");
 								}
 								if (cspRule.startsWith("sha256-")) {
 									/** This must be done synchronously because it is inside of a Custom Element */
-									const validateHashSync = $aero.sandbox.ext.awaitSync(validateHash);
-									const hash = cspRule.replace("^sha256-", "");
-									if (cspRules.includes("unsafe-inline") && !validateHashSync(hash, el.innerHTML)) {
+									const validateHashSync = $aero.sandbox.extLib.syncify(validateHash);
+									const hash = cspRule.replace(/^sha256-/, "");
+									if (cspRules.includes("unsafe-inline") && !validateHashSync(hash, el.innerHTML))
 										// Hash validation
-										throw new Error(`CSP violation: hash mismatch in script-src occured for the rule: unsafe-inline`);
-									} else {
-										// SRI validation
-										if (hash !== el.integrity) {
-											throw new Error("CSP violation iin script-src occured for the rule: sha256 (SRI validation failed)");
-										}
-									}
+										$aero.logger.fatalErr(`CSP violation occured (hash mismatch in script-src occured for the rule, unsafe-inline)!`);
+									// SRI validation
+									else if (hash !== el.integrity)
+										$aero.logger.fatalErr("A SP violation in script-src occured for the rule, sha256 (SRI validation failed)!");
 								}
-								if (cspRule.startsWith("sha384-")) {
-									/** This must be done synchronously because it is inside of a Custom Element */
-									const validateHashSync = $aero.sandbox.ext.awaitSync(validateHash);
-									const hash = cspRule.replace("^sha384-", "");
-									if (cspRules.includes("unsafe-inline") && !validateHashSync(hash, el.innerHTML, "SHA-384")) {
-										// Hash validation
-										throw new Error("hash mismatch in script-src occured for the rule: unsafe-inline");
-									} else {
-										// SRI validation
-										if (hash !== el.integrity) {
-											throw new Error("CSP violation in script-src occured for the rule: sha384 (SRI validation failed)");
-										}
-									}
-								}
-								validateCSPPlain(cspRule, "script-src");
 							}
+							if (cspRule.startsWith("sha384-")) {
+								/** This must be done synchronously because it is inside of a Custom Element */
+								const validateHashSync = $aero.sandbox.extLib.syncify(validateHash);
+								const hash = cspRule.replace(/^sha384-/, "");
+								if (cspRules.includes("unsafe-inline") && !validateHashSync(hash, el.innerHTML, "SHA-384"))
+									// Hash validation
+									$aero.logger.fatalErr("A hash mismatch occured in script-src (occured for the rule, unsafe-inline)!");
+								else {
+									// SRI validation
+									if (hash !== el.integrity)
+										$aero.logger.fatalErr("A CSP violation in script-src occured for the rule, sha384 (SRI validation failed)!");
+								}
+							}
+							validateCSPPlain(cspRule, "script-src");
 						}
 					}
-
-					// FIXME: Fix safeText so that it could be used here
-					el.innerHTML = $aero.js.rewriteScript(el.innerText, {
-						isModule: el.type === "module"
-					}, {
-
-					});
-
-					// The inline code is read-only, so the element must be cloned
-					const cloner = new Cloner(el);
-
-					cloner.clone();
-					cloner.cleanup();
 				}
+
+				// FIXME: Fix safeText so that it could be used here
+				el.innerHTML = $aero.js.rewriteScript(el.innerText, {
+					isModule: el.type === "module"
+				}, {
+
+				});
+
+				// The inline code is read-only, so the element must be cloned
+				const cloner = new Cloner(el);
+
+				cloner.clone();
+				cloner.cleanup();
 			}
 		}
+	}
 	});
 }

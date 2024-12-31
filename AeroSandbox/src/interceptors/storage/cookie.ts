@@ -65,10 +65,39 @@ if ("cookieStore" in window) {
 	});
 }
 
-{
-	let cookieBak = document.cookie;
-	Object.defineProperty(document, "cookie", {
-		get: () => rewriteGetCookie(cookieBak, proxyLocation()),
-		set: value => (cookieBak = rewriteSetCookie(value, proxyLocation()))
-	});
+
+export default [{
+	/** Emulates for the `Clear-Site-Data` header */
+	init() {
+		const clear = $aero.sec.clear;
+		const all = clear.includes("'*'");
+		if (all || clear.includes("'cookies'")) {
+			clearCookies(upToProxyOrigin());
+		}
+		if (all || clear.includes("'executionContexts'")) {
+			// This is done here and not in other other storage interceptors because cookies would be the most supported
+			navigator.serviceWorker.addEventListener("message", event => {
+				if (event.data === "$aero_clearExecutionContext") location.reload();
+			});
+		}
+	},
+	proxifiedGetter: (ctx) => {
+		return rewriteGetCookie(ctx.this, proxyLocation())
+	},
+	proxifiedSetter: (ctx) => {
+		return rewriteSetCookie(ctx.this, proxyLocation())
+	},
+	globalProp: "document.cookie"
+}] as APIInterceptor[];
+
+function clearCookies(path: string) {
+	const cookies = document.cookie.split(";");
+
+	for (const cookie of cookies) {
+		const eqPos = cookie.indexOf("=");
+
+		const name = eqPos > -1 ? cookie.substring(0, eqPos) : cookie;
+
+		document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${path};`;
+	}
 }

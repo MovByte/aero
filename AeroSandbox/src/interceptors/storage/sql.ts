@@ -1,41 +1,70 @@
+// TODO: Import @types for WebSQL
+
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
-import { proxyLocation } from "$shared/proxyLocation";
 
-/**
- */
-const createHandler = () => {
-	return (target, that, args) => {
-		const [key]: [string] = args;
+import { escapeWithOrigin } from "$src/shared/escaping/escape";
+import { prefixKey } from "$util/storage";
 
-		const newKey = `${proxyLocation().origin}_sql_${key}`;
-
-		args[0] = newKey;
-
-		const item = localStorage.getItem("dbNames");
+const sharedProxyHandler = {
+	apply(target, that, args) {
+		const [realKey]: [string] = args;
+		const proxifiedKey = prefixKey($aero.sandbox.config.sqlStoreId, realKey);
+		args[0] = proxifiedKey;
+		const item = localStorage.getItem("$aero_dbNames");
 		if (item !== null) {
-			const dbNames: readonly string[] = JSON.parse(item);
-			if (dbNames.includes(newKey))
+			const dbNames: string[] = JSON.parse(item);
+			if (dbNames.includes(proxifiedKey))
 				localStorage.setItem(
-					"dbNames",
-					JSON.stringify(dbNames.push(newKey))
+					"$aero_dbNames",
+					JSON.stringify(dbNames.push(proxifiedKey))
 				);
 		}
-
 		return Reflect.apply(target, that, args);
-	};
+	}
 };
 
-// FIXME: This is all deprecated way of doing thiigs
 export default [
 	{
-		createStorageProxyHandlers: cookieStoreId =>
-			Proxy.revocable(openDatabase, createHandler(cookieStoreId)),
+		init: () => {
+			const clear = $aero.sec.clear;
+			const all = clear.includes("'*'");
+			if (
+				all || clear.includes("'storage'") && localStorage.hasItem("$aero_dbNames")
+			) {
+				const dbNames = localStorage.getItem("$aero_dbNames");
+				if (dbNames !== null)
+					for (const dbName of dbNames) {
+						// @ts-ignore
+						openDatabase(dbName).transaction(tx => {
+							tx.executeSql(
+								'SELECT name FROM sqlite_master WHERE type="table"',
+								[],
+								// @ts-ignore
+								(tx, data) => {
+									for (let i = 0; i < data.rows.length; i++) {
+										const tableName = data.rows.item(i).name;
+										if (
+											tableName.startsWith(escapeWithOrigin("")) &&
+											tableName !==
+											"__WebKitDatabaseInfoTable__"
+										)
+											tx.executeSql(
+												`DELETE FROM ${tableName}`
+											);
+									}
+								}
+							);
+						});
+					}
+			}
+		},
+		proxyHandler: sharedProxyHandler,
+		forCors: true,
 		globalProp: "openDatabase",
 		supports: SupportEnum.deprecated | SupportEnum.shippingChromium
 	},
 	{
-		createStorageProxyHandlers: cookieStoreId =>
-			Proxy.revocable(openDatabaseSync, createHandler(cookieStoreId)),
+		proxyHandler: sharedProxyHandler,
 		globalProp: "openDatabaseSync",
 		supports: SupportEnum.deprecated | SupportEnum.shippingChromium
 	}

@@ -9,8 +9,7 @@ import getPackageVersions from "../../../aeroSW/tests/shared/getNPMVersions";
 
 const packageVersionsRes = getPackageVersions();
 if (packageVersionsRes.isErr())
-  throw new Error("Failed to get the NPM package versions for aero: ", packageVersionsRes.error);
-}
+  throw new Error(`Failed to get the NPM package versions for aero:\n\t${packageVersionsRes.error.stack.split("\n").join("\n\t")}!`);
 const packageVersions = packageVersionsRes.value;
 
 /*
@@ -18,7 +17,7 @@ const octokit = new Octokit({ auth: import.meta.env.GITHUB_KEY });
 
 const githubURLSplit = getGitHubURLSplit(packageJSON.repository.url);
 if (githubURLSplit.isErr())
-  throw new Error("Invalid GitHub URL in the package.json");
+  throw new Error(`Invalid GitHub URL in the package.json:\n\t${githubURLSplit.error.stack.split("\n").join("\n\t")}!`);
 const [owner, repo] = githubURLSplit.value;
 
 const repoJSON = await octokit.request('GET  /repos/{owner}/{repo}', {

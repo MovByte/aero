@@ -27,11 +27,27 @@ export default function (str: string, origin = ""): RegExp {
  **/
 export function escapeWithOrigin(
 	str: string,
-	prefix: string,
-	logger: eitherLogger,
+	prefix = $aero.config.prefix,
+	logger: eitherLogger = $aero.logger,
 	origin = proxyLocation(prefix, logger).origin
 ): string {
 	return `${origin}_${str}`;
+}
+
+/**
+ * ...
+ * @param str The string with the prefix to remove
+ * @param prefix The proxy prefix to escape with. Usually `aeroConfig.prefix`.
+ * @param origin Defaults to the current proxy origin. Usually `...proxifiedLocation.origin`
+ * @returns The unescaped string with the origin
+ */
+export function unescapeWithOrigin(
+	str: string,
+	prefix = $aero.config.prefix,
+	logger: eitherLogger = $aero.logger,
+	origin = proxyLocation(prefix, logger).origin
+) {
+	return str.replace(new RegExp(`^${origin}_`), "");
 }
 
 /**

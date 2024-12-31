@@ -3,9 +3,9 @@
  * @module
  */
 
-import { storagePrefix } from "$shared/storage";
+import { escapeWithOrigin } from "$shared/escaping/escape";
 
-function createStorageNomenclatureHandlers(storeId): { [key: string]: ProxyHandler<Storage> } {
+export function createStorageNomenclatureHandlers(storeId): { [key: string]: ProxyHandler<Storage> } {
 	return {
 		prefix: {
 			apply: (target, that, args) => {
@@ -24,21 +24,18 @@ function createStorageNomenclatureHandlers(storeId): { [key: string]: ProxyHandl
 	}
 }
 
-
-function prefixKey(prefix, key: string): string {
-	let proxifiedKey = storagePrefix(key);
+export function prefixKey(prefix, key: string): string {
+	let proxifiedKey = escapeWithOrigin(key);
 	if (prefix) {
 		proxifiedKey = `${prefix}_${proxifiedKey}`;
 	}
 	return proxifiedKey;
 }
 /** Works for everything except Session Storage */
-function unprefixKey(storeId: string, key: string): string {
-	const storeIdKey = storagePrefix(storeId);
+export function unprefixKey(storeId: string, key: string): string {
+	const storeIdKey = escapeWithOrigin(storeId);
 	if (!key.startsWith(storeIdKey))
 		$aero.logger.fatalErr(`Failed to unprefix the key (the key does not have the expected cookie store key prefix, "${storeIdKey}")!`);
 	const keyWithoutStoreIdKey = key.replace(new RegExp(`^${storeIdKey}`), "");
 	return keyWithoutStoreIdKey;
 }
-
-export { createStorageNomenclatureHandlers, prefixKey, unprefixKey };

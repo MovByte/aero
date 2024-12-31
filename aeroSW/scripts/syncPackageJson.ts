@@ -42,13 +42,13 @@ const octokit = new Octokit({
 })
 
 if (!("repository" in packageJSON))
-	throw new Error("No repository field found in the package.json, required to get the URL field used to fetch the keywords");
+	throw new Error("No repository field found in the package.json, required to get the URL field used to fetch the keywords!");
 if (!("url" in packageJSON.repository))
-	throw new Error("No URL field found in the repository field of the package.json, required to fetch the keywords");
+	throw new Error("No URL field found in the repository field of the package.json, required to fetch the keywords!");
 
 const githubURLSplitRes = getGitHubURLSplit(packageJSON.repository.url, logger.debug);
 if (githubURLSplitRes.isErr())
-	throw new Error(`Failed to get the owner and repository name from the GitHub URL: ${githubURLSplitRes.error.message}`);
+	throw new Error(`Failed to get the owner and repository name from the GitHub URL:\n\t${githubURLSplitRes.error.stack?.split("\n").join("\n\t")}!`);
 const [owner, repo] = githubURLSplitRes.value;
 
 let repoJSON;
@@ -63,15 +63,15 @@ try {
 		}
 	})
 } catch (err) {
-	throw new Error(`Failed to fetch the repository JSON through the SDK: ${err.message}`);
+	throw new Error(`Failed to fetch the repository JSON through the SDK:\n\t${err.stack?.split("\n").join("\n\t")}`);
 }
 
 if (!("data" in repoJSON))
-	throw new Error("No data field found in the repository JSON, expected to find the field there" + (verboseMode ? `. The full repo in question for this error is: ${repoJSON}` : ""));
+	throw new Error("No data field found in the repository JSON, expected to find the field there" + (verboseMode ? `. The full repo in question for this error is:\n\t${repoJSON}` : ""));
 if (!("topics" in repoJSON.data))
-	throw new Error("The topics field was not found in the repository JSON, expected to find the keywords there" + (verboseMode ? `. The full repo in question for this error is: ${repoJSON}` : ""));
+	throw new Error("The topics field was not found in the repository JSON, expected to find the keywords there" + (verboseMode ? `. The full repo in question for this error is:\n\t${repoJSON}` : ""));
 if (!("description" in repoJSON.data))
-	throw new Error("The description field was not found in the repository JSON, expected to find the description there" + (verboseMode ? `. The full repo in question for this error is: ${repoJSON}` : ""));
+	throw new Error("The description field was not found in the repository JSON, expected to find the description there" + (verboseMode ? `. The full repo in question for this error is:\n\t${repoJSON}` : ""));
 
 const newPackageJSONObj = {
 	...packageJSON,
@@ -79,18 +79,19 @@ const newPackageJSONObj = {
 	description: repoJSON.data.description
 };
 
-logger.debug("Stringifying the new package.json object:\n", newPackageJSONObj);
+logger.debug("Stringifying the new package.json object:\n\t", newPackageJSONObj);
 
 let newPackageJSON;
 try {
 	newPackageJSON = JSON.stringify(newPackageJSONObj);
 } catch (err) {
-	throw new Error(`Failed to stringify the new package.json object: ${err.message}`);
+	// @ts-ignore
+	throw new Error(`Failed to stringify the new package.json object:\n\t${err.stack?.split("\n").join("\n\t")}`);
 }
 
 const packageJSONPath = resolve(__dirname, "../package.json");
 
-logger.debug(`Stringified the new package.json object. Now:\n${packageJSONPath}`);
+logger.debug(`Stringified the new package.json object. Now:\n\t${packageJSONPath}`);
 
 let fmtNewPackageJSON;
 try {
@@ -102,11 +103,12 @@ try {
 		filePath: "package.json"
 	});
 } catch (err) {
-	throw new Error(`Failed to use Biome to format the new package.json object: ${err.message}`);
+	// @ts-ignore
+	throw new Error(`Failed to use Biome to format the new package.json object:\n\t${err.stack?.split("\n").join("\n\t")}`);
 }
 
 if (!("content" in fmtNewPackageJSON))
-	throw new Error("No content field found in the formatted package.json object from BiomeJS, expected to find the field there");
+	throw new Error("No content field found in the formatted package.json object from BiomeJS, expected to find the field there!");
 
 logger.debug(`Writing the new keywords and keywords to the package.json @ ${packageJSONPath}. Writing: \n${newPackageJSON}`);
 
@@ -115,7 +117,7 @@ try {
 		flag: "w",
 	});
 } catch (err) {
-	throw new Error(`Failed to write the new keywords and description to the package.json @ ${packageJSONPath}: ${err.message}`);
+	throw new Error(`Failed to write the new keywords and description to the package.json @ ${packageJSONPath}: ${err.stack?.split("\n").join("\n\t")}!`);
 }
 
 console.info("Successfully updated the keywords and description in the package.json");

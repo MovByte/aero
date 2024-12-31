@@ -16,8 +16,8 @@ export default function setRulesForMediaEmulation(htmlRules) {
 					// @ts-ignore: The check `el.canPlayType("application/vnd.apple.mpegurl")` is for Safari only
 					el.canPlayType("application/vnd.apple.mpegurl") ||
 					// This check is for any browser
-					$aero.sandbox.ext.Hls.isSupported())) {
-					const hls = new $aero.sandbox.ext.Hls();
+					$aero.sandbox.extLib.Hls.isSupported())) {
+					const hls = new $aero.sandbox.extLib.Hls();
 					hls.loadSource(newVal);
 					hls.attachMedia(el);
 				}
@@ -33,7 +33,7 @@ export default function setRulesForMediaEmulation(htmlRules) {
 				if (newVal.endsWith(".mpd") ||
 					// Check if the browser supports MPEG-DASH
 					window.MediaSource && MediaSource.isTypeSupported("application/dash+xml")) {
-					const dash = new $aero.sandbox.ext.dashjs.MediaPlayer();
+					const dash = new $aero.sandbox.extLib.dashjs.MediaPlayer();
 					dash.initialize(el, newVal, true);
 				}
 			}

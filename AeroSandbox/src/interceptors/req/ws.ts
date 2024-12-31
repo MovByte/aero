@@ -11,7 +11,7 @@ const socketMap: WeakMap<WebSocket, emuWSState> = new WeakMap();
 
 export default [
 	{
-		proxyHandlers: {
+		proxyHandler: {
 			construct(target, args) {
 				const emuWS = new EventTarget() as WebSocket;
 				Object.setPrototypeOf(emuWS, target.prototype);
@@ -192,7 +192,7 @@ export default [
 		globalProp: "WebSocket.prototype.readyState"
 	},
 	{
-		proxyHandlers: {
+		proxyHandler: {
 			apply(_target, that, args) {
 				const ws = socketMap.get(that);
 				return ws.barews.send(args[0]);
@@ -202,7 +202,7 @@ export default [
 		globalProp: "WebSocket.prototype.send"
 	},
 	{
-		proxyHandlers: {
+		proxyHandler: {
 			apply(_target, that, args) {
 				const ws = socketMap.get(that);
 				if (args[0] === undefined) args[0] = 1000;
@@ -213,7 +213,7 @@ export default [
 		forAltProtocol: AltProtocolEnum.ws,
 		globalProp: "WebSocket.prototype.close"
 	}, {
-		proxyHandlers: {
+		proxyHandler: {
 			apply(target, that, args) {
 				if (args[1] instanceof Function) {
 					const origFunc = args[1];

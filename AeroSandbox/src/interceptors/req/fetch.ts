@@ -1,11 +1,11 @@
 import {
 	type APIInterceptor,
-	anyWorkerEnumMember
+	AnyWorkerEnumMember
 } from "$types/apiInterceptors.d.ts";
 //import { handleFetchEvent } from "$aero_browser/util/swlessUtils";
 
 export default {
-	proxyHandlers: {
+	proxyHandler: {
 		apply(target, that, args) {
 			let [, opts]: [any?, RequestInit?] = args;
 			opts ??= {};

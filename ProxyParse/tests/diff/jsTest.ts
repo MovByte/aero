@@ -200,7 +200,8 @@ if (isCLI) {
 			// @ts-ignore
 			tryRewritersAero = testData.default;
 		} catch (err) {
-			throw new Error(`Invalid test data path, ${testDataPath}, for JS-diff: ${err}`)
+			// @ts-ignore
+			throw new Error(`Invalid test data path, ${testDataPath}, for JS-diff:\n\t${err.split("\n").join("\n\t")}`);
 		}
 
 		const benchRes = await benchJSTest({
@@ -211,19 +212,20 @@ if (isCLI) {
 			checkoutsDir: flags.get("checkoutsDir") || env.CHECKOUTS_DIR
 		}, true, tryRewritersAero);
 		if (benchRes.isErr())
-			throw new Error(`Failed to run the JSTest benchmarks for the CLI: ${benchRes.error.message} `);
+			// @ts-ignore
+			throw new Error(`Failed to run the JSTest benchmarks for the CLI:\n\t${benchRes.error.split("\n").join("\n\t")}`);
 		const bench = benchRes.value;
 
 		const outputCSV = flags.get("outputCSV");
 		if (typeof outputCSV === "string" || outputCSV !== "false") {
 			const csvRes = await processJSTestBenchToCSV(bench);
 			if (csvRes.isErr())
-				throw new Error(`Failed to process the JSTest Benchmarks into a CSV for the CLI: ${csvRes.error.message}`);
+				throw new Error(`Failed to process the JSTest Benchmarks into a CSV for the CLI:\n\t${csvRes.error.split("\n").join("\n\t")}!`);
 			try {
 				// @ts-ignore: `outputCSV` has already been checked to be a `string` type
 				writeFile(path.join(rootDir, outputCSV), csvRes.value, "utf-8");
 			} catch (err) {
-				throw new Error(`Failed to write the CSV to the file system: ${err}\nThe CSV was: ${csvRes.value}`);
+				throw new Error(`Failed to write the CSV to the file system: ${err}\nThe CSV was:\n${csvRes.value}!`);
 			}
 		} else {
 			console.log(bench.name);

@@ -20,7 +20,13 @@ import formRequestOpts from "$fetchHandlers/util/formRequestOpts"
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
-type Passthrough = Readonly<{
+const securityPolicyMaps: {
+	readonly accessControl: Map<string, string>;
+} = {
+	accessControl: new Map<string, string>(),
+}
+
+export default async function rewriteReq({ logger, req, reqUrl, clientId, clientUrl, aeroPathFilter, reqDestination, isNavigate, isiFrame, sec, cache, rewrittenParamsOriginals }: Readonly<{
 	logger: eitherLogger
 	req: Request;
 	reqUrl: URL;
@@ -35,15 +41,7 @@ type Passthrough = Readonly<{
 	cache: Cache;
 	/** This is mainly intended so that `appendSearchParam()`, whenever it is called, can help the response header rewriter with `No-Vary-Search` header rewriting later */
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
-}>
-
-const securityPolicyMaps: {
-	readonly accessControl: Map<string, string>;
-} = {
-	accessControl: new Map<string, string>(),
-}
-
-export default async function rewriteReq({ logger, req, reqUrl, clientId, clientUrl, aeroPathFilter, reqDestination, isNavigate, isiFrame, sec, cache, rewrittenParamsOriginals }: Passthrough): Promise<ResultAsync<{
+}>): Promise<ResultAsync<{
 	/** You should return the Response in the fetch handler if that is what is returned */
 	finalRespEarly?: Response;
 } | {
@@ -114,7 +112,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 					pass = true;
 			}
 			if (!pass)
-				throw new Error("The request was blocked by Access-Control-Allow-Origin");
+				throw new Error("The request was blocked by Access-Control-Allow-Origin!");
 		}
 	}
 

@@ -10,8 +10,8 @@
 export default function getValFromSW(toGet: {
 	name: string
 }): void {
-	return $aero.extLib.syncify(new Promise((resolve, reject) => {
-		const bc = new BroadcastChannel(`$aero-get-stored-val`);
+	return $aero.sandbox.extLib.syncify(new Promise((resolve, reject) => {
+		const bc = new BroadcastChannel(`$aero-stored-val`);
 		bc.postMessage({
 			clientId: $aero.clientId,
 			for: "get",

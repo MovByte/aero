@@ -1,7 +1,11 @@
+/**
+ * @module
+ */
+
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 
 import { createStorageNomenclatureHandlers, unprefixKey } from "./storage";
-import { storagePrefix } from "$shared/storage";
+import { escapeWithOrigin } from "$shared/escaping/escape";
 
 export default function createStorageApiInterceptors(key: string, storeId: string): APIInterceptor[] {
 	const storageNomenclatureHandlers = createStorageNomenclatureHandlers(storeId);
@@ -12,8 +16,8 @@ export default function createStorageApiInterceptors(key: string, storeId: strin
 					const storageApi = key === "sessionStorage" ? localStorage : target;
 					for (let i = 0; i < storageApi.length; i++) {
 						const realKey = storageApi.key(i);
-						const storeIdKey = storagePrefix(storeId);
-						if (realKey.startsWith(storeIdKey))
+						const storeIdKey = escapeWithOrigin(storeId);
+						if (realKey.startsWith(`${storeIdKey}_`))
 							storageApi.removeItem(realKey);
 					}
 				}
@@ -32,8 +36,8 @@ export default function createStorageApiInterceptors(key: string, storeId: strin
 					const proxifiedKeys: string[] = [];
 					for (let i = 0; i < storageApi.length; i++) {
 						const realKey = storageApi.key(i);
-						const storeIdKey = storagePrefix(storeId);
-						if (realKey.startsWith(storeIdKey))
+						const storeIdKey = escapeWithOrigin(storeId);
+						if (realKey.startsWith(`${storeIdKey}_`))
 							proxifiedKeys.push(unprefixKey(storeId, realKey));
 					}
 					return proxifiedKeys[getIndex];

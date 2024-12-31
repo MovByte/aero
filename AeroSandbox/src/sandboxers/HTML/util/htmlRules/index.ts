@@ -7,7 +7,7 @@ import type { htmlRule } from "$aero/types/htmlRules";
 
 import setRulesContentRewriters from "./rewriteContent";
 import setRulesLinks from "./links";
-import setRulesSecurity from "./sec-only";
+import setRulesSecurity from "./secOnly";
 import setRulesFrames from "./frame";
 import setRulesForMediaEmulation from "./media";
 

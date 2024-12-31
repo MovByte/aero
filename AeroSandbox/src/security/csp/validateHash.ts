@@ -15,6 +15,6 @@ export async function validateHash(hash: string, checkStr: string, algo: "SHA-25
 	const hashBuffer = await crypto.subtle.digest(algo, textEnc);
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
 	const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, "0")).join("");
-	throw new Error(`CSP violation: Hash mismatch: expected ${hash}, got ${hashHex}`)
+	$aero.logger.fatalErr(`A CSP violation occured (hash mismatch)${ERR_LOG_AFTER_COLON}expected ${hash}, got ${hashHex}!`);
 }
 

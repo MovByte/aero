@@ -143,7 +143,7 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error.message);
 	const rewrittenReqVals = rewrittenReqValsRes.value;
 	if ("finalRespEarly" in rewrittenReqVals)
-		return nOkAsync((rewrittenReqVals.finalRespEarly);
+		return nOkAsync(rewrittenReqVals.finalRespEarly);
 	const { rewrittenReqOpts, proxyUrl, cacheMan } = rewrittenReqVals;
 
 	// Make the request to the proxy

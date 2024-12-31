@@ -2,7 +2,7 @@
 
 import { afterPrefix } from "$util/getProxyURL";
 
-import { proxyLocation } from "$util/proxyLocation";
+import { proxyLocation } from "$shared/proxyLocation";
 
 import { type APIInterceptor, SupportEnum } from "$types/apiInterceptors.d.ts";
 /*
@@ -10,7 +10,7 @@ export default [
 	// Entries
 	// FIXME:
 	{
-		proxyHandlers: {
+		proxyHandler: {
 			apply(target, that, args) {
 				const entries: any[] = Reflect.apply(target, that, args);
 

@@ -4,6 +4,7 @@ import type { Config } from "./config";
 import type { SearchParamOptionsConfig } from "../../aeroSW/types/config";
 import type JSRewriter from "$aero/src/sandboxers/JS/JSRewriter";
 
+/** Everything in here is passthrough other than the `sandbox` prop */
 export type AeroGlobalType = Readonly<{
 	clientId: string;
 	init: string;
@@ -15,10 +16,16 @@ export type AeroGlobalType = Readonly<{
 	logger: AeroSandboxLogger;
 	config: Config;
 	searchParamOptions: SearchParamOptionsConfig;
-	rewriters: {
-		js: JSRewriter;
+	sandbox: {
+		extLib: { [key: string]: any };
+		rewriters: {
+			js: JSRewriter;
+		};
+		appBadges: {
+			proxyOrigin: string;
+			contents: number;
+		}[];
 	};
-	extLib: { [key: string]: any };
 }>;
 
 declare global {

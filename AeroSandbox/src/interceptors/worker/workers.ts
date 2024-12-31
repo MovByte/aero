@@ -1,10 +1,9 @@
 import { type APIInterceptor, ExposedContextsEnum } from "$types/apiInterceptors";
 import { URL_IS } from "$types/apiInterceptors";
 
+import { proxyLocation, upToProxyOrigin } from "$shared/proxyLocation";
 import { afterPrefix } from "$util/getProxyURL";
 import rewriteSrc from "$shared/src";
-
-import { proxyLocation } from "$shared/proxyLocation";
 
 /*
 export default {
@@ -15,12 +14,11 @@ export default {
 
 export default [
 	{
-		// @ts-ignore
 		proxyHandler: {
 			apply(target, that, args) {
 				const [path, opts] = args;
 				// Rewrite this here so that the SW can handle it and nest the scripts accordingly
-				args[0] = `${rewriteSrc(path, proxyLocation($aero.config.prefix, $aero.logger).href)}?mod=${opts.type === "module"
+				args[0] = `${rewriteSrc(path, proxyLocation().href)}?mod=${opts.type === "module"
 					}`;
 				$aero.logger.log(
 					`Registering a nested service worker\n${path} ➜ ${args[0]}`
@@ -64,12 +62,12 @@ export default [
 		escapeFixes: [
 			{
 				targeting: "VALUE_PROXIFIED_OBJ",
-				props_that_escape: {
+				propsThatEscape: {
 					"index.add": [{
 						targeting: "API_PARAM",
 						targetingParam: 1,
 						apiMethod: "add",
-						escapeType: {
+						type: {
 							what: "URL_STRING",
 							is: URL_IS.ANY_URL
 						},

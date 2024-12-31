@@ -7,7 +7,7 @@ import {
 import escape from "$shared/escaping/escape";
 
 export default {
-	proxyHandlers: {
+	proxyHandler: {
 		construct(target, args) {
 			const [config] = args;
 

@@ -84,7 +84,7 @@ export default class extends Cache {
 	/**
 	 * @param - Proxy origin
 	 */
-	async clear(origin: string): Promise<void> {
+	static async clear(origin: string): Promise<void> {
 		const cache = await this.#getCache();
 		const keys = await cache.keys();
 
@@ -195,7 +195,7 @@ export default class extends Cache {
 		return nOk(undefined);
 	}
 
-	async #getCache(): Promise<Cache> {
+	static async #getCache(): Promise<Cache> {
 		return await caches.open(self.config.cacheKey);
 	}
 

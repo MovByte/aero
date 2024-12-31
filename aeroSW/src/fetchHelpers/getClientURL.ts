@@ -14,14 +14,6 @@ import appendSearchParam from "$shared/escaping/appendSearchParam";
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
-type Passthrough = Readonly<{
-	params: URLSearchParams,
-	referrerPolicyParamName: string,
-	referrerPolicy: string,
-	/** This is mainly intended so that `appendSearchParam()` can help the response header rewriter with `No-Vary-Search` header rewriting later */
-	rewrittenParamsOriginals: rewrittenParamsOriginalsType
-}>
-
 /**
  * Gets the URL of the client through the `Client` API in SWs
  * This client URL is used when forming the proxy URL and in various uses for emulation
@@ -43,7 +35,13 @@ export default async function getClientUrlThroughClient(clientId: string): Promi
  * @returns The `URL` of the client wrapped in a `ResultAsync` for better error handling from *Neverthrow*
  */
 /* biome-enable no-param-reassign */
-export async function getClientUrlThroughForcedReferrer(pass: Passthrough): Promise<ResultAsync<URL, Error>> {
+export async function getClientUrlThroughForcedReferrer(pass: Readonly<{
+	params: URLSearchParams,
+	referrerPolicyParamName: string,
+	referrerPolicy: string,
+	/** This is mainly intended so that `appendSearchParam()` can help the response header rewriter with `No-Vary-Search` header rewriting later */
+	rewrittenParamsOriginals: rewrittenParamsOriginalsType
+}>): Promise<ResultAsync<URL, Error>> {
 	const {
 		params,
 		referrerPolicyParamName,

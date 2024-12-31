@@ -22,7 +22,14 @@ import JSRewriter from "$sandbox/sandboxers/JS/JSRewriter";
 import type { Sec } from "$aero/aeroSW/types";
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
 
-type Passthrough = Readonly<{
+const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
+
+/**
+ * Rewrites the response with the content rewriters and the response headers rewriter
+ * @param param0 The passthrough object needed for the cache setting
+ * @returns 
+ */
+export default async function rewriteResp(pass: Readonly<{
 	originalResp: Response;
 	rewrittenReqHeaders: Headers,
 	/** If you are making a server-only implementation, you could infer this from the mime type and file type */
@@ -35,17 +42,7 @@ type Passthrough = Readonly<{
 	sec: Readonly<Sec>;
 	/** This is for `No-Vary-Search` rewriting */
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
-}>;
-
-
-const jsRewriter = new JSRewriter(aeroConfig.sandbox.jsParserConfig);
-
-/**
- * Rewrites the response with the content rewriters and the response headers rewriter
- * @param param0 The passthrough object needed for the cache setting
- * @returns 
- */
-export default async function rewriteResp(pass: Passthrough, accessControlRuleMap: Map<string, string>): Promise<ResultAsync<{
+}>, accessControlRuleMap: Map<string, string>): Promise<ResultAsync<{
 	rewrittenBody: string | ReadableStream;
 	rewrittenRespHeaders: Headers,
 	rewrittenStatus: number

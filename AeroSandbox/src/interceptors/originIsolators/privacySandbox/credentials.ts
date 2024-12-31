@@ -12,7 +12,7 @@ import {
 	ExposedContextsEnum
 } from "$types/apiInterceptors.d.ts";
 
-import { proxyLocation } from "$util/proxyLocation";
+import { proxyLocation } from "$shared/proxyLocation";
 import { afterPrefix } from "$util/getProxyURL";
 import type BareClient from "@mercuryworkshop/bare-mux";
 
@@ -98,7 +98,7 @@ function proxifyCredentials(credentials: Credential): Credential {
 export default [
 	{
 		// TODO: Support the rest of the navigator.credentials API - https://developer.mozilla.org/en-US/docs/Web/API/CredentialsContainer
-		proxyHandlers: {
+		proxyHandler: {
 			apply(target, that, args) {
 				const [credentialsObj] = args;
 
@@ -133,7 +133,7 @@ export default [
 		exposedContexts: ExposedContextsEnum.window
 	},
 	{
-		proxyHandlers: {
+		proxyHandler: {
 			apply(_target, _that, args) {
 				const credentialsObj: Credential = args[0];
 
@@ -144,7 +144,7 @@ export default [
 		exposedContexts: ExposedContextsEnum.window
 	},
 	{
-		proxyHandlers: {
+		proxyHandler: {
 			apply(target, that, args) {
 				const options: CredentialRequestOptions = args[0];
 

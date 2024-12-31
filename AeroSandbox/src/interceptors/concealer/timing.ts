@@ -10,12 +10,13 @@ Using `entry.name` to expose the url:
 import { type APIInterceptor, SupportEnum, URL_IS_ESCAPE } from "$types/apiInterceptors";
 
 import getMsgFromSW from "$util/getMsgFromSW";
+import { fmtMissingPropExpectedOfSW } from "../util/bcCommunication/expectParamsInMsgResp";
 import getValFromSW from "$util/getValFromSW";
 import { afterPrefix } from "$shared/afterPrefix";
 import upToProxyLocation from "$shared/upToProxyLocation";
 
 export default [{
-	init: () => {
+	init() {
 		// Get the timing data whenever a new request comes in
 		getMsgFromSW("perf-timing-resp-cached", event => {
 			const { url, cached } = event.data.payload;
@@ -43,7 +44,7 @@ export default [{
 	conceals: [
 		{
 			targeting: "API_RETURN",
-			escapeType: {
+			type: {
 				what: "URL_STRING",
 				is: URL_IS_ESCAPE.FULL_URL
 			}
@@ -161,5 +162,5 @@ function getRespCachedArchive(): {
  * @param prop The property that is missing
  */
 function fmtIsMissingProp(prop: string): string {
-	return `The response cache archive is missing the  (expected of the aero SW handler) \`${prop}\` property!`;
+	return fmtMissingPropExpectedOfSW("response cache archive", prop);
 }

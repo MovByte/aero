@@ -1,4 +1,4 @@
-import type { APIInterceptor, eventListener } from "$types/apiInterceptors.d.ts";
+import { type APIInterceptor, type eventListener, ExposedContextsEnum, URL_IS_ESCAPE } from "$types/apiInterceptors.d.ts";
 
 import { proxyLocation, upToProxyOrigin } from "$shared/proxyLocation";
 
@@ -73,16 +73,41 @@ const locationProxy = Proxy.revocable(inheritedObject, {
 	}
 });
 
-// TODO: ADD CONCEAL TYPES AND ESCAPE FIXER TYPES
 export default [{
 	proxifiedObj: locationProxy,
 	globalProp: `["<proxyNamespace>"].sandbox.proxifiedLocation`
 }, {
-	proxifiedGetter: (ctx) => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.hostname,
-	globalProp: `document.location`,
+	proxifiedGetter: ctx => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.hostname,
+	proxifiedSetter: ctx => {
+		// @ts-ignore
+		locationProxy.domain = ctx.newVal;
+	},
+	globalProp: "document.domain",
+	conceals: [{
+		what: "URL_STRING",
+		is: URL_IS_ESCAPE.FULL_URL
+	}],
+	escapeFixes: [{
+		what: "URL_STRING",
+		is: URL_IS_ESCAPE.FULL_URL
+	}],
+	exposedContexts: ExposedContextsEnum.WINDOW
 }, {
-	proxifiedGetter: (ctx) => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.domain,
-	globalProp: `document.location`
+	proxifiedGetter: ctx => globalThis[ctx.globalNamespace].sandbox.proxifiedLocation.domain,
+	proxifiedSetter: ctx => {
+		// @ts-ignore
+		locationProxy.href = ctx.newVal;
+	},
+	globalProp: "document.location",
+	conceals: [{
+		what: "URL_STRING",
+		is: URL_IS_ESCAPE.FULL_URL
+	}],
+	escapeFixes: [{
+		what: "URL_STRING",
+		is: URL_IS_ESCAPE.FULL_URL
+	}],
+	exposedContexts: ExposedContextsEnum.WINDOW
 }] as APIInterceptor[];
 
 const eventInterceptor = [{
@@ -97,6 +122,8 @@ const eventInterceptor = [{
 	},
 	type: "window",
 	eventName: "hashchange",
+	// FIXME: This is the old way of doing things
+	/*
 	conceals: [{
 		what: "HashChangeEvent.newURL",
 		revealerType: {
@@ -110,8 +137,8 @@ const eventInterceptor = [{
 			type: "url",
 			reveals: "origin"
 		}
-	}
-	]
+	}]
+	*/
 }, {
 	interceptor(event: Event, listener: eventListener) {
 		if (event instanceof MessageEvent)
@@ -123,6 +150,8 @@ const eventInterceptor = [{
 	},
 	type: "window",
 	eventName: ["message", "messageerror"],
+	// FIXME: This is the old way of doing things
+	/*
 	conceals: [{
 		what: "MessageEvent.origin",
 		revealerType: {
@@ -130,5 +159,6 @@ const eventInterceptor = [{
 			reveals: "origin"
 		}
 	}]
+	*/
 }]
 export { eventInterceptor };

@@ -1,4 +1,4 @@
-import { proxyLocation } from "$util/proxyLocation";
+import { proxyLocation } from "$shared/proxyLocation";
 
 // Frame checks
 /*
@@ -10,7 +10,7 @@ if (frameElement) {
 	const parentOrigin = frameElement.getAttribute("parentProxyOrigin");
 
 	if (!parentOrigin)
-		throw new Error("The parent's proxy origin wasn't given to the frame");
+		throw new Error("The parent's proxy origin wasn't given to the frame"!);
 
 	const frameOptions = $aero.sec.headers.frame;
 

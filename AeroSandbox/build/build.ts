@@ -5,7 +5,7 @@ import { initAll } from "./buildTools.ts";
 import { exec } from "node:child_process";
 
 if ("Deno" in globalThis)
-	throw new Error("This script is not intended to be run in Deno.");
+	throw new Error("This script is not intended to be run in Deno!");
 
 // @ts-ignore This file is not intended to be for deno
 const liveBuildMode = "LIVE_BUILD" in process.env;
@@ -30,10 +30,11 @@ initAll(
 		try {
 			exec("npm run buildRaw");
 		} catch (err) {
-			throw new Error(`Failed to run the main build script: ${err.message}`);
+			throw new Error(`Failed to run the main build script:\n\t${err.stack.join("\n").join("\n\t")}!`);
 		}
 	},
 	(err: Error) => {
-		throw new Error(`Failed to initialize the dist folder: ${err.message}`);
+		// @ts-ignore
+		throw new Error(`Failed to initialize the dist folder:\n\t${err.stack.join("\n").join("\n\t")}!`);
 	}
 )

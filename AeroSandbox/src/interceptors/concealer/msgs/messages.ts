@@ -6,7 +6,7 @@ import { APIInterceptor, ExposedContextsEnum } from "$types/apiInterceptors";
 import { afterPrefix } from "$intUtil/getProxyURL";
 
 const apiInterceptors = [{
-	proxyHandlers: {
+	proxyHandler: {
 		apply(_target, _that, args) {
 			// @ts-ignore
 			args[1] = eventInterceptor(...args);
@@ -16,7 +16,7 @@ const apiInterceptors = [{
 	globalProp: "addEventListener",
 	exposedContexts: ExposedContextsEnum.window,
 }, {
-	proxyHandlers: {
+	proxyHandler: {
 		// FIXME: Breaks on Google
 		apply(_target, _that, args) {
 			let [data, origin] = args;

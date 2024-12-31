@@ -1,7 +1,7 @@
 import sharedConfig from "$util/sharedConfig";
 
 import rewriteSrc from "$src/shared/src";
-import { proxyLocation } from "$util/proxyLocation";
+import { proxyLocation } from "$shared/proxyLocation";
 import proto from "$util/proto";
 
 /**

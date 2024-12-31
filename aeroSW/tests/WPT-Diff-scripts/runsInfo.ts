@@ -1,3 +1,8 @@
+/**
+ * @module
+ * This module also contains a **CLI** that can be ran with TODO:...
+ */
+
 // Neverthrow
 import type { ResultAsync } from "neverthrow";
 import { okAsync, errAsync as nErrAsync } from "neverthrow";
