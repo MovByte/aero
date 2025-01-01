@@ -16,4 +16,6 @@ export enum BrowserEmulationFeatures {
 export enum OsPassthroughFeatures {
 	fileDownload,
 	filePicker,
+	pwas,
+	contentSharing
 }

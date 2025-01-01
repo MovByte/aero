@@ -4,7 +4,7 @@ import { proxyLocation } from "$shared/proxyLocation";
 import { APIInterceptor } from "$types/apiInterceptors";
 
 export default {
-	createProxyHandler: (ctx) => ({
+	createProxyHandler: ctx => ({
 		async apply(target, that, args) {
 			const relatedApps = await Reflect.apply(target, that, args);
 			// @ts-ignore

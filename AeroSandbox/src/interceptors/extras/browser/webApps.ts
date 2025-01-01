@@ -1,9 +1,15 @@
-import { type APIInterceptor, ExposedContextsEnum } from "$types/apiInterceptors";
-import { BrowserEmulationFeatures, OsPassthroughFeatures } from "$types/buildConfig";
+import typia from "typia";
 
-import { throwMissingPropExpectedOfBC } from "$src/interceptors/util/bcCommunication/expectParamsInMsgResp";
+import { type APIInterceptor, ExposedContextsEnum } from "$types/apiInterceptors";
+import { BrowserEmulationFeatures } from "$types/buildConfig";
+
 import { proxyLocation } from "$shared/proxyLocation";
 
+interface BeforeInstallPromptFakeEventResponse {
+	clientId: string,
+	for: "fake-event-response",
+	fakeEventData: BeforeInstallPromptFakeEventData
+}
 interface BeforeInstallPromptFakeEventData {
 	platforms: string[],
 	userChoice: {
@@ -11,55 +17,48 @@ interface BeforeInstallPromptFakeEventData {
 		platform: string
 	}
 };
+const validateBeforeInstallPromptFakeEventResponse = typia.createValidate<BeforeInstallPromptFakeEventResponse>();
 
-const bc = new BroadcastChannel("$aero-browser-badges");
+const beforeInstallPromptBc = new BroadcastChannel("$aero-browser-before-install-prompt");
+const badgesTransferBc = new BroadcastChannel("$aero-browser-badges-transfer");
+const badgesClearNoticeBc = new BroadcastChannel("$aero-browser-badges-clear-notice");
+
+/** This will be populated later in `init` */
+let appBadges = [];
 
 export default [{
 	init() {
-		// TODO: Runtime validate FakeEvent data
-		const fakeEventData = $aero.sandbox.extLib.syncify(new Promise((resolve, reject) => {
-			const bc = new BroadcastChannel("$aero-browser-before-install-prompt");
-			bc.postMessage({
+		const fakeEventData = $aero.sandbox.extLib.syncify(new Promise((resolve, _reject) => {
+			beforeInstallPromptBc.postMessage({
 				clientId: $aero.clientId,
 				for: "fake-event-request",
 			});
-			bc.onmessage = event => {
-				throwMissingPropExpectedOfBC("the fake event response", ["clientId", "for", "fakeEvent"], event);
-				const resp = event.data as BeforeInstallPromptFakeEventData;
+			beforeInstallPromptBc.onmessage = event => {
+				const resp = event.data as BeforeInstallPromptFakeEventResponse;
+				validateBeforeInstallPromptFakeEventResponse(resp);
 				if (event.data.clientId === $aero.clientId && event.data.for === "fake-event-response")
 					resolve(event.data.fakeEventData);
 			}
-		}))() as {
-			platforms: string[],
-			userChoice: {
-				outcome: "accepted" | "dismissed",
-				platform: string
-			}
-		};
-		if ()
-			passEventData = event.data;
-		const fakeEvent = BeforeInstallPromptEvent("beforeinstallprompt");
-		window.dispatchEvent(
-	}
-	interceptFull(event, listener) {
-		const listenerResult = listener(event);
-	},
-	// TODO: Make Intercept before
-	interceptAfter(listenerResult) {
+		}))() as BeforeInstallPromptFakeEventData;
 
+		// TODO: Find the @types for this
+		// @ts-ignore
+		const fakeEvent = BeforeInstallPromptEvent("beforeinstallprompt", fakeEventData);
+		window.dispatchEvent(fakeEvent);
 	},
-	interceptEvent: true,
+	for: "EVENT",
+	interceptEvent: false,
 	interceptEventOn: "WINDOW",
 	eventName: "appinstalled",
 }, {
 	init(ctx) {
-		$aero.sandbox.appBadges = new Proxy([], {
+		appBadges = new Proxy([], {
 			set(target, prop, value) {
 				target[prop] = value;
 				// Automatically save to disk
-				localStorage.setItem("$aero-badges", JSON.stringify($aero.sandbox.appBadges));
+				localStorage.setItem("$aero-badges", JSON.stringify(appBadges));
 				if (BrowserEmulationFeatures.webApps in ctx.featuresConfig.browserExtras)
-					bc.postMessage({
+					badgesTransferBc.postMessage({
 						clientId: $aero.clientId,
 						for: "badges-contents-changed",
 						data: value
@@ -68,26 +67,26 @@ export default [{
 			}
 		})
 		if (BrowserEmulationFeatures.webApps in ctx.featuresConfig.browserExtras)
-			bc.onmessage = event => {
+			badgesTransferBc.onmessage = event => {
 				if (event.data.clientId === $aero.clientId && event.data.for === "get-badges")
-					bc.postMessage({
+					badgesTransferBc.postMessage({
 						clientId: $aero.clientId,
 						for: "send-badges",
-						data: $aero.sandbox.appBadges
+						data: appBadges
 					});
 			}
 	},
 	proxyHandler: {
 		apply(_target, _that, args) {
 			const [contents] = args;
-			if ($aero.sandbox.appBadges.find(
+			if (appBadges.find(
 				badge => badge.proxyOrigin === proxyLocation().origin,
 				(_el, i) =>
 					// Update if it already exists
-					$aero.sandbox.appBadges[i] = contents
+					appBadges[i] = contents
 			) === null) {
 				// Add if it doesn't exist already
-				$aero.sandbox.appBadges.push({
+				appBadges.push({
 					proxyOrigin: proxyLocation().origin,
 					contents
 				});
@@ -99,8 +98,9 @@ export default [{
 }, {
 	proxyHandler: {
 		apply() {
-			$aero.sandbox.appBadges = $aero.sandbox.appBadges.filter(appBadge => appBadge.proxyOrigin !== proxyLocation().origin);
-			bc.postMessage({
+			appBadges = appBadges.filter(appBadge => appBadge.proxyOrigin !== proxyLocation().origin);
+
+			badgesClearNoticeBc.postMessage({
 				clientId: $aero.clientId,
 				for: "badges-contents-cleared"
 			});

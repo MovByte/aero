@@ -94,11 +94,11 @@ export default [
 		forAltProtocol: AltProtocolEnum.ws,
 		globalProp: "Websocket"
 	}, {
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.binaryType;
 		},
-		proxifySetter: (ctx) => {
+		proxifySetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			if (ctx.newVal === "blob" || ctx.newVal === "arraybuffer") ws.binaryType = ctx.newVal;
 		},
@@ -113,18 +113,18 @@ export default [
 		globalProp: "WebSocket.prototype.bufferedAmount"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.extensions;
 		},
 		forAltProtocol: AltProtocolEnum.ws,
 		globalProp: "WebSocket.prototype.extensions"
 	}, {
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.onclose;
 		},
-		proxifySetter: (ctx) => {
+		proxifySetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			ws.onclose = ctx.newVal;
 		},
@@ -132,11 +132,11 @@ export default [
 		globalProp: "WebSocket.prototype.onclose"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.onerror;
 		},
-		proxifySetter: (ctx) => {
+		proxifySetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			ws.onerror = ctx.newVal;
 		},
@@ -144,11 +144,11 @@ export default [
 		globalProp: "WebSocket.prototype.onerror"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.onmessage;
 		},
-		proxifySetter: (ctx) => {
+		proxifySetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			ws.onmessage = ctx.newVal;
 		},
@@ -156,11 +156,11 @@ export default [
 		globalProp: "WebSocket.prototype.onmessage"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.onclose;
 		},
-		proxifySetter: (ctx) => {
+		proxifySetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			ws.onclose = ctx.newVal;
 		},
@@ -168,7 +168,7 @@ export default [
 		globalProp: "WebSocket.prototype.onopen"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.url;
 		},
@@ -176,7 +176,7 @@ export default [
 		globalProp: "WebSocket.prototype.url"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.protocol;
 		},
@@ -184,7 +184,7 @@ export default [
 		globalProp: "WebSocket.prototype.protocol"
 	},
 	{
-		proxifyGetter: (ctx) => {
+		proxifyGetter: ctx => {
 			const ws = socketMap.get(ctx.this);
 			return ws.barews.readyState;
 		},

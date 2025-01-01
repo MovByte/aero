@@ -81,10 +81,10 @@ export default [{
 			});
 		}
 	},
-	proxifiedGetter: (ctx) => {
+	proxifiedGetter: ctx => {
 		return rewriteGetCookie(ctx.this, proxyLocation())
 	},
-	proxifiedSetter: (ctx) => {
+	proxifiedSetter: ctx => {
 		return rewriteSetCookie(ctx.this, proxyLocation())
 	},
 	globalProp: "document.cookie"
