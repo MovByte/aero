@@ -1,7 +1,7 @@
 import typia from "typia";
 
 // @ts-ignore: you must first run `npm i`
-import type { ExecLoadURLRespData } from "$node_modules/proxy-middleware-bc/elecron-ipc/types/to-sandbox/transferDataResps.ts"
+import type { ExecLoadURLRespData } from "$types/ipc/Electron/fromProxyMiddleware/transferDataResps.ts"
 
 import { LitElement, property, customElement } from "lit-element";
 
