@@ -68,10 +68,10 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 	const catchAllClientsValid = REQ_INTERCEPTION_CATCH_ALL === "clients" && event.clientId !== "";
 	// Detect feature flag mismatches
 	if (catchAllClientsValid && SERVER_ONLY)
-		return nErrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled.'));
+		return nErrAsync(new Error('Feature Flags Mismatch: The Feature Flag "REQ_INTERCEPTION_CATCH_ALL" can\'t be set to "clients" when "SERVER_ONLY" is enabled!'));
 
 	if (clientUrlRes.isErr())
-		return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);
+		return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error);
 	/** This client URL is used when forming the proxy URL and in various uses for emulation */
 	const clientUrl = clientUrlRes.value;
 	if (clientUrl === "skip") {
@@ -88,7 +88,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 		isiFrame
 	});
 	if (getProxyURLRes.isErr())
-		return fmtNeverthrowErr("Failed to get the proxy URL", getProxyURLRes.error.message);
+		return fmtNeverthrowErr("Failed to get the proxy URL", getProxyURLRes.error);
 	/** The proxy URL used for fetching the site under the proxy */
 	const proxyUrl = getProxyURLRes.value;
 	// Log the request
@@ -127,7 +127,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 		// @ts-ignore: The types are compatible
 		sec);
 	if (corsStatusRes.isErr())
-		return fmtNeverthrowErr("Failed to perform CORS emulation/testing", corsStatusRes.error.message);
+		return fmtNeverthrowErr("Failed to perform CORS emulation/testing", corsStatusRes.error);
 	const corsStatus = corsStatusRes.value;
 	if ("cachedResponse" in corsStatus) {
 		logger.debug("Returning cached response found through Cache Emulation");
@@ -147,7 +147,7 @@ export default async function rewriteReq({ logger, req, reqUrl, clientId, client
 		clientUrl
 	});
 	if (rewrittenReqOptsRes.isErr())
-		return fmtNeverthrowErr("Failed to create the the request options", rewrittenReqOptsRes.error.message);
+		return fmtNeverthrowErr("Failed to create the the request options", rewrittenReqOptsRes.error);
 	/** The request options that will be used to fetch the site under the proxy*/
 	const rewrittenReqOpts = rewrittenReqOptsRes.value;
 

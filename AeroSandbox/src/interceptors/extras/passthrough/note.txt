@@ -1,0 +1,2 @@
+Notice: these passthrough interceptors will be bundled in a separate bundle. The SW response BroadcastChannels will be answered inside of proxy middleware. These passthrough interceptors also require the Browser Ports Middleware to be included in the web proxy.
+This notice will be replaced by proper documentation in https://aero.sh/docs

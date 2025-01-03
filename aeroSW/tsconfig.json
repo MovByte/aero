@@ -48,6 +48,6 @@
 		"../AeroSandbox/tests/shared/importHooks.mjs",
 		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs",
 		"../AeroSandbox/tests/shared/customImportResolveHooks.mjs"
-	],
+, "../AeroSandbox/src/apis/IPC/Proxy Middleware/Electron/types/electronPassthrough.d.ts"	],
 	"exclude": ["tests/**/*", "rspack.config.ts"]
 }

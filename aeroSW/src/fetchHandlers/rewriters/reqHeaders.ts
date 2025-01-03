@@ -63,7 +63,7 @@ export default async (headers: Headers, ctx: Passthrough): Promise<ResultAsync<v
 			const proxifiedDirectiveRes = await getSiteDirective(ctx.proxyUrl, ctx.clientUrl, ctx.bc);
 			if (proxifiedDirectiveRes.isErr())
 				// @ts-ignore
-				return fmtNeverthrowErr("Failed to create and get the proxified site directive for rewriting the header Sec-Fetch-Site", proxifiedDirectiveRes.error.message);
+				return fmtNeverthrowErr("Failed to create and get the proxified site directive for rewriting the header Sec-Fetch-Site", proxifiedDirectiveRes.error);
 			headers.set(key, proxifiedDirectiveRes.value);
 			continue;
 		}

@@ -36,7 +36,7 @@ export default async function setupPatchedCLI({ dirs, proxyURL, wptRepo, browser
 }): Promise<ResultAsync<void, Error>> {
 	const checkoutRes = await checkoutRepo(wptRepo, dirs.checkout, "WPT");
 	if (checkoutRes.isErr())
-		return fmtNeverthrowErr("Failed to checkout the WPT tests", checkoutRes.error.message);
+		return fmtNeverthrowErr("Failed to checkout the WPT tests", checkoutRes.error);
 
 	const wptDir = resolve(dirs.checkout, "WPT");
 	const browserDir = resolve(wptDir, "tools", "wptrunner", "browsers");
@@ -48,7 +48,7 @@ export default async function setupPatchedCLI({ dirs, proxyURL, wptRepo, browser
 
 	const browsersListRes = await patchBrowsersList(resolve(browserDir, "__init__.py"), proxyName);
 	if (browsersListRes.isErr())
-		return fmtNeverthrowErr("Failed to patch the browsers list", browsersListRes.error.message);
+		return fmtNeverthrowErr("Failed to patch the browsers list", browsersListRes.error);
 	const browsersList = browsersListRes.value;
 	const browserClassRes = await patchBrowserClass(
 		{
@@ -58,7 +58,7 @@ export default async function setupPatchedCLI({ dirs, proxyURL, wptRepo, browser
 			proxyURL
 		});
 	if (browserClassRes.isErr())
-		return fmtNeverthrowErr("Failed to patch the browser class", browserClassRes.error.message);
+		return fmtNeverthrowErr("Failed to patch the browser class", browserClassRes.error);
 	const browserClass = browserClassRes.value;
 
 	writeFile(resolve(browserDir, `${proxyName}-chrome.py`), browserClass, "utf-8");
@@ -81,7 +81,7 @@ async function patchBrowsersList(pass: {
 		const browserInitCode = await readFile(browserInitPath, "utf-8");
 		const modifier = new BrowsersListPatch(browserInitCode);
 		const modifiedCodeResult = await modifier.addBrowserToProductList(proxyName);
-		if (modifiedCodeResult.isErr()) return fmtNeverthrowErr("Failed to patch browsers list", modifiedCodeResult.error.message);
+		if (modifiedCodeResult.isErr()) return fmtNeverthrowErr("Failed to patch browsers list", modifiedCodeResult.error);
 		await writeFile(browserInitPath, modifiedCodeResult.value, "utf-8");
 		return nOkAsync(undefined);
 	} catch (err) {
@@ -108,7 +108,7 @@ async function patchBrowserClass({
 		const ogBrowserCode = await readFile(aeroBrowserPath, "utf-8");
 		const patcher = new BrowserClassModifier(ogBrowserCode);
 		const patchRes = await patcher.patchBrowserClass({ browser, proxyURL });
-		if (patchRes.isErr()) return fmtNeverthrowErr("Failed to patch the browser code", patchRes.error.message);
+		if (patchRes.isErr()) return fmtNeverthrowErr("Failed to patch the browser code", patchRes.error);
 		await writeFile(aeroBrowserPath, patchRes.value, "utf-8");
 		return nOkAsync(undefined);
 	} catch (err) {

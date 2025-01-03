@@ -20,7 +20,7 @@ export default async function rewriteReq({
 }): Promise<ResultAsync<RequestInit, Error>> {
 	const rewrittenReqHeadersRes = await rewriteReqHeaders(req.headers, clientUrl);
 	if (rewrittenReqHeadersRes.isErr())
-		return fmtNeverthrowErr("Failed to rewrite the request headers", rewrittenReqHeadersRes.error.message);
+		return fmtNeverthrowErr("Failed to rewrite the request headers", rewrittenReqHeadersRes.error);
 	const rewrittenReqHeaders = rewrittenReqHeadersRes.value;
 
 	/** The request options, but rewritten to be proxified for aero */

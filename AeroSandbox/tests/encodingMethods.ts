@@ -72,7 +72,7 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 	/** The URLs to get with */
 	let testUrlsRes = await getUrlTestData();
 	if (testUrlsRes.isErr())
-		return fmtNeverthrowErr("Failed to get test URLs required for benchmarking the encoding methods", testUrlsRes.error.message, true);
+		return fmtNeverthrowErr("Failed to get test URLs required for benchmarking the encoding methods", testUrlsRes.error, true);
 	const testUrls = testUrlsRes.value;
 
 	// Init the encoders
@@ -94,7 +94,7 @@ async function createBenchEncodingMethods(benchOptions: Options): Promise<Result
 		for (const testUrl of testUrls) {
 			const encUrlRes = precompXOR.encodeUrl(testUrl, "2");
 			if (encUrlRes.isErr())
-				throw fmtErr("Failed to encode the URL with precomputed XOR	", encUrlRes.error.message);
+				throw fmtErr("Failed to encode the URL with precomputed XOR	", encUrlRes.error);
 			const encUrl = encUrlRes.value;
 			precompXOR.decodeUrl(encUrl, "2");
 			//console.log(encUrl);

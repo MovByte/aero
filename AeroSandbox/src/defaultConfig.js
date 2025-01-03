@@ -14,7 +14,7 @@ const defaultConfig = {
 		nestedSWs: "./nestedSWs.js",
 		storageIsolator: "./storageIsolator.js",
 		// Extra APIs (do not include these if you are making a SW proxy)
-		ControlViews: "./ControlViews.js"
+		controlViews: "./ControlViews.js"
 	},
 	webrtcTurnServers: ["stun:stun.l.google.com:19302"],
 	htmlSandboxElementName: "aero-html-sandbox",

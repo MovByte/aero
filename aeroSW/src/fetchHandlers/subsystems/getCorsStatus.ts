@@ -61,7 +61,7 @@ export default async function getCORSStatus({
 
 			const redirectRes = await hstsCacheEmulator.redirect();
 			if (redirectRes.isErr())
-				return fmtNeverthrowErr("Failed to determine if the client should redirect when using the cache emulator", redirectRes.error.message);
+				return fmtNeverthrowErr("Failed to determine if the client should redirect when using the cache emulator", redirectRes.error);
 			const redirUrl = proxyUrl;
 			redirUrl.protocol = "https:";
 			return redir(redirUrl.href);

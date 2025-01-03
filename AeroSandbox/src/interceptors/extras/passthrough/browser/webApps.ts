@@ -28,7 +28,7 @@ let appBadges = [];
 
 export default [{
 	init() {
-		const fakeEventData = $aero.sandbox.extLib.syncify(new Promise((resolve, _reject) => {
+		const fakeEventData = $aero.sandbox.extLib.syncify(new Promise((resolve) => {
 			beforeInstallPromptBc.postMessage({
 				clientId: $aero.clientId,
 				for: "fake-event-request",

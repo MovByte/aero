@@ -4,6 +4,9 @@ import type { ResultAsync } from "neverthrow";
 import { okAsync } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
+// Types for passthrough
+import type { WebViewControls } from "$types/electronPassthrough";
+
 import injFmtWrapper from "$aero/src/this/util/internal/injFmtWrapper";
 // Preprocessor
 import mainFmtHTML from "../../preprocessors/mainInjBundle/mainFmtHTML.val";
@@ -39,9 +42,10 @@ export default async function rewriteResp(pass: Readonly<{
 	isScript: boolean;
 	isNavigate: boolean;
 	isMod: boolean;
-	sec: Readonly<Sec>;
+	sec: Sec;
 	/** This is for `No-Vary-Search` rewriting */
 	rewrittenParamsOriginals: rewrittenParamsOriginalsType;
+	electronWebViewControls?: Readonly<WebViewControls>;
 }>, accessControlRuleMap: Map<string, string>): Promise<ResultAsync<{
 	rewrittenBody: string | ReadableStream;
 	rewrittenRespHeaders: Headers,
@@ -57,7 +61,7 @@ export default async function rewriteResp(pass: Readonly<{
 		isNavigate,
 		isMod,
 		sec,
-		rewrittenParamsOriginals
+		rewrittenParamsOriginals,
 	} = pass;
 
 	// Rewrite the response headers
@@ -69,7 +73,7 @@ export default async function rewriteResp(pass: Readonly<{
 		rewrittenParamsOriginals
 	});
 	if (rewrittenRespHeadersRes.isErr())
-		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespHeadersRes.error.message);
+		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespHeadersRes.error);
 	const { speculationRules } = rewrittenRespHeadersRes.value;
 
 	const type = originalResp.headers.get("content-type");
@@ -99,6 +103,7 @@ export default async function rewriteResp(pass: Readonly<{
 			"CLIENT_ID": aeroConfig.clientId,
 			// $aero (global proxy namespace) passthrough
 			"SEC": sec ? `...${JSON.stringify(sec)}` : "",
+			"ELECTRON_WEBVIEW_CONTROLS": "electronWebViewControls" in pass ? `...${JSON.stringify(pass.electronWebViewControls)}` : "",
 			"PREFIX": aeroConfig.prefix,
 			"SEARCH_PARAM_OPTIONS": JSON.stringify(aeroConfig.searchParamOptions),
 			// Bundles

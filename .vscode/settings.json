@@ -51,7 +51,7 @@
 		"**/Makefile": false,
 		"**/*.sh": false
 	},
-	"explorer.excludeGitIgnore": true,
+	"explorer.excludeGitIgnore": false,
 	"[json]": {
 		"editor.defaultFormatter": "biomejs.biome"
 	}

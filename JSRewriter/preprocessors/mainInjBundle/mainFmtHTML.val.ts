@@ -38,6 +38,7 @@ export default function fmtHTMLInjBundle({ DEBUG }: FeatureFlagsPassthrough) {
 				clientId: {{CLIENT_ID}}
 				// Security
 				sec: {{SEC}},
+				electronWebViewControls: {{ELECTRON_WEBVIEW_CONTROLS}},
 				// This is used to later copy into an iFrame's srcdoc; this is for an edge case
 				init: {{IMPORT}},
 				prefix: {{PREFIX}},

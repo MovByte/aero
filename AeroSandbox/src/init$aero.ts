@@ -1,3 +1,5 @@
+import "../src/apis/Electron/IPC/index"
+
 // Sanity check
 if (!("$aero" in window)) {
 	const err = "Unable to initalize $aero";

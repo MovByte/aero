@@ -46,7 +46,7 @@ export async function isSameSite(url1: URL, url2: URL, bc: BareClient = $aero.bc
 	else if (FETCH_PUBLIC_SUFFIX_PRIORITY === "run-time") {
 		const publicSuffixesRes = await getPublicSuffixList(bc);
 		if (publicSuffixesRes.isErr())
-			return fmtNeverthrowErr("Failed to get the public suffixes list", publicSuffixesRes.error.message);
+			return fmtNeverthrowErr("Failed to get the public suffixes list", publicSuffixesRes.error);
 		publicSuffixes = publicSuffixesRes.value;
 	} else {
 		return fmtNeverthrowErr(`Failed to get the feature flag "fetchPublicSuffixPriority"`, "The feature flag is not set to either `compile-time` or `run-time`");

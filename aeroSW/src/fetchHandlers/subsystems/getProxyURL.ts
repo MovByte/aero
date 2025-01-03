@@ -36,7 +36,7 @@ export default function getProxyUrl({
 	);
 	if (rawProxyUrlRes.isErr())
 		return fmtNeverthrowErr(
-			"Error while getting the raw proxy URL required to get the final formatted proxy URL used for fetching the site under the proxy", rawProxyUrlRes.error.message
+			"Error while getting the raw proxy URL required to get the final formatted proxy URL used for fetching the site under the proxy", rawProxyUrlRes.error
 		);
 
 	/** The URL to the site that will be proxied */

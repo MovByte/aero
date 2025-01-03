@@ -23,13 +23,13 @@ import safeExec from "./safeExec";
 export default async function checkoutRepo(repoURL: string, rootDir: string, repoName: string): Promise<ResultAsync<void, Error>> {
 	const checkoutDirRes = checkoutDirPath(rootDir, "checkouts");
 	if (checkoutDirRes.isErr())
-		return fmtCheckoutErrRes(checkoutDirRes.error.message);
+		return fmtCheckoutErrRes(checkoutDirRes.error);
 	const checkoutDir = checkoutDirRes.value;
 	const repoDir = repoDirPath(checkoutDir, repoName);
 
 	const createCheckoutDirRes = await createCheckoutDir(checkoutDir);
 	if (createCheckoutDirRes.isErr())
-		return fmtCheckoutErrRes(createCheckoutDirRes.error.message);
+		return fmtCheckoutErrRes(createCheckoutDirRes.error);
 
 	try {
 		await access(repoDir);

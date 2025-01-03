@@ -5,12 +5,14 @@
 // Better type-safe handling
 /// For runtime type validation
 import { is } from "ts-runtime-checks";
+import typia from "typia";
 /// Neverthrow
 import type { ResultAsync, Result } from "neverthrow";
 import { okAsync as nOkAsync, errAsync as nErrAsync, ok as nOk, err as nErr } from "neverthrow";
 import { fmtNeverthrowErr } from "$shared/fmtErr";
 
 import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
+import type { WebViewControls } from "$types/electronPassthrough";
 
 // Sanity checkers
 import troubleshoot, { troubleshootJustConfigs, troubleshootingStrs } from "./fetchHelpers/troubleshoot";
@@ -92,8 +94,9 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 	/** If the request is intended for a script */
 	const isScript = reqDest === "script";
 	if (isScript) {
-		const isModParam = getPassthroughParam(reqParams, "isMod");
-		isMod = isModParam && isModParam === "true";
+		const isModParamStatus = getPassthroughParam(reqParams, "isMod");
+		if (isModParamStatus.passthroughParamExists)
+			isMod = isModParamStatus.passthroughParamExists && isModParamStatus.param === "true";
 	}
 
 	const accessControlRuleMap = new Map<string, string>();
@@ -112,16 +115,16 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 		isNavigate
 	})
 	if (clientUrlRes.isErr())
-		return fmtNeverthrowErr(`${troubleshootingStrs.userErrTag}Failed to get the client URL. You have probably made a typo.`, clientUrlRes.error.message);
+		return fmtNeverthrowErr(`${troubleshootingStrs.userErrTag}Failed to get the client URL. You have probably made a typo.`, clientUrlRes.error);
 	/** This client URL is used when forming the proxy URL and in various uses for emulation */
 	const clientUrl = clientUrlRes.value;
 	if (clientUrl === "skip") {
 		logger.log("Skipping the request");
-		return nOkAsync((await fetch(req.url));
+		return nOkAsync(await fetch(req.url));
 	}
 
 	/** This is an object meant for passthrough, ultimately to the response rewriter, that will contain all of the CORS headers that were discarded in `getCORSStatus`, and will be injected into the site for CORS Emulation features powered by *AeroSandbox* */
-	const sec: Partial<Sec> = {};
+	const sec: Sec = {};
 	/** This is mainly intended so that `appendSearchParam()`, whenever it is called, can help the response header rewriter with `No-Vary-Search` header rewriting later */
 	const rewrittenParamsOriginals: rewrittenParamsOriginalsType = {};
 
@@ -137,14 +140,22 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 		isiFrame,
 		sec,
 		clients,
-		rewrittenParamsOriginals
+		rewrittenParamsOriginals,
 	}, accessControlRuleMap);
 	if (rewrittenReqValsRes.isErr())
-		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error.message);
+		return fmtNeverthrowErr("Failed to rewrite the request", rewrittenReqValsRes.error);
 	const rewrittenReqVals = rewrittenReqValsRes.value;
 	if ("finalRespEarly" in rewrittenReqVals)
 		return nOkAsync(rewrittenReqVals.finalRespEarly);
 	const { rewrittenReqOpts, proxyUrl, cacheMan } = rewrittenReqVals;
+
+	// @ts-ignore
+	if (typeof electronWebViewControls !== "undefined") {
+		if ("httpReferrer" in electronWebViewControls)
+			rewrittenReqOpts.headers.set("Referer", electronWebViewControls.httpReferrer);
+		if ("useragent" in electronWebViewControls)
+			rewrittenReqOpts.headers.set("User-Agent", electronWebViewControls.useragent);
+	}
 
 	// Make the request to the proxy
 	const proxyResp = (SERVER_ONLY ? self.serverFetch : await new BareMux.BareClient()).fetch(
@@ -155,10 +166,10 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 	const validateRespRes = validateResp(proxyResp);
 	if (validateRespRes.isErr())
 		// Propogate the error result up the chain (`validateResp` is already meant to handle errors itself)
+		// @ts-ignore
 		return validateRespRes;
 
-	// Rewrite the response
-	const rewrittenRespRes = await rewriteResp({
+	const rewriteRespPass = {
 		originalResp: proxyResp,
 		rewrittenReqHeaders: rewrittenReqOpts.headers,
 		reqDestination: reqDest,
@@ -167,10 +178,16 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 		isNavigate,
 		isMod,
 		sec,
-		rewrittenParamsOriginals
-	});
+		rewrittenParamsOriginals,
+	};
+	// @ts-ignore
+	if (typeof electronWebViewControls !== "undefined")
+		// @ts-ignore
+		rewriteRespPass.electronWebViewControls = electronWebViewControls;
+	// Rewrite the response
+	const rewrittenRespRes = await rewriteResp(rewriteRespPass);
 	if (rewrittenRespRes.isErr())
-		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespRes.error.message);
+		return fmtNeverthrowErr("Failed to rewrite the response", rewrittenRespRes.error);
 	const { rewrittenBody, rewrittenRespHeaders, rewrittenStatus } = rewrittenRespRes.value;
 
 	// Perform encoded body emulation
@@ -212,7 +229,7 @@ export default async function handleSW(event: readonly FetchEvent): Promise<Resu
 			clientsWithSameProxyOrigin
 		})
 		if (perfCacheSettingRes.isErr())
-			return fmtNeverthrowErr("Failed to cache the response", perfCacheSettingRes.error.message);
+			return fmtNeverthrowErr("Failed to cache the response", perfCacheSettingRes.error);
 	}
 
 	// Return the response

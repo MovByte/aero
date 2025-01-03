@@ -28,7 +28,7 @@ import type { rewrittenParamsOriginalsType } from "$types/commonPassthrough"
  *	isNavigate: req.mode === "navigate" && ["document", "iframe"].includes(req.destination)
  * })
  * if (clientUrlRes.isErr()) {
- *	return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error.message);
+ *	return fmtNeverthrowErr("Failed to get the client URL", clientUrlRes.error);
  * }
  */
 export default async function getClientURLAeroWrapper(pass: Readonly<{
@@ -86,7 +86,7 @@ export default async function getClientURLAeroWrapper(pass: Readonly<{
 		})
 		if (clientUrlRes.isErr())
 			return fmtNeverthrowErr(
-				"Failed to get the client URL through the forced referrer policy", clientUrlRes.error.message
+				"Failed to get the client URL through the forced referrer policy", clientUrlRes.error
 			)
 		clientUrl = clientUrlRes.value;
 	} else

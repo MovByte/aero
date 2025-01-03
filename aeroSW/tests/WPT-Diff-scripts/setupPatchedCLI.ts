@@ -60,7 +60,7 @@ async function runTests({
 }: OutputInfo): Promise<ResultAsync<void, Error>> {
 	const setupCLIRes = await setupPatchedCLI({ checkoutDir, browser, proxyName, proxyURL, wptRepo });
 	if (setupCLIRes.isErr())
-		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error.message);
+		return fmtNeverthrowErr("Failed to setup the patched WPT CLI, required to run the WPT-diff tests under aero", setupCLIRes.error);
 
 	const patchedBrowser = `${proxyName}-${browser}`;
 
@@ -86,7 +86,7 @@ async function runTests({
 
 	const writeNPMVersionsRes = await writeNPMVersions(testResultsDir);
 	if (writeNPMVersionsRes.isErr())
-		return fmtNeverthrowErr("Failed to write the NPM package versions for aero", writeNPMVersionsRes.error.message);
+		return fmtNeverthrowErr("Failed to write the NPM package versions for aero", writeNPMVersionsRes.error);
 
 	return okAsync(undefined);
 }
