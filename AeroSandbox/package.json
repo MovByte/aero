@@ -15,7 +15,11 @@
 		"./configTypes": "./types/config.d.ts",
 		"./contextualIdentities": "./src/apis/contextualIdentities.ts",
 		"./ElectronControlView": "./src/apis/ControlView/ElectronControlView.ts",
-		"./ElectronWebView": "./src/apis/ControlView/ElectronWebView.ts"
+		"./ElectronWebView": "./src/apis/ControlView/ElectronWebView.ts",
+    "./electronIpcTransferDataReqsTypes": "./types/ipc/Electron/toProxyMiddleware/transferEventReqs.d.ts",
+    "./electronIpcTransferDataRespsTypes": "./types/ipc/Electron/toProxyMiddleware/transferEventResps.d.ts",
+    "./middlewareElectronIpcTransferDataRespsTypes": "./types/ipc/Electron/fromProxyMiddleware/transferEventResps.d.ts",
+    "./middlewareElectronIpcTransferDataReqsTypes": "./types/ipc/Electron/fromProxyMiddleware/transferEventReqs.d.ts"
 	},
 	"files": [
 		"dist/*.js",

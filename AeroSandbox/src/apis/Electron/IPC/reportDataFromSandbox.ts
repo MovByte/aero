@@ -2,7 +2,7 @@ import typia from "typia";
 
 // @ts-ignore: you must run `npm i`
 import type { GetLoadPing } from "$node_modules/proxy-middleware-bc/elecron-ipc/types/to-sandbox/transferDataReqs.ts"
-import type { SendLoadPing } from "$types/ipc/Electron/toProxyMiddleware/transferDataResps";
+import type { SendLoadPing } from "$types/ipc/Electron/toProxyMiddleware/transferEventResps";
 
 // This section is for recording events that happen inside of a WebContent instance for the elements and methods that create them
 /**
